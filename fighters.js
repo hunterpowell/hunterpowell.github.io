@@ -15,12 +15,11 @@ class Fighter {
             { color: '#eab308', emoji: '🟡' },  // yellow
             { color: '#a855f7', emoji: '🟣' },  // purple
             { color: '#f97316', emoji: '🟠' },  // orange
-            { color: '#ec4899', emoji: '🩷' },  // pink
             { color: '#06b6d4', emoji: '🔵' },  // cyan
         ];
 
         // Random speed
-        this.speed = [100, 150, 200][Math.floor(Math.random() * 3)];
+        this.speed = [125, 150, 175][Math.floor(Math.random() * 3)];
 
         this.score = 0;
         this.poweredUp = false;
@@ -183,11 +182,17 @@ class FightersSimulation {
         this.highScore = 0;
         this.lastTime = performance.now();
         this.animationFrameId = null;
+        this.collisionCooldown = 0;
     }
 
     checkCombatCollision() {
         const f1 = this.fighter1;
         const f2 = this.fighter2;
+
+        // Collision cooldown check
+        if (this.collisionCooldown && this.collisionCooldown > Date.now()) {
+            return false;
+        }
 
         // AABB collision detection
         if (f1.x < f2.x + f2.width &&
@@ -195,9 +200,34 @@ class FightersSimulation {
             f1.y < f2.y + f2.height &&
             f1.y + f1.height > f2.y) {
 
+            // Set cooldown to prevent multiple rapid collisions
+            this.collisionCooldown = Date.now() + 500; // 500ms cooldown
+
             // Swap velocities
             [f1.dx, f2.dx] = [f2.dx, f1.dx];
             [f1.dy, f2.dy] = [f2.dy, f1.dy];
+
+            // Separate fighters to prevent overlap
+            const overlapX = (f1.width + f2.width) / 2 - Math.abs(f1.x + f1.width/2 - (f2.x + f2.width/2));
+            const overlapY = (f1.height + f2.height) / 2 - Math.abs(f1.y + f1.height/2 - (f2.y + f2.height/2));
+
+            if (overlapX < overlapY) {
+                if (f1.x < f2.x) {
+                    f1.x -= overlapX / 2;
+                    f2.x += overlapX / 2;
+                } else {
+                    f1.x += overlapX / 2;
+                    f2.x -= overlapX / 2;
+                }
+            } else {
+                if (f1.y < f2.y) {
+                    f1.y -= overlapY / 2;
+                    f2.y += overlapY / 2;
+                } else {
+                    f1.y += overlapY / 2;
+                    f2.y -= overlapY / 2;
+                }
+            }
 
             // Determine winner
             let winner, loser;
@@ -225,6 +255,7 @@ class FightersSimulation {
 
             // Change loser's color
             loser.changeColor();
+            console.log(`${loser === f1 ? 'Blue' : 'Red'} changed to color index ${loser.currentColorIndex}`);
 
             // Clear powerups
             f1.poweredUp = false;

@@ -614,7 +614,7 @@
                     <div class="demo-container">
                         <div class="demo-header">
                             <h4>Interactive Demo</h4>
-                            <p>Watch the physics simulation in action - blue vs red with powerups (this is a simplified browser version)</p>
+                            <p>Watch the physics simulation in action - blue vs red with powerups (this is a heavily simplified browser version)</p>
                         </div>
                         <div class="demo-content">
                             <canvas id="fightersCanvas" width="500" height="400" style="background-color: #1e293b; border-radius: 0.5rem; border: 2px solid var(--border);"></canvas>
@@ -695,16 +695,12 @@
             const resetBtn = document.getElementById('resetBtn');
             const genStat = document.getElementById('genStat');
             const fitnessStat = document.getElementById('fitnessStat');
-            const avgStat = document.getElementById('avgStat');
-            const turnsStat = document.getElementById('turnsStat');
 
             let simulation = null;
 
             function updateStats(stats) {
                 genStat.textContent = `${stats.generation}/${stats.totalGenerations}`;
                 fitnessStat.textContent = stats.bestFitness;
-                avgStat.textContent = stats.avgFitness;
-                turnsStat.textContent = stats.turnsAlive;
 
                 if (!stats.running) {
                     startBtn.disabled = false;

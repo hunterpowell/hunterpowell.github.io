@@ -1,102 +1,456 @@
-<!doctype html>
-<html lang="en-US">
-  <head>
-    <title>My Portfolio Site</title>
-  </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter Powell | Software Developer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <body>
-    <!-- header -->
-    <header>
-      <h1>My Tech Portfolio</h1>
-    </header>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --accent: #3b82f6;
+            --accent-hover: #60a5fa;
+            --border: #475569;
+        }
 
-    <!-- navbar -->
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background-color: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--accent-hover);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Sections */
+        section {
+            min-height: 100vh;
+            padding: 6rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+
+        /* Hero Section */
+        #home {
+            text-align: center;
+        }
+
+        #home h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #home .subtitle {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        #home .tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 0.75rem 2rem;
+            background-color: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 1rem;
+        }
+
+        .cta-button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        /* About Section */
+        #about {
+            background-color: var(--bg-secondary);
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .about-text p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .skills {
+            margin-top: 2rem;
+        }
+
+        .skill-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .skill-category h3 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            background-color: var(--bg-card);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* Projects Section */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .project-card {
+            background-color: var(--bg-card);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .project-card h3 {
+            color: var(--accent);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .tech-tag {
+            background-color: var(--bg-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+            color: var(--accent-hover);
+        }
+
+        .project-links {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .project-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .project-link:hover {
+            color: var(--accent-hover);
+        }
+
+        /* Contact Section */
+        #contact {
+            background-color: var(--bg-secondary);
+        }
+
+        .contact-content {
+            text-align: center;
+        }
+
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .contact-item a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .contact-item a:hover {
+            color: var(--accent-hover);
+        }
+
+        .contact-item span {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-primary);
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            #home h1 {
+                font-size: 2.5rem;
+            }
+
+            #home .subtitle {
+                font-size: 1.2rem;
+            }
+
+            section h2 {
+                font-size: 2rem;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-links {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
     <nav>
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Projects</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-
-      <!-- search! -->
-      <form>
-        <input type="search" name="q" placeholder="Search site" />
-        <input type="submit" value="Go!" />
-      </form>
+        <ul>
+            <li><a href="#home">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
     </nav>
 
-    <!-- main content -->
-    <main>
-      <article>
-        <h2>My Interview Journey</h2>
+    <!-- Hero Section -->
+    <section id="home">
+        <div class="container">
+            <h1>Hunter Powell</h1>
+            <p class="subtitle">Software Developer | Backend Specialist</p>
+            <p class="tagline">Computer Science student at Sacramento State with a passion for building efficient backend systems and solving complex problems through code.</p>
+            <a href="#contact" class="cta-button">Get In Touch</a>
+        </div>
+    </section>
 
-        <p>
-          This is my page, there are many like it but this one is mine.
-          I've been doing a lot of research into <strong>data structures
-          and algorithms</strong> in Python lately. I had a job interview
-          with <strong>Roblox</strong>, and their technical interviews were
-          no joke!
-        </p>
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <h2>About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>I'm a Computer Science student at Sacramento State University, expecting to graduate in May 2026. I specialize in backend development and have a strong foundation in data structures and algorithms.</p>
+                    <p>I'm most proficient in Python and prefer working on backend systems, though I'm also experienced with Java and C++. Currently learning Rust because it's cool and I enjoy exploring new technologies.</p>
+                    <p>When I'm not coding, you can find me watching movies, reading, gaming, or exploring the outdoors.</p>
+                </div>
+                <div class="skills">
+                    <div class="skill-category">
+                        <h3>Languages</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Java</span>
+                            <span class="skill-tag">C++</span>
+                            <span class="skill-tag">Rust (learning)</span>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <h3>Frameworks & Tools</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Django</span>
+                            <span class="skill-tag">Tkinter</span>
+                            <span class="skill-tag">Git</span>
+                        </div>
+                    </div>
+                    <div class="skill-category">
+                        <h3>Focus Areas</h3>
+                        <div class="skill-tags">
+                            <span class="skill-tag">Backend Development</span>
+                            <span class="skill-tag">Algorithms</span>
+                            <span class="skill-tag">Data Structures</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <p>
-          <a href="https://leetcode.com/problems/reorganize-string/description/?envType=company&envId=roblox&favoriteSlug=roblox-thirty-days/">
-            Here's an example problem
-          </a>
-        </p>
+    <!-- Projects Section -->
+    <section id="projects">
+        <div class="container">
+            <h2>Featured Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3>Evolving Maze Solver</h3>
+                    <p>A population-based evolutionary algorithm where robots learn to solve mazes through genetic selection. Each generation, the best-performing robots reproduce, passing their traits to offspring until an optimal solution emerges.</p>
+                    <p>Built entirely in pure Java with no external frameworks or libraries, running directly in the command line. This project demonstrates genetic algorithms and object-oriented programming principles.</p>
+                    <div class="project-tech">
+                        <span class="tech-tag">Java</span>
+                        <span class="tech-tag">Genetic Algorithms</span>
+                        <span class="tech-tag">OOP</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/hunterpowell" class="project-link" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
 
-        <img src="https://media.tenor.com/dZ6gIOwtqpoAAAAj/pepe-thumbs-up.gif"
-             alt="ok!" />
+                <div class="project-card">
+                    <h3>Interactive Screensaver</h3>
+                    <p>A dynamic screensaver featuring two bouncing images/GIFs with realistic collision physics and a powerup system. Tracks individual scores for each image and maintains a high score across sessions.</p>
+                    <p>Implements physics-based movement, collision detection, and score persistence, all with a clean graphical interface built using Python's Tkinter library.</p>
+                    <div class="project-tech">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Tkinter</span>
+                        <span class="tech-tag">Physics Simulation</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/hunterpowell" class="project-link" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        <section>
-          <h3>Technical Interview Prep</h3>
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="container">
+            <div class="contact-content">
+                <h2>Let's Connect</h2>
+                <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 1rem;">I'm always open to discussing new opportunities, collaborations, or just chatting about tech.</p>
+                <div class="contact-links">
+                    <div class="contact-item">
+                        <span>GitHub</span>
+                        <a href="https://github.com/hunterpowell" target="_blank">@hunterpowell</a>
+                    </div>
+                    <div class="contact-item">
+                        <span>LinkedIn</span>
+                        <a href="https://linkedin.com/in/hunterpowell-dev" target="_blank">hunterpowell-dev</a>
+                    </div>
+                    <div class="contact-item">
+                        <span>Email</span>
+                        <a href="mailto:hunterpowell99@gmail.com">hunterpowell99@gmail.com</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-          <p>
-            Preparing for technical interviews requires consistent practice
-            and understanding of core concepts. I focused on arrays, strings,
-            hash maps, and recursion to build a strong foundation.
-          </p>
-
-          <p>
-            The key is to not just memorize solutions, but to understand
-            the patterns and be able to apply them to new problems.
-          </p>
-        </section>
-
-        <section>
-          <h3>Resources I Used</h3>
-
-          <p>
-            LeetCode was my primary resource for practice problems. I also
-            watched YouTube tutorials and read articles about system design
-            and coding best practices.
-          </p>
-
-          <p>
-            Consistency is more important than intensity. Even 30 minutes
-            a day can make a huge difference over time.
-          </p>
-        </section>
-      </article>
-
-      <!-- Sidebar content nested within main -->
-      <aside>
-        <h2>Quick Links</h2>
-
-        <ul>
-          <li><a href="#">My GitHub Projects</a></li>
-          <li><a href="#">LeetCode Profile</a></li>
-          <li><a href="#">Resume/CV</a></li>
-          <li><a href="#">Blog Archive</a></li>
-          <li><a href="#">Contact Form</a></li>
-        </ul>
-      </aside>
-    </main>
-
-    <!-- footer -->
+    <!-- Footer -->
     <footer>
-      <p>©Copyright 2025 by Hunter. All rights reserved.</p>
+        <p>&copy; 2026 Hunter Powell. All rights reserved.</p>
     </footer>
-  </body>
+</body>
 </html>

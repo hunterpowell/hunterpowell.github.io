@@ -90,6 +90,29 @@
         /* Hero Section */
         #home {
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #home::before {
+            content: "def solve_maze(grid, start, end):\n    queue = [(start, [start])]\n    visited = set()\n    \n    while queue:\n        (vertex, path) = queue.pop(0)\n        if vertex in visited:\n            continue\n        visited.add(vertex)\n        \n        if vertex == end:\n            return path\n        \n        for neighbor in get_neighbors(grid, vertex):\n            if neighbor not in visited:\n                queue.append((neighbor, path + [neighbor]))\n    return None\n\nclass Robot:\n    def __init__(self, genes):\n        self.genes = genes\n        self.fitness = 0\n    \n    def mutate(self, rate=0.01):\n        for i in range(len(self.genes)):\n            if random() < rate:\n                self.genes[i] = random_gene()";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            opacity: 0.05;
+            white-space: pre;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #home .container {
+            position: relative;
+            z-index: 1;
         }
 
         #home h1 {

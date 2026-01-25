@@ -265,6 +265,108 @@
             color: var(--accent-hover);
         }
 
+        /* Demo Section */
+        .demo-container {
+            margin: 2rem 0;
+            background-color: var(--bg-secondary);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .demo-header h4 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .demo-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .demo-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        #robotCanvas {
+            background-color: var(--bg-primary);
+            border-radius: 0.5rem;
+            border: 2px solid var(--border);
+            max-width: 100%;
+            height: auto;
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .demo-btn {
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--border);
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .demo-btn:hover:not(:disabled) {
+            background-color: var(--border);
+            transform: translateY(-2px);
+        }
+
+        .demo-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .demo-btn-primary {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .demo-btn-primary:hover:not(:disabled) {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .demo-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .stat-item {
+            background-color: var(--bg-primary);
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
         /* Contact Section */
         #contact {
             background-color: var(--bg-secondary);
@@ -365,7 +467,7 @@
     <section id="home">
         <div class="container">
             <h1>Hunter Powell</h1>
-            <p class="subtitle">Software Developer | Backend Specialist</p>
+            <p class="subtitle">Software Developer</p>
             <p class="tagline">Computer Science student at Sacramento State with a passion for building efficient backend systems and solving complex problems through code.</p>
             <a href="#contact" class="cta-button">Get In Touch</a>
         </div>
@@ -421,13 +523,49 @@
                     <h3>Evolving Maze Solver</h3>
                     <p>A population-based evolutionary algorithm where robots learn to solve mazes through genetic selection. Each generation, the best-performing robots reproduce, passing their traits to offspring until an optimal solution emerges.</p>
                     <p>Built entirely in pure Java with no external frameworks or libraries, running directly in the command line. This project demonstrates genetic algorithms and object-oriented programming principles.</p>
+
+                    <!-- Interactive Demo -->
+                    <div class="demo-container">
+                        <div class="demo-header">
+                            <h4>Interactive Demo</h4>
+                            <p>Watch the genetic algorithm in action as robots evolve to collect batteries</p>
+                        </div>
+                        <div class="demo-content">
+                            <canvas id="robotCanvas" width="440" height="440"></canvas>
+                            <div class="demo-controls">
+                                <button id="startBtn" class="demo-btn demo-btn-primary">Start Evolution</button>
+                                <button id="pauseBtn" class="demo-btn" disabled>Pause</button>
+                                <button id="resetBtn" class="demo-btn">Reset</button>
+                            </div>
+                            <div class="demo-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Generation:</span>
+                                    <span class="stat-value" id="genStat">0/100</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Best Fitness:</span>
+                                    <span class="stat-value" id="fitnessStat">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Avg Fitness:</span>
+                                    <span class="stat-value" id="avgStat">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Turns Survived:</span>
+                                    <span class="stat-value" id="turnsStat">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="project-tech">
                         <span class="tech-tag">Java</span>
+                        <span class="tech-tag">JavaScript</span>
                         <span class="tech-tag">Genetic Algorithms</span>
                         <span class="tech-tag">OOP</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://github.com/hunterpowell" class="project-link" target="_blank">View on GitHub →</a>
+                        <a href="https://github.com/hunterpowell/robots" class="project-link" target="_blank">View on GitHub →</a>
                     </div>
                 </div>
 
@@ -441,7 +579,7 @@
                         <span class="tech-tag">Physics Simulation</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://github.com/hunterpowell" class="project-link" target="_blank">View on GitHub →</a>
+                        <a href="https://github.com/hunterpowell/idle_fighters" class="project-link" target="_blank">View on GitHub →</a>
                     </div>
                 </div>
             </div>
@@ -476,5 +614,63 @@
     <footer>
         <p>&copy; 2026 Hunter Powell. All rights reserved.</p>
     </footer>
+
+    <!-- Robot Simulation Script -->
+    <script src="robots.js"></script>
+    <script>
+        // Initialize the simulation when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('robotCanvas');
+            const startBtn = document.getElementById('startBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const genStat = document.getElementById('genStat');
+            const fitnessStat = document.getElementById('fitnessStat');
+            const avgStat = document.getElementById('avgStat');
+            const turnsStat = document.getElementById('turnsStat');
+
+            let simulation = null;
+
+            function updateStats(stats) {
+                genStat.textContent = `${stats.generation}/${stats.totalGenerations}`;
+                fitnessStat.textContent = stats.bestFitness;
+                avgStat.textContent = stats.avgFitness;
+                turnsStat.textContent = stats.turnsAlive;
+
+                if (!stats.running) {
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    startBtn.textContent = 'Restart Evolution';
+                }
+            }
+
+            startBtn.addEventListener('click', function() {
+                if (!simulation || !simulation.running) {
+                    simulation = new RobotSimulation(canvas, updateStats);
+                    simulation.start();
+                    startBtn.disabled = true;
+                    pauseBtn.disabled = false;
+                    startBtn.textContent = 'Running...';
+                }
+            });
+
+            pauseBtn.addEventListener('click', function() {
+                if (simulation) {
+                    simulation.pause();
+                    pauseBtn.textContent = simulation.paused ? 'Resume' : 'Pause';
+                }
+            });
+
+            resetBtn.addEventListener('click', function() {
+                if (simulation) {
+                    simulation.reset();
+                }
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                startBtn.textContent = 'Start Evolution';
+                pauseBtn.textContent = 'Pause';
+            });
+        });
+    </script>
 </body>
 </html>

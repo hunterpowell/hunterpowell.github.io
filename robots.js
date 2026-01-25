@@ -179,9 +179,11 @@ const CONFIG = {
 
 // Main Simulation Class
 class RobotSimulation {
-    constructor(canvas, statsCallback) {
-        this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+    constructor(gen1Canvas, finalCanvas, statsCallback) {
+        this.gen1Canvas = gen1Canvas;
+        this.finalCanvas = finalCanvas;
+        this.gen1Ctx = gen1Canvas.getContext('2d');
+        this.finalCtx = finalCanvas.getContext('2d');
         this.statsCallback = statsCallback;
         this.running = false;
         this.paused = false;
@@ -193,7 +195,8 @@ class RobotSimulation {
         this.bestEverMap = null;
         this.bestEverGen = 0;
         this.bestEverFitness = 0;
-        this.animationFrame = null;
+        this.gen1Bot = null;
+        this.gen1Map = null;
 
         this.initializeRobots();
     }
@@ -208,6 +211,12 @@ class RobotSimulation {
         this.bestEverBot = null;
         this.bestEverMap = null;
         this.bestEverFitness = 0;
+        this.gen1Bot = null;
+        this.gen1Map = null;
+
+        // Clear both canvases
+        this.gen1Ctx.clearRect(0, 0, this.gen1Canvas.width, this.gen1Canvas.height);
+        this.finalCtx.clearRect(0, 0, this.finalCanvas.width, this.finalCanvas.height);
     }
 
     async runGeneration() {
@@ -235,6 +244,14 @@ class RobotSimulation {
         // Sort by fitness
         this.sortByFitness();
 
+        // Save a random robot from generation 1
+        if (this.currentGen === 0) {
+            const randomIdx = Math.floor(Math.random() * CONFIG.ROBOTS_PER_GEN);
+            this.gen1Bot = new Robot(this.robots[randomIdx]);
+            this.gen1Bot.path = [...this.robots[randomIdx].path];
+            this.gen1Map = this.maps[randomIdx].clone();
+        }
+
         // Track best ever
         if (this.robots[0].fitness > this.bestEverFitness) {
             this.bestEverFitness = this.robots[0].fitness;
@@ -247,19 +264,16 @@ class RobotSimulation {
         // Update stats
         this.updateStats();
 
-        // Visualize best of this generation
-        if (this.bestEverBot) {
-            await this.visualizeBestRobot();
-        }
-
         this.currentGen++;
 
-        // Evolve next generation
+        // Evolve next generation or finish
         if (this.currentGen < CONFIG.GENERATIONS) {
             this.evolveNextGen();
         } else {
             this.running = false;
             this.updateStats();
+            // Display final comparison
+            await this.displayComparison();
         }
     }
 
@@ -341,54 +355,63 @@ class RobotSimulation {
         return [child1, child2];
     }
 
-    async visualizeBestRobot() {
-        if (!this.bestEverBot || !this.bestEverMap) return;
+    drawRobotOnCanvas(ctx, canvas, robot, map) {
+        if (!robot || !map) return;
 
-        const cellSize = this.canvas.width / this.bestEverMap.size;
+        const cellSize = canvas.width / map.size;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // Draw map
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let y = 0; y < map.size; y++) {
+            for (let x = 0; x < map.size; x++) {
+                const cell = map.map[y][x];
 
-        for (let y = 0; y < this.bestEverMap.size; y++) {
-            for (let x = 0; x < this.bestEverMap.size; x++) {
-                const cell = this.bestEverMap.map[y][x];
-
-                if (cell === this.bestEverMap.WALL) {
-                    this.ctx.fillStyle = '#475569';
-                } else if (cell === this.bestEverMap.BATTERY) {
-                    this.ctx.fillStyle = '#22c55e';
+                if (cell === map.WALL) {
+                    ctx.fillStyle = '#475569';
+                } else if (cell === map.BATTERY) {
+                    ctx.fillStyle = '#22c55e';
                 } else {
-                    this.ctx.fillStyle = '#1e293b';
+                    ctx.fillStyle = '#1e293b';
                 }
 
-                this.ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                this.ctx.strokeStyle = '#0f172a';
-                this.ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                ctx.strokeStyle = '#0f172a';
+                ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
         }
 
         // Draw path
-        if (this.bestEverBot.path.length > 0) {
-            this.ctx.strokeStyle = '#3b82f6';
-            this.ctx.lineWidth = 2;
-            this.ctx.beginPath();
+        if (robot.path && robot.path.length > 0) {
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
 
-            const firstPoint = this.bestEverBot.path[0];
-            this.ctx.moveTo(firstPoint.x * cellSize + cellSize/2, firstPoint.y * cellSize + cellSize/2);
+            const firstPoint = robot.path[0];
+            ctx.moveTo(firstPoint.x * cellSize + cellSize/2, firstPoint.y * cellSize + cellSize/2);
 
-            for (let i = 1; i < this.bestEverBot.path.length; i++) {
-                const point = this.bestEverBot.path[i];
-                this.ctx.lineTo(point.x * cellSize + cellSize/2, point.y * cellSize + cellSize/2);
+            for (let i = 1; i < robot.path.length; i++) {
+                const point = robot.path[i];
+                ctx.lineTo(point.x * cellSize + cellSize/2, point.y * cellSize + cellSize/2);
             }
-            this.ctx.stroke();
+            ctx.stroke();
 
             // Draw robot at end position
-            const lastPoint = this.bestEverBot.path[this.bestEverBot.path.length - 1];
-            this.ctx.fillStyle = '#f59e0b';
-            this.ctx.beginPath();
-            this.ctx.arc(lastPoint.x * cellSize + cellSize/2, lastPoint.y * cellSize + cellSize/2, cellSize/3, 0, 2 * Math.PI);
-            this.ctx.fill();
+            const lastPoint = robot.path[robot.path.length - 1];
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.arc(lastPoint.x * cellSize + cellSize/2, lastPoint.y * cellSize + cellSize/2, cellSize/3, 0, 2 * Math.PI);
+            ctx.fill();
         }
+    }
+
+    async displayComparison() {
+        // Draw gen 1 robot on left canvas
+        this.drawRobotOnCanvas(this.gen1Ctx, this.gen1Canvas, this.gen1Bot, this.gen1Map);
+
+        // Draw best ever robot on right canvas
+        this.drawRobotOnCanvas(this.finalCtx, this.finalCanvas, this.bestEverBot, this.bestEverMap);
     }
 
     updateStats() {
@@ -429,7 +452,6 @@ class RobotSimulation {
         this.running = false;
         this.paused = false;
         this.initializeRobots();
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.updateStats();
     }
 }

@@ -293,12 +293,45 @@
             gap: 1rem;
         }
 
-        #robotCanvas {
+        .canvas-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            width: 100%;
+            margin: 1rem 0;
+        }
+
+        .canvas-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .canvas-wrapper h5 {
+            color: var(--accent);
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .canvas-wrapper canvas {
             background-color: var(--bg-primary);
             border-radius: 0.5rem;
             border: 2px solid var(--border);
             max-width: 100%;
             height: auto;
+        }
+
+        .canvas-caption {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .canvas-container {
+                grid-template-columns: 1fr;
+            }
         }
 
         .demo-controls {
@@ -531,7 +564,18 @@
                             <p>Watch the genetic algorithm in action as robots evolve to collect batteries</p>
                         </div>
                         <div class="demo-content">
-                            <canvas id="robotCanvas" width="440" height="440"></canvas>
+                            <div class="canvas-container">
+                                <div class="canvas-wrapper">
+                                    <h5>Generation 1 (Random)</h5>
+                                    <canvas id="gen1Canvas" width="350" height="350"></canvas>
+                                    <p class="canvas-caption">Before Evolution</p>
+                                </div>
+                                <div class="canvas-wrapper">
+                                    <h5>Generation 100 (Best)</h5>
+                                    <canvas id="finalCanvas" width="350" height="350"></canvas>
+                                    <p class="canvas-caption">After Evolution</p>
+                                </div>
+                            </div>
                             <div class="demo-controls">
                                 <button id="startBtn" class="demo-btn demo-btn-primary">Start Evolution</button>
                                 <button id="pauseBtn" class="demo-btn" disabled>Pause</button>
@@ -620,7 +664,8 @@
     <script>
         // Initialize the simulation when the page loads
         document.addEventListener('DOMContentLoaded', function() {
-            const canvas = document.getElementById('robotCanvas');
+            const gen1Canvas = document.getElementById('gen1Canvas');
+            const finalCanvas = document.getElementById('finalCanvas');
             const startBtn = document.getElementById('startBtn');
             const pauseBtn = document.getElementById('pauseBtn');
             const resetBtn = document.getElementById('resetBtn');
@@ -646,7 +691,7 @@
 
             startBtn.addEventListener('click', function() {
                 if (!simulation || !simulation.running) {
-                    simulation = new RobotSimulation(canvas, updateStats);
+                    simulation = new RobotSimulation(gen1Canvas, finalCanvas, updateStats);
                     simulation.start();
                     startBtn.disabled = true;
                     pauseBtn.disabled = false;

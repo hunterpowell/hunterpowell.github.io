@@ -561,7 +561,7 @@
                     <div class="demo-container">
                         <div class="demo-header">
                             <h4>Interactive Demo</h4>
-                            <p>Watch the genetic algorithm in action as robots evolve to collect batteries</p>
+                            <p>Watch the genetic algorithm in action as robots evolve to collect batteries (this is a stripped down version rewritten in JavaScript and built to run in browser)</p>
                         </div>
                         <div class="demo-content">
                             <div class="canvas-container">
@@ -590,14 +590,6 @@
                                     <span class="stat-label">Best Fitness:</span>
                                     <span class="stat-value" id="fitnessStat">0</span>
                                 </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Avg Fitness:</span>
-                                    <span class="stat-value" id="avgStat">0</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Turns Survived:</span>
-                                    <span class="stat-value" id="turnsStat">0</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -617,8 +609,40 @@
                     <h3>Interactive Screensaver</h3>
                     <p>A dynamic screensaver featuring two bouncing images/GIFs with realistic collision physics and a powerup system. Tracks individual scores for each image and maintains a high score across sessions.</p>
                     <p>Implements physics-based movement, collision detection, and score persistence, all with a clean graphical interface built using Python's Tkinter library.</p>
+
+                    <!-- Interactive Demo -->
+                    <div class="demo-container">
+                        <div class="demo-header">
+                            <h4>Interactive Demo</h4>
+                            <p>Watch the physics simulation in action - blue vs red with powerups (this is a simplified browser version)</p>
+                        </div>
+                        <div class="demo-content">
+                            <canvas id="fightersCanvas" width="500" height="400" style="background-color: #1e293b; border-radius: 0.5rem; border: 2px solid var(--border);"></canvas>
+                            <div class="demo-controls">
+                                <button id="fightersStartBtn" class="demo-btn demo-btn-primary">Start Simulation</button>
+                                <button id="fightersPauseBtn" class="demo-btn" disabled>Pause</button>
+                                <button id="fightersResetBtn" class="demo-btn">Reset</button>
+                            </div>
+                            <div class="demo-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Blue Score:</span>
+                                    <span class="stat-value" id="p1ScoreStat">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Red Score:</span>
+                                    <span class="stat-value" id="p2ScoreStat">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">High Score:</span>
+                                    <span class="stat-value" id="highScoreStat">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="project-tech">
                         <span class="tech-tag">Python</span>
+                        <span class="tech-tag">JavaScript</span>
                         <span class="tech-tag">Tkinter</span>
                         <span class="tech-tag">Physics Simulation</span>
                     </div>
@@ -714,6 +738,63 @@
                 pauseBtn.disabled = true;
                 startBtn.textContent = 'Start Evolution';
                 pauseBtn.textContent = 'Pause';
+            });
+        });
+    </script>
+
+    <!-- Fighters Simulation Script -->
+    <script src="fighters.js"></script>
+    <script>
+        // Initialize the fighters simulation when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const fightersCanvas = document.getElementById('fightersCanvas');
+            const fightersStartBtn = document.getElementById('fightersStartBtn');
+            const fightersPauseBtn = document.getElementById('fightersPauseBtn');
+            const fightersResetBtn = document.getElementById('fightersResetBtn');
+            const p1ScoreStat = document.getElementById('p1ScoreStat');
+            const p2ScoreStat = document.getElementById('p2ScoreStat');
+            const highScoreStat = document.getElementById('highScoreStat');
+
+            let fightersSimulation = null;
+
+            function updateFightersStats(stats) {
+                p1ScoreStat.textContent = stats.player1Score;
+                p2ScoreStat.textContent = stats.player2Score;
+                highScoreStat.textContent = stats.highScore;
+
+                if (!stats.running) {
+                    fightersStartBtn.disabled = false;
+                    fightersPauseBtn.disabled = true;
+                    fightersStartBtn.textContent = 'Start Simulation';
+                }
+            }
+
+            fightersStartBtn.addEventListener('click', function() {
+                if (!fightersSimulation) {
+                    fightersSimulation = new FightersSimulation(fightersCanvas, updateFightersStats);
+                }
+                fightersSimulation.start();
+                fightersStartBtn.disabled = true;
+                fightersPauseBtn.disabled = false;
+                fightersStartBtn.textContent = 'Running...';
+            });
+
+            fightersPauseBtn.addEventListener('click', function() {
+                if (fightersSimulation) {
+                    fightersSimulation.pause();
+                    fightersPauseBtn.textContent = fightersSimulation.running ? 'Pause' : 'Resume';
+                    fightersStartBtn.textContent = fightersSimulation.running ? 'Running...' : 'Start Simulation';
+                }
+            });
+
+            fightersResetBtn.addEventListener('click', function() {
+                if (fightersSimulation) {
+                    fightersSimulation.reset();
+                }
+                fightersStartBtn.disabled = false;
+                fightersPauseBtn.disabled = true;
+                fightersStartBtn.textContent = 'Start Simulation';
+                fightersPauseBtn.textContent = 'Pause';
             });
         });
     </script>

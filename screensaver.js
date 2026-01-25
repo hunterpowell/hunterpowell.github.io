@@ -1,14 +1,16 @@
 // DOM-based screensaver - bouncing images overlay
 class ScreensaverFighter {
-    constructor(imageSrc, playerNum, containerWidth, containerHeight) {
+    constructor(imageSrc, playerNum, containerWidth, containerHeight, imagePool = []) {
         this.width = 240;
         this.height = 240;
         this.containerWidth = containerWidth;
         this.containerHeight = containerHeight;
         this.playerNum = playerNum;
+        this.imagePool = imagePool;
+        this.currentImage = imageSrc;
 
         // Random speed
-        this.speed = [100, 150, 200][Math.floor(Math.random() * 3)];
+        this.speed = [150, 200, 250][Math.floor(Math.random() * 3)];
 
         this.score = 0;
         this.poweredUp = false;
@@ -55,6 +57,19 @@ class ScreensaverFighter {
 
     updateScore() {
         this.scoreElement.textContent = this.score.toString();
+    }
+
+    changeImage() {
+        if (this.imagePool.length <= 1) return;
+
+        let newImage;
+        do {
+            const randomIdx = Math.floor(Math.random() * this.imagePool.length);
+            newImage = this.imagePool[randomIdx];
+        } while (newImage === this.currentImage);
+
+        this.currentImage = newImage;
+        this.element.src = newImage;
     }
 
     move(deltaTime) {
@@ -152,10 +167,28 @@ class FullscreenScreensaver {
     async start() {
         if (this.running) return;
 
-        // Pick two random images
+        // Clean up any existing elements first
+        if (this.fighters.length > 0) {
+            this.fighters.forEach(f => {
+                if (f.element && f.element.parentNode) f.element.remove();
+                if (f.scoreElement && f.scoreElement.parentNode) f.scoreElement.remove();
+            });
+            this.fighters = [];
+        }
+        if (this.powerUp && this.powerUp.element && this.powerUp.element.parentNode) {
+            this.powerUp.element.remove();
+            this.powerUp = null;
+        }
+
+        // Reset high score
+        this.highScore = 0;
+
+        // Pick two random images (shuffle each time)
         const shuffled = [...this.images].sort(() => Math.random() - 0.5);
         const image1 = shuffled[0] || 'https://via.placeholder.com/240/3b82f6/ffffff?text=Player+1';
         const image2 = shuffled[1] || 'https://via.placeholder.com/240/ef4444/ffffff?text=Player+2';
+
+        console.log('Starting screensaver with images:', image1, image2);
 
         // Create fighters
         this.fighters = [

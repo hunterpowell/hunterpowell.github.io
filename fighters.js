@@ -5,6 +5,19 @@ class Fighter {
         this.height = 60;
         this.canvasWidth = canvasWidth;
         this.canvasHeight = canvasHeight;
+        this.playerNum = playerNum;
+
+        // Color pool for each player
+        this.colorPool = [
+            { color: '#3b82f6', emoji: '🔵' },  // blue
+            { color: '#ef4444', emoji: '🔴' },  // red
+            { color: '#22c55e', emoji: '🟢' },  // green
+            { color: '#eab308', emoji: '🟡' },  // yellow
+            { color: '#a855f7', emoji: '🟣' },  // purple
+            { color: '#f97316', emoji: '🟠' },  // orange
+            { color: '#ec4899', emoji: '🩷' },  // pink
+            { color: '#06b6d4', emoji: '🔵' },  // cyan
+        ];
 
         // Random speed
         this.speed = [100, 150, 200][Math.floor(Math.random() * 3)];
@@ -16,14 +29,15 @@ class Fighter {
         if (playerNum === 1) {
             this.x = canvasWidth / 4 - this.width / 2;
             this.y = canvasHeight / 2 - this.height / 2;
-            this.color = '#3b82f6'; // blue
-            this.emoji = '🔵';
+            this.currentColorIndex = 0; // Start with blue
         } else {
             this.x = canvasWidth * 0.75 - this.width / 2;
             this.y = canvasHeight / 2 - this.height / 2;
-            this.color = '#ef4444'; // red
-            this.emoji = '🔴';
+            this.currentColorIndex = 1; // Start with red
         }
+
+        this.color = this.colorPool[this.currentColorIndex].color;
+        this.emoji = this.colorPool[this.currentColorIndex].emoji;
 
         // Small variance in starting position
         this.x += Math.random() * 100 - 50;
@@ -33,6 +47,18 @@ class Fighter {
         const dir = [this.speed, -this.speed];
         this.dx = dir[Math.floor(Math.random() * 2)];
         this.dy = dir[Math.floor(Math.random() * 2)];
+    }
+
+    changeColor() {
+        // Pick a random color different from current
+        let newIndex;
+        do {
+            newIndex = Math.floor(Math.random() * this.colorPool.length);
+        } while (newIndex === this.currentColorIndex);
+
+        this.currentColorIndex = newIndex;
+        this.color = this.colorPool[this.currentColorIndex].color;
+        this.emoji = this.colorPool[this.currentColorIndex].emoji;
     }
 
     updatePosition(deltaTime) {
@@ -196,6 +222,9 @@ class FightersSimulation {
             // Update scores
             winner.score += 1;
             loser.score = 0;
+
+            // Change loser's color
+            loser.changeColor();
 
             // Clear powerups
             f1.poweredUp = false;

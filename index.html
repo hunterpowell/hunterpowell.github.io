@@ -408,22 +408,48 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: rgba(15, 23, 42, 0.95);
+            background-color: rgba(15, 23, 42, 0.5);
             z-index: 9999;
             cursor: pointer;
+            overflow: hidden;
         }
 
         #screensaverOverlay.active {
             display: block;
         }
 
-        #screensaverOverlay canvas {
+        .screensaver-image {
             position: absolute;
-            top: 50%;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .screensaver-score {
+            position: absolute;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            pointer-events: none;
+        }
+
+        .screensaver-powerup {
+            position: absolute;
+            font-size: 40px;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .screensaver-highscore {
+            position: fixed;
+            top: 20px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 95vw;
-            max-height: 95vh;
+            transform: translateX(-50%);
+            color: white;
+            font-weight: bold;
+            font-size: 36px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            z-index: 10000;
         }
 
         #screensaverOverlay .close-hint {
@@ -730,7 +756,7 @@
 
     <!-- Fullscreen Screensaver Overlay -->
     <div id="screensaverOverlay">
-        <canvas id="fullscreenCanvas" width="1200" height="800"></canvas>
+        <div class="screensaver-highscore" id="screensaverHighScore">High Score: 0</div>
         <div class="close-hint">Click anywhere to close</div>
     </div>
 
@@ -847,36 +873,77 @@
     </script>
 
     <!-- Easter Egg Fullscreen Screensaver -->
+    <script src="screensaver.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const overlay = document.getElementById('screensaverOverlay');
             const easterEggBtn = document.getElementById('easterEggBtn');
-            const fullscreenCanvas = document.getElementById('fullscreenCanvas');
-            let fullscreenSimulation = null;
+            let screensaver = null;
+
+            // Load images from the images folder
+            async function loadImages() {
+                // Try to load images from a predefined list
+                const imageFiles = [
+                    'images/image1.png',
+                    'images/image2.png',
+                    'images/image3.png',
+                    'images/image4.png',
+                    'images/image5.png',
+                    'images/image1.jpg',
+                    'images/image2.jpg',
+                    'images/image3.jpg',
+                    'images/image4.jpg',
+                    'images/image5.jpg',
+                    'images/image1.gif',
+                    'images/image2.gif'
+                ];
+
+                // Test which images exist
+                const validImages = [];
+                for (const img of imageFiles) {
+                    try {
+                        const response = await fetch(img, { method: 'HEAD' });
+                        if (response.ok) {
+                            validImages.push(img);
+                        }
+                    } catch (e) {
+                        // Image doesn't exist, skip
+                    }
+                }
+
+                // If no images found, use placeholders
+                if (validImages.length === 0) {
+                    return [
+                        'https://via.placeholder.com/240/3b82f6/ffffff?text=Player+1',
+                        'https://via.placeholder.com/240/ef4444/ffffff?text=Player+2'
+                    ];
+                }
+
+                return validImages;
+            }
 
             // Activate overlay on button click
-            easterEggBtn.addEventListener('click', function(e) {
+            easterEggBtn.addEventListener('click', async function(e) {
                 e.stopPropagation();
                 overlay.classList.add('active');
 
-                // Create and start fullscreen simulation
-                if (!fullscreenSimulation) {
-                    fullscreenSimulation = new FightersSimulation(fullscreenCanvas, function() {});
+                // Load images and create screensaver
+                const images = await loadImages();
+                if (!screensaver) {
+                    screensaver = new FullscreenScreensaver(overlay, images);
                 }
-                fullscreenSimulation.start();
+                screensaver.start();
             });
 
             // Close overlay on click
-            overlay.addEventListener('click', function() {
-                overlay.classList.remove('active');
-                if (fullscreenSimulation) {
-                    fullscreenSimulation.pause();
+            overlay.addEventListener('click', function(e) {
+                // Only close if clicking the overlay itself
+                if (e.target === overlay || e.target.classList.contains('close-hint')) {
+                    overlay.classList.remove('active');
+                    if (screensaver) {
+                        screensaver.stop();
+                    }
                 }
-            });
-
-            // Prevent canvas clicks from closing overlay
-            fullscreenCanvas.addEventListener('click', function(e) {
-                e.stopPropagation();
             });
         });
     </script>

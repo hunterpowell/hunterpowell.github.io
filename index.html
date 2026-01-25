@@ -400,6 +400,48 @@
             color: var(--accent);
         }
 
+        /* Fullscreen Overlay */
+        #screensaverOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.95);
+            z-index: 9999;
+            cursor: pointer;
+        }
+
+        #screensaverOverlay.active {
+            display: block;
+        }
+
+        #screensaverOverlay canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 95vw;
+            max-height: 95vh;
+        }
+
+        #screensaverOverlay .close-hint {
+            position: absolute;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            opacity: 0.7;
+            animation: fadeInOut 3s ease-in-out infinite;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+
         /* Contact Section */
         #contact {
             background-color: var(--bg-secondary);
@@ -625,11 +667,11 @@
                             </div>
                             <div class="demo-stats">
                                 <div class="stat-item">
-                                    <span class="stat-label">Blue Score:</span>
+                                    <span class="stat-label">P1 Score:</span>
                                     <span class="stat-value" id="p1ScoreStat">0</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-label">Red Score:</span>
+                                    <span class="stat-label">P2 Score:</span>
                                     <span class="stat-value" id="p2ScoreStat">0</span>
                                 </div>
                                 <div class="stat-item">
@@ -681,7 +723,16 @@
     <!-- Footer -->
     <footer>
         <p>&copy; 2026 Hunter Powell. All rights reserved.</p>
+        <button id="easterEggBtn" style="margin-top: 0.5rem; padding: 0.25rem 0.75rem; background: none; border: 1px solid var(--border); color: var(--text-secondary); border-radius: 0.25rem; cursor: pointer; font-size: 0.8rem; opacity: 0.5; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
+            ?
+        </button>
     </footer>
+
+    <!-- Fullscreen Screensaver Overlay -->
+    <div id="screensaverOverlay">
+        <canvas id="fullscreenCanvas" width="1200" height="800"></canvas>
+        <div class="close-hint">Click anywhere to close</div>
+    </div>
 
     <!-- Robot Simulation Script -->
     <script src="robots.js"></script>
@@ -791,6 +842,41 @@
                 fightersPauseBtn.disabled = true;
                 fightersStartBtn.textContent = 'Start Simulation';
                 fightersPauseBtn.textContent = 'Pause';
+            });
+        });
+    </script>
+
+    <!-- Easter Egg Fullscreen Screensaver -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('screensaverOverlay');
+            const easterEggBtn = document.getElementById('easterEggBtn');
+            const fullscreenCanvas = document.getElementById('fullscreenCanvas');
+            let fullscreenSimulation = null;
+
+            // Activate overlay on button click
+            easterEggBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                overlay.classList.add('active');
+
+                // Create and start fullscreen simulation
+                if (!fullscreenSimulation) {
+                    fullscreenSimulation = new FightersSimulation(fullscreenCanvas, function() {});
+                }
+                fullscreenSimulation.start();
+            });
+
+            // Close overlay on click
+            overlay.addEventListener('click', function() {
+                overlay.classList.remove('active');
+                if (fullscreenSimulation) {
+                    fullscreenSimulation.pause();
+                }
+            });
+
+            // Prevent canvas clicks from closing overlay
+            fullscreenCanvas.addEventListener('click', function(e) {
+                e.stopPropagation();
             });
         });
     </script>

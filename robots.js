@@ -170,10 +170,10 @@ class Robot {
 
 // Simulation Configuration
 const CONFIG = {
-    ROBOTS_PER_GEN: 200,  // Reduced for browser performance
-    GENERATIONS: 100,      // Reduced for demo purposes
+    ROBOTS_PER_GEN: 50,   // Reduced for browser performance
+    GENERATIONS: 50,      // Reduced for demo purposes
     TOP_PERCENT: 0.5,
-    TOURNAMENT_SIZE: 10,
+    TOURNAMENT_SIZE: 5,
     MUTATION_RATE: 0.03
 };
 
@@ -223,19 +223,27 @@ class RobotSimulation {
         this.maps = [];
         let totalFitness = 0;
 
-        // Run each robot through the maze
-        for (let i = 0; i < CONFIG.ROBOTS_PER_GEN; i++) {
-            const map = new Map();
-            this.maps.push(map);
-            this.robots[i].reset();
-            this.robots[i].randomStart(map);
-            this.robots[i].look(map);
+        // Run each robot through the maze in batches to avoid freezing
+        const batchSize = 10;
+        for (let batch = 0; batch < CONFIG.ROBOTS_PER_GEN; batch += batchSize) {
+            const end = Math.min(batch + batchSize, CONFIG.ROBOTS_PER_GEN);
 
-            while (this.robots[i].energy > 0) {
-                this.robots[i].movement(map);
+            for (let i = batch; i < end; i++) {
+                const map = new Map();
+                this.maps.push(map);
+                this.robots[i].reset();
+                this.robots[i].randomStart(map);
+                this.robots[i].look(map);
+
+                while (this.robots[i].energy > 0) {
+                    this.robots[i].movement(map);
+                }
+
+                totalFitness += this.robots[i].fitness;
             }
 
-            totalFitness += this.robots[i].fitness;
+            // Yield to browser between batches
+            await new Promise(resolve => setTimeout(resolve, 0));
         }
 
         const avgFit = Math.floor(totalFitness / CONFIG.ROBOTS_PER_GEN);
@@ -433,14 +441,20 @@ class RobotSimulation {
         this.running = true;
         this.paused = false;
 
-        while (this.running && this.currentGen < CONFIG.GENERATIONS) {
-            if (!this.paused) {
-                await this.runGeneration();
-                // Small delay to allow UI updates
-                await new Promise(resolve => setTimeout(resolve, 10));
-            } else {
-                await new Promise(resolve => setTimeout(resolve, 100));
+        try {
+            while (this.running && this.currentGen < CONFIG.GENERATIONS) {
+                if (!this.paused) {
+                    await this.runGeneration();
+                    // Allow UI to update between generations
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
             }
+        } catch (error) {
+            console.error('Simulation error:', error);
+            this.running = false;
+            this.updateStats();
         }
     }
 

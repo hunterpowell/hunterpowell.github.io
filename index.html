@@ -424,34 +424,6 @@
             user-select: none;
         }
 
-        .screensaver-score {
-            position: absolute;
-            color: white;
-            font-weight: bold;
-            font-size: 24px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            pointer-events: none;
-        }
-
-        .screensaver-powerup {
-            position: absolute;
-            font-size: 40px;
-            pointer-events: none;
-            user-select: none;
-        }
-
-        .screensaver-highscore {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-weight: bold;
-            font-size: 36px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            z-index: 10000;
-        }
-
         #screensaverOverlay .close-hint {
             position: absolute;
             bottom: 2rem;
@@ -674,9 +646,9 @@
                 </div>
 
                 <div class="project-card">
-                    <h3>Interactive Screensaver</h3>
-                    <p>A dynamic screensaver featuring two bouncing images/GIFs with realistic collision physics and a powerup system. Tracks individual scores for each image and maintains a high score across sessions.</p>
-                    <p>Implements physics-based movement, collision detection, and score persistence, all with a clean graphical interface built using Python's Tkinter library.</p>
+                    <h3>DVD Logo Screensaver</h3>
+                    <p>A nostalgic recreation of the classic DVD logo screensaver. Features a bouncing logo that changes color each time it hits an edge, with the satisfying anticipation of watching for corner hits.</p>
+                    <p>Built using Python's Tkinter library with a transparent fullscreen overlay. The web version includes an easter egg - click the button below to activate!</p>
 
                     <!-- Interactive Demo -->
                     <div class="demo-container">
@@ -756,7 +728,6 @@
 
     <!-- Fullscreen Screensaver Overlay -->
     <div id="screensaverOverlay">
-        <div class="screensaver-highscore" id="screensaverHighScore">High Score: 0</div>
         <div class="close-hint">Click anywhere to close</div>
     </div>
 
@@ -880,22 +851,17 @@
             const easterEggBtn = document.getElementById('easterEggBtn');
             let screensaver = null;
 
-            // Load images from the images folder
+            // Load DVD logo images
             async function loadImages() {
-                // Try to load images from a predefined list
+                // Try to load colored DVD logos
                 const imageFiles = [
-                    'images/image1.png',
-                    'images/image2.png',
-                    'images/image3.png',
-                    'images/image4.png',
-                    'images/image5.png',
-                    'images/image1.jpg',
-                    'images/image2.jpg',
-                    'images/image3.jpg',
-                    'images/image4.jpg',
-                    'images/image5.jpg',
-                    'images/image1.gif',
-                    'images/image2.gif'
+                    'images/red.png',
+                    'images/green.png',
+                    'images/blue.png',
+                    'images/cyan.png',
+                    'images/magenta.png',
+                    'images/purple.png',
+                    'images/yellow.png'
                 ];
 
                 // Test which images exist
@@ -911,11 +877,16 @@
                     }
                 }
 
-                // If no images found, use placeholders
+                // If no images found, use placeholder colored DVDs
                 if (validImages.length === 0) {
                     return [
-                        'https://via.placeholder.com/240/3b82f6/ffffff?text=Player+1',
-                        'https://via.placeholder.com/240/ef4444/ffffff?text=Player+2'
+                        'https://via.placeholder.com/400x200/ef4444/ffffff?text=DVD',
+                        'https://via.placeholder.com/400x200/3b82f6/ffffff?text=DVD',
+                        'https://via.placeholder.com/400x200/22c55e/ffffff?text=DVD',
+                        'https://via.placeholder.com/400x200/06b6d4/ffffff?text=DVD',
+                        'https://via.placeholder.com/400x200/ec4899/ffffff?text=DVD',
+                        'https://via.placeholder.com/400x200/a855f7/ffffff?text=DVD',
+                        'https://via.placeholder.com/400x200/eab308/ffffff?text=DVD'
                     ];
                 }
 

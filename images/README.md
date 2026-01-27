@@ -1,15 +1,16 @@
-# Images Folder
+# DVD Logo Images
 
-Place your images here for the screensaver easter egg!
+Place your colored DVD logo images here for the screensaver easter egg!
 
-Supported formats: `.png`, `.jpg`, `.jpeg`, `.gif`
+Expected filenames:
+- `red.png`
+- `green.png`
+- `blue.png`
+- `cyan.png`
+- `magenta.png`
+- `purple.png`
+- `yellow.png`
 
-Name your images like:
-- `image1.png`
-- `image2.jpg`
-- `image3.gif`
-- etc.
+The DVD logo will bounce around the screen and cycle through these colors each time it hits an edge. Click the "?" button in the footer to activate the screensaver!
 
-The screensaver will randomly pick 2 images to bounce around the screen when you click the "?" button in the footer.
-
-If no images are found, placeholder images will be used instead.
+If no images are found, colored placeholder logos will be used instead.

@@ -19,7 +19,7 @@ class DVDLogo {
         this.x = containerWidth / 2 - this.width / 2;
         this.y = containerHeight / 2 - this.height / 2;
 
-        // Constant speed, random direction (2 or -2 like the Python version)
+        // Constant speed, random direction
         const dir = [1.5, -1.5];
         this.dx = dir[Math.floor(Math.random() * 2)];
         this.dy = dir[Math.floor(Math.random() * 2)];

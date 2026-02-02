@@ -75,48 +75,6 @@
             <h2>Featured Projects</h2>
             <div class="projects-grid">
                 <div class="project-card">
-                    <h3>Procedural Tree Generator</h3>
-                    <p>A recursive procedural tree generator that creates unique, natural-looking trees with cherry blossoms. Each tree is different thanks to randomized branching angles, death chances, and petal placement.</p>
-                    <p>Originally built in Python using Turtle graphics with a Tkinter GUI. The web version below is a JavaScript Canvas port of the CLI version.</p>
-
-                    <!-- Interactive Demo -->
-                    <div class="demo-container">
-                        <div class="demo-header">
-                            <h4>Interactive Demo</h4>
-                            <p>Generate a unique procedural tree - each one is different!</p>
-                        </div>
-                        <div class="demo-content">
-                            <canvas id="treeCanvas" width="500" height="400" style="background-color: #87CEEB; border-radius: 0.5rem; border: 2px solid var(--border); max-width: 100%; height: auto;"></canvas>
-                            <div class="demo-controls">
-                                <button id="treeStartBtn" class="demo-btn demo-btn-primary">Grow Tree</button>
-                                <button id="treePauseBtn" class="demo-btn" disabled>Pause</button>
-                                <button id="treeResetBtn" class="demo-btn">Reset</button>
-                            </div>
-                            <div class="demo-stats">
-                                <div class="stat-item">
-                                    <span class="stat-label">Branches:</span>
-                                    <span class="stat-value" id="branchesStat">0</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">Blossoms:</span>
-                                    <span class="stat-value" id="petalsStat">0</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="project-tech">
-                        <span class="tech-tag">Python</span>
-                        <span class="tech-tag">Tkinter</span>
-                        <span class="tech-tag">Turtle Graphics</span>
-                        <span class="tech-tag">Procedural Generation</span>
-                    </div>
-                    <div class="project-links">
-                        <a href="https://github.com/hunterpowell/tree-gen" class="project-link" target="_blank">View on GitHub →</a>
-                    </div>
-                </div>
-
-                <div class="project-card">
                     <h3>Evolving Maze Solver</h3>
                     <p>A population-based evolutionary algorithm where robots learn to solve mazes through genetic selection. Each generation, the best-performing robots reproduce, passing their traits to offspring until an optimal solution emerges.</p>
                     <p>Built entirely in pure Java with no external frameworks or libraries, running directly in the command line. This project demonstrates genetic algorithms and object-oriented programming principles.</p>
@@ -169,35 +127,31 @@
                 </div>
 
                 <div class="project-card">
-                    <h3>DVD Logo Screensaver</h3>
-                    <p>A nostalgic recreation of the classic DVD logo screensaver. Features a bouncing logo that changes color each time it hits an edge, with the satisfying anticipation of watching for corner hits.</p>
-                    <p>Built using Python's Tkinter library with a transparent fullscreen overlay. The web version includes an easter egg - click the button below to activate!</p>
+                    <h3>Procedural Tree Generator</h3>
+                    <p>A recursive procedural tree generator that creates unique, natural-looking trees with cherry blossoms. Each tree is different thanks to randomized branching angles, death chances, and petal placement.</p>
+                    <p>Originally built in Python using Turtle graphics with a Tkinter GUI. The web version below is a JavaScript Canvas port of the CLI version.</p>
 
                     <!-- Interactive Demo -->
                     <div class="demo-container">
                         <div class="demo-header">
                             <h4>Interactive Demo</h4>
-                            <p>Watch the physics simulation in action - two colorful orbs with powerups (this is a heavily simplified browser version)</p>
+                            <p>Generate a unique procedural tree - each one is different!</p>
                         </div>
                         <div class="demo-content">
-                            <canvas id="fightersCanvas" width="500" height="400" style="background-color: #1e293b; border-radius: 0.5rem; border: 2px solid var(--border);"></canvas>
+                            <canvas id="treeCanvas" width="500" height="400" style="background-color: #87CEEB; border-radius: 0.5rem; border: 2px solid var(--border); max-width: 100%; height: auto;"></canvas>
                             <div class="demo-controls">
-                                <button id="fightersStartBtn" class="demo-btn demo-btn-primary">Start Simulation</button>
-                                <button id="fightersPauseBtn" class="demo-btn" disabled>Pause</button>
-                                <button id="fightersResetBtn" class="demo-btn">Reset</button>
+                                <button id="treeStartBtn" class="demo-btn demo-btn-primary">Grow Tree</button>
+                                <button id="treePauseBtn" class="demo-btn" disabled>Pause</button>
+                                <button id="treeResetBtn" class="demo-btn">Reset</button>
                             </div>
                             <div class="demo-stats">
                                 <div class="stat-item">
-                                    <span class="stat-label">P1 Score:</span>
-                                    <span class="stat-value" id="p1ScoreStat">0</span>
+                                    <span class="stat-label">Branches:</span>
+                                    <span class="stat-value" id="branchesStat">0</span>
                                 </div>
                                 <div class="stat-item">
-                                    <span class="stat-label">P2 Score:</span>
-                                    <span class="stat-value" id="p2ScoreStat">0</span>
-                                </div>
-                                <div class="stat-item">
-                                    <span class="stat-label">High Score:</span>
-                                    <span class="stat-value" id="highScoreStat">0</span>
+                                    <span class="stat-label">Blossoms:</span>
+                                    <span class="stat-value" id="petalsStat">0</span>
                                 </div>
                             </div>
                         </div>
@@ -206,10 +160,11 @@
                     <div class="project-tech">
                         <span class="tech-tag">Python</span>
                         <span class="tech-tag">Tkinter</span>
-                        <span class="tech-tag">Physics Simulation</span>
+                        <span class="tech-tag">Turtle Graphics</span>
+                        <span class="tech-tag">Procedural Generation</span>
                     </div>
                     <div class="project-links">
-                        <a href="https://github.com/hunterpowell/idle_fighters" class="project-link" target="_blank">View on GitHub →</a>
+                        <a href="https://github.com/hunterpowell/tree-gen" class="project-link" target="_blank">View on GitHub →</a>
                     </div>
                 </div>
             </div>
@@ -358,63 +313,6 @@
                 pauseBtn.disabled = true;
                 startBtn.textContent = 'Start Evolution';
                 pauseBtn.textContent = 'Pause';
-            });
-        });
-    </script>
-
-    <!-- Fighters Simulation Script -->
-    <script src="fighters.js"></script>
-    <script>
-        // Initialize the fighters simulation when the page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            const fightersCanvas = document.getElementById('fightersCanvas');
-            const fightersStartBtn = document.getElementById('fightersStartBtn');
-            const fightersPauseBtn = document.getElementById('fightersPauseBtn');
-            const fightersResetBtn = document.getElementById('fightersResetBtn');
-            const p1ScoreStat = document.getElementById('p1ScoreStat');
-            const p2ScoreStat = document.getElementById('p2ScoreStat');
-            const highScoreStat = document.getElementById('highScoreStat');
-
-            let fightersSimulation = null;
-
-            function updateFightersStats(stats) {
-                p1ScoreStat.textContent = stats.player1Score;
-                p2ScoreStat.textContent = stats.player2Score;
-                highScoreStat.textContent = stats.highScore;
-
-                if (!stats.running) {
-                    fightersStartBtn.disabled = false;
-                    fightersPauseBtn.disabled = true;
-                    fightersStartBtn.textContent = 'Start Simulation';
-                }
-            }
-
-            fightersStartBtn.addEventListener('click', function() {
-                if (!fightersSimulation) {
-                    fightersSimulation = new FightersSimulation(fightersCanvas, updateFightersStats);
-                }
-                fightersSimulation.start();
-                fightersStartBtn.disabled = true;
-                fightersPauseBtn.disabled = false;
-                fightersStartBtn.textContent = 'Running...';
-            });
-
-            fightersPauseBtn.addEventListener('click', function() {
-                if (fightersSimulation) {
-                    fightersSimulation.pause();
-                    fightersPauseBtn.textContent = fightersSimulation.running ? 'Pause' : 'Resume';
-                    fightersStartBtn.textContent = fightersSimulation.running ? 'Running...' : 'Start Simulation';
-                }
-            });
-
-            fightersResetBtn.addEventListener('click', function() {
-                if (fightersSimulation) {
-                    fightersSimulation.reset();
-                }
-                fightersStartBtn.disabled = false;
-                fightersPauseBtn.disabled = true;
-                fightersStartBtn.textContent = 'Start Simulation';
-                fightersPauseBtn.textContent = 'Pause';
             });
         });
     </script>

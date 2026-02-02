@@ -9,9 +9,9 @@ class TreeSimulation {
         this.running = false;
         this.animationId = null;
 
-        // Tree parameters (matching the Python CLI defaults)
-        this.startingLength = 125;
-        this.minBranchLength = 10;
+        // Tree parameters (scaled down for canvas size)
+        this.startingLength = 80;
+        this.minBranchLength = 8;
         this.petalOdds = 0.6;
         this.extraBranchOdds = 0.15;
         this.deathChance = 0.1;
@@ -67,7 +67,7 @@ class TreeSimulation {
         this.generateStump(baseX, baseY);
 
         // 4 main trunk directions, like the Python version
-        const trunkTop = baseY - 40;
+        const trunkTop = baseY - 35;
         const startAngles = [-50, -10, 10, 50];
 
         for (const angle of startAngles) {
@@ -76,44 +76,18 @@ class TreeSimulation {
     }
 
     generateStump(cx, groundY) {
-        // Flared stump using x^7 curves (matching Python's draw_stump)
-        const points = [];
-        const steps = 75;
-        const stepSize = 0.02;
-        const stumpHeight = 40;
-        const stumpWidth = 25;
-
-        // Right side curve
-        const rightPoints = [];
-        for (let i = 0; i <= steps; i++) {
-            const t = i * stepSize;
-            const x = t;
-            const y = Math.pow(t, 7);
-            rightPoints.push({
-                x: cx + x * stumpWidth,
-                y: groundY - stumpHeight + y * stumpHeight
-            });
-        }
-
-        // Left side curve (mirrored)
-        const leftPoints = [];
-        for (let i = 0; i <= steps; i++) {
-            const t = i * stepSize;
-            const x = t;
-            const y = Math.pow(t, 7);
-            leftPoints.push({
-                x: cx - x * stumpWidth,
-                y: groundY - stumpHeight + y * stumpHeight
-            });
-        }
+        // Simple tapered trunk — narrow at top, flared at base
+        const stumpHeight = 35;
+        const topWidth = 6;
+        const bottomWidth = 18;
 
         this.drawQueue.push({
             type: 'stump',
-            rightPoints: rightPoints,
-            leftPoints: leftPoints,
             cx: cx,
             groundY: groundY,
-            stumpWidth: stumpWidth
+            stumpHeight: stumpHeight,
+            topWidth: topWidth,
+            bottomWidth: bottomWidth
         });
     }
 
@@ -225,22 +199,11 @@ class TreeSimulation {
     drawStump(ctx, item) {
         ctx.fillStyle = '#654321';
         ctx.beginPath();
-
-        // Right side
-        ctx.moveTo(item.cx, item.groundY - 40);
-        for (const p of item.rightPoints) {
-            ctx.lineTo(p.x, p.y);
-        }
-
-        // Bottom
-        ctx.lineTo(item.cx + item.stumpWidth, item.groundY);
-        ctx.lineTo(item.cx - item.stumpWidth, item.groundY);
-
-        // Left side (reversed)
-        for (let i = item.leftPoints.length - 1; i >= 0; i--) {
-            ctx.lineTo(item.leftPoints[i].x, item.leftPoints[i].y);
-        }
-
+        // Trapezoid: narrow top, wide bottom
+        ctx.moveTo(item.cx - item.topWidth, item.groundY - item.stumpHeight);
+        ctx.lineTo(item.cx + item.topWidth, item.groundY - item.stumpHeight);
+        ctx.lineTo(item.cx + item.bottomWidth, item.groundY);
+        ctx.lineTo(item.cx - item.bottomWidth, item.groundY);
         ctx.closePath();
         ctx.fill();
     }

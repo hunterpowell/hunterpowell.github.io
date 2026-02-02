@@ -75,6 +75,48 @@
             <h2>Featured Projects</h2>
             <div class="projects-grid">
                 <div class="project-card">
+                    <h3>Procedural Tree Generator</h3>
+                    <p>A recursive procedural tree generator that creates unique, natural-looking trees with cherry blossoms. Each tree is different thanks to randomized branching angles, death chances, and petal placement.</p>
+                    <p>Originally built in Python using Turtle graphics with a Tkinter GUI. The web version below is a JavaScript Canvas port of the CLI version.</p>
+
+                    <!-- Interactive Demo -->
+                    <div class="demo-container">
+                        <div class="demo-header">
+                            <h4>Interactive Demo</h4>
+                            <p>Generate a unique procedural tree - each one is different!</p>
+                        </div>
+                        <div class="demo-content">
+                            <canvas id="treeCanvas" width="500" height="400" style="background-color: #87CEEB; border-radius: 0.5rem; border: 2px solid var(--border);"></canvas>
+                            <div class="demo-controls">
+                                <button id="treeStartBtn" class="demo-btn demo-btn-primary">Grow Tree</button>
+                                <button id="treePauseBtn" class="demo-btn" disabled>Pause</button>
+                                <button id="treeResetBtn" class="demo-btn">Reset</button>
+                            </div>
+                            <div class="demo-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">Branches:</span>
+                                    <span class="stat-value" id="branchesStat">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Blossoms:</span>
+                                    <span class="stat-value" id="petalsStat">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="project-tech">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">Tkinter</span>
+                        <span class="tech-tag">Turtle Graphics</span>
+                        <span class="tech-tag">Procedural Generation</span>
+                    </div>
+                    <div class="project-links">
+                        <a href="https://github.com/hunterpowell/tree-gen" class="project-link" target="_blank">View on GitHub →</a>
+                    </div>
+                </div>
+
+                <div class="project-card">
                     <h3>Evolving Maze Solver</h3>
                     <p>A population-based evolutionary algorithm where robots learn to solve mazes through genetic selection. Each generation, the best-performing robots reproduce, passing their traits to offspring until an optimal solution emerges.</p>
                     <p>Built entirely in pure Java with no external frameworks or libraries, running directly in the command line. This project demonstrates genetic algorithms and object-oriented programming principles.</p>
@@ -210,6 +252,60 @@
     <div id="screensaverOverlay">
         <div class="close-hint">Click anywhere to close</div>
     </div>
+
+    <!-- Tree Generator Script -->
+    <script src="tree.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const treeCanvas = document.getElementById('treeCanvas');
+            const treeStartBtn = document.getElementById('treeStartBtn');
+            const treePauseBtn = document.getElementById('treePauseBtn');
+            const treeResetBtn = document.getElementById('treeResetBtn');
+            const branchesStat = document.getElementById('branchesStat');
+            const petalsStat = document.getElementById('petalsStat');
+
+            let treeSimulation = null;
+
+            function updateTreeStats(stats) {
+                branchesStat.textContent = stats.branches;
+                petalsStat.textContent = stats.petals;
+
+                if (!stats.running && stats.progress >= 100) {
+                    treeStartBtn.disabled = false;
+                    treePauseBtn.disabled = true;
+                    treeStartBtn.textContent = 'Grow New Tree';
+                }
+            }
+
+            treeStartBtn.addEventListener('click', function() {
+                if (!treeSimulation) {
+                    treeSimulation = new TreeSimulation(treeCanvas, updateTreeStats);
+                }
+                treeSimulation.start();
+                treeStartBtn.disabled = true;
+                treePauseBtn.disabled = false;
+                treeStartBtn.textContent = 'Growing...';
+            });
+
+            treePauseBtn.addEventListener('click', function() {
+                if (treeSimulation) {
+                    treeSimulation.pause();
+                    treePauseBtn.textContent = treeSimulation.running ? 'Pause' : 'Resume';
+                    treeStartBtn.textContent = treeSimulation.running ? 'Growing...' : 'Grow Tree';
+                }
+            });
+
+            treeResetBtn.addEventListener('click', function() {
+                if (treeSimulation) {
+                    treeSimulation.reset();
+                }
+                treeStartBtn.disabled = false;
+                treePauseBtn.disabled = true;
+                treeStartBtn.textContent = 'Grow Tree';
+                treePauseBtn.textContent = 'Pause';
+            });
+        });
+    </script>
 
     <!-- Robot Simulation Script -->
     <script src="robots.js"></script>

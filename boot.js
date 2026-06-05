@@ -11,7 +11,7 @@
     const screen = boot.querySelector('[data-boot-screen]');
 
     const lines = [
-        'HunterOS BIOS v4.8',
+        'HunterOS BIOS v4.2',
         'Copyright (C) 2026 Hunter Powell',
         '',
         'Detecting hardware . . .',

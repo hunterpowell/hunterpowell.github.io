@@ -325,8 +325,8 @@
                 print('(a few commands are hidden — go poke around)', 'muted');
             },
             whoami() {
-                print('Hunter Powell — CS student @ Sacramento State (graduating May 2026).');
-                print('Backend & systems. Python, C++, Java, a little Rust.');
+                print('Hunter Powell — CS student @ Sacramento State (graduating Dec 2026).');
+                print('Backend, Systems, and ML. Python, C++, Java, a little Rust.');
             },
             ls() { FILES.forEach(([name]) => print('  ' + name)); },
             open(arg) {
@@ -356,7 +356,7 @@
                 print('    .........');
                 print('    |       |]');
                 print('    \\       /');
-                print('     `-----\'    brewing . . . ☕');
+                print('     `-----\'    brewing . . . ');
             },
         };
 
@@ -364,13 +364,13 @@
             const a = (arg || '').toLowerCase().trim();
             if (a === 'hire-me' || a === 'hire me') {
                 print('[sudo] access granted. ✓');
-                print('Hunter is open to new-grad & internship roles starting May 2026.');
+                print('Hunter is open to new-grad & internship roles');
                 printHTML('reach him at <a href="mailto:hunterpowell99@gmail.com">hunterpowell99@gmail.com</a>');
                 openWindow('contact');
                 return;
             }
             print('[sudo] nice try — you are not in the sudoers file.');
-            print('       This incident will be reported. 😏', 'muted');
+            print('       This incident will be reported. ;)', 'muted');
         }
 
         function run(raw) {
@@ -382,7 +382,7 @@
             const arg = line.slice(parts[0].length).trim();
 
             if (key === 'sudo') return sudo(arg);
-            if (key === 'rm') return print('Nope. I worked hard on these files. 🙂');
+            if (key === 'rm') return print('Nope. I worked hard on these files. :)');
             if (key === 'vim' || key === 'vi' || key === 'nano' || key === 'emacs') {
                 return print('You\'re in ' + key + ' now. Good luck exiting. (kidding — try closing the window)');
             }
@@ -398,7 +398,7 @@
         }
 
         // banner
-        print('HunterOS [Version 4.8]');
+        print('HunterOS [Version 4.2]');
         print('(c) 2026 Hunter Powell. All rights reserved.', 'muted');
         print('Type `help` to get started.');
         print('');

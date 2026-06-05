@@ -90,7 +90,7 @@ body {
     touch-action: none;         /* let pointer-drag work on touch */
     user-select: none;
 }
-.desktop-icon.dragging { opacity: 0.7; }
+.desktop-icon.dragging { opacity: 0.7; z-index: 9999; }   /* stay visible above windows while dragging */
 
 .desktop-icon .glyph {
     font-size: 30px;
@@ -117,6 +117,7 @@ body {
     position: absolute;
     min-width: 240px;
     min-height: 120px;
+    max-width: calc(100vw - 16px);   /* never wider than the screen (mobile) */
     max-height: 88vh;
     background: var(--win-face);
     border: 1px solid var(--win-border);
@@ -239,7 +240,7 @@ body {
     margin-bottom: 0.25rem;
 }
 .window-body .subtitle { font-size: 1.05rem; color: var(--ink-soft); margin-bottom: 1rem; }
-.window-body h2 { font-family: 'VT323', monospace; font-size: 1.7rem; color: var(--title-b); margin-bottom: 0.6rem; }
+.window-body h2 { font-family: 'VT323', monospace; font-size: 1.7rem; color: var(--accent); margin-bottom: 0.6rem; }
 .window-body h3 { font-family: 'VT323', monospace; font-size: 1.3rem; color: var(--accent); margin-bottom: 0.4rem; }
 .window-body p { margin-bottom: 0.9rem; }
 .window-body a { color: var(--link); }

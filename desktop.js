@@ -174,10 +174,11 @@
             win.classList.remove('maxed');
             win.style.left = win.dataset.px; win.style.top = win.dataset.py;
             win.style.width = win.dataset.pw || '';
-            win.style.height = '';
+            win.style.height = win.dataset.ph || '';   // restore pre-maximize height
         } else {
             win.dataset.px = win.style.left; win.dataset.py = win.style.top;
             win.dataset.pw = win.style.width;
+            win.dataset.ph = win.style.height;         // remember it (terminal/resized windows)
             win.classList.add('maxed');
             win.style.left = '8px'; win.style.top = '8px';
             win.style.width = (desktop.clientWidth - 16) + 'px';

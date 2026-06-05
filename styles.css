@@ -239,6 +239,14 @@ body {
 .window-body h3 { font-family: 'VT323', monospace; font-size: 1.3rem; color: var(--accent); margin-bottom: 0.4rem; }
 .window-body p { margin-bottom: 0.9rem; }
 .window-body a { color: var(--link); }
+.window-body code {
+    font-family: 'VT323', monospace;
+    font-size: 0.95em;
+    padding: 0 4px;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    color: var(--accent);
+}
 
 .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
 .tag {
@@ -462,9 +470,77 @@ body {
     flex: none;
 }
 
+/* ============================================================
+   Boot splash
+   ============================================================ */
+#boot {
+    position: fixed;
+    inset: 0;
+    z-index: 200000;
+    background: #1d1822;            /* deep plum-black */
+    color: #d8c7d2;
+    font-family: 'VT323', monospace;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    padding: 7vh 8vw;
+    cursor: pointer;
+    overflow: hidden;
+    transition: opacity 0.5s ease;
+}
+#boot.done { opacity: 0; pointer-events: none; }
+.boot-screen { margin: 0; white-space: pre-wrap; font: inherit; }
+.boot-screen::after {
+    content: '▮';
+    margin-left: 2px;
+    color: var(--title-bar);
+    animation: boot-blink 1s steps(1) infinite;
+}
+@keyframes boot-blink { 50% { opacity: 0; } }
+
+/* ============================================================
+   Terminal (cmd.exe)
+   ============================================================ */
+.term-window .term-body {
+    background: #2a2230;           /* dark plum console */
+    background-image: none;
+    border-top: 1px solid var(--win-dark);
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-family: 'VT323', monospace;
+    font-size: 1.18rem;
+    line-height: 1.3;
+    color: #e7d6df;
+    overflow: hidden;
+}
+.term-output {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.term-output .cmd { color: #f2c2d4; }      /* echoed command line */
+.term-output .muted { color: #9a8a94; }
+.term-output a { color: #f3b6cb; }
+.term-input-line { display: flex; align-items: baseline; gap: 6px; flex: none; }
+.term-prompt { color: #d093ab; flex: none; }
+.term-input {
+    flex: 1;
+    min-width: 0;
+    background: none;
+    border: none;
+    outline: none;
+    font: inherit;
+    color: #e7d6df;
+    caret-color: var(--title-bar);
+}
+
 @media (max-width: 600px) {
     .clock { display: none; }
     .credit-extra { display: none; }   /* keep the handle, drop the tagline */
     .credit { max-width: 60vw; }
     .window-body h1 { font-size: 2rem; }
+    #boot { font-size: 1.05rem; padding: 6vh 6vw; }
 }

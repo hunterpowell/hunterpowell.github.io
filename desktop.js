@@ -38,7 +38,7 @@
         wireWindow(win, id);
 
         const taskBtn = makeTaskButton(win, id);
-        const cleanup = initDemo(win);   // null for non-demo windows
+        const cleanup = initDemo(win) || initTerminal(win, id);   // null for plain windows
         open.set(id, { win, taskBtn, cleanup });
 
         focus(id);
@@ -261,6 +261,171 @@
             reset: () => sim.reset(),
         });
         return () => { sim.running = false; };   // break the generation loop
+    }
+
+    /* ---- terminal (cmd.exe) ------------------------------- */
+    const FILES = [
+        ['about_me.txt',    'about'],
+        ['projects',        'projects'],
+        ['contact',         'contact'],
+        ['cherry_tree.exe', 'tree'],
+        ['maze_solver.exe', 'robots'],
+        ['cmd.exe',         'terminal'],
+    ];
+    const JOKES = [
+        'Why do programmers prefer dark mode? Because light attracts bugs.',
+        'There are 10 kinds of people: those who read binary and those who don\'t.',
+        'A SQL query walks into a bar, sidles up to two tables and asks: "may I JOIN you?"',
+        '!false — it\'s funny because it\'s true.',
+        'I would tell you a UDP joke, but you might not get it.',
+    ];
+
+    function initTerminal(win, id) {
+        const body = win.querySelector('.term-body');
+        if (!body) return null;
+        const output = body.querySelector('[data-term-output]');
+        const input = body.querySelector('[data-term-input]');
+        const history = [];
+        let histIdx = 0;
+
+        function scroll() { output.scrollTop = output.scrollHeight; }
+        function print(text, cls) {
+            const div = document.createElement('div');
+            if (cls) div.className = cls;
+            div.textContent = text == null ? '' : text;
+            output.appendChild(div);
+            scroll();
+        }
+        function printHTML(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;   // only ever called with trusted, code-defined markup
+            output.appendChild(div);
+            scroll();
+        }
+        function launch(target, label) {
+            openWindow(target);
+            print('Opening ' + label + ' . . .', 'muted');
+        }
+
+        const commands = {
+            help() {
+                print('Available commands:', 'muted');
+                print('  help                this list');
+                print('  whoami              short bio');
+                print('  ls / dir            list desktop files');
+                print('  open <name>         open a window (try: open projects)');
+                print('  about | projects | contact    jump to a window');
+                print('  tree | maze         launch a demo .exe');
+                print('  github              open my GitHub');
+                print('  echo <text>         repeat after me');
+                print('  date | time         current date / time');
+                print('  clear | cls         wipe the screen');
+                print('  exit                close this window');
+                print('(a few commands are hidden — go poke around)', 'muted');
+            },
+            whoami() {
+                print('Hunter Powell — CS student @ Sacramento State (graduating May 2026).');
+                print('Backend & systems. Python, C++, Java, a little Rust.');
+            },
+            ls() { FILES.forEach(([name]) => print('  ' + name)); },
+            open(arg) {
+                if (!arg) { print('usage: open <name>   (try `ls`)', 'muted'); return; }
+                const a = arg.toLowerCase().replace(/\.(exe|txt)$/, '');
+                const hit = FILES.find(([name, wid]) =>
+                    wid === a || name.toLowerCase().replace(/\.(exe|txt)$/, '') === a);
+                if (hit) launch(hit[1], hit[0]);
+                else print('open: cannot find "' + arg + '". try `ls`.', 'muted');
+            },
+            about() { launch('about', 'about_me.txt'); },
+            projects() { launch('projects', 'projects'); },
+            contact() { launch('contact', 'contact'); },
+            tree() { launch('tree', 'cherry_tree.exe'); },
+            maze() { launch('robots', 'maze_solver.exe'); },
+            robots() { launch('robots', 'maze_solver.exe'); },
+            github() { window.open('https://github.com/hunterpowell', '_blank'); print('Opening GitHub . . .', 'muted'); },
+            echo(arg) { print(arg || ''); },
+            date() { print(new Date().toDateString()); },
+            time() { print(new Date().toLocaleTimeString()); },
+            clear() { output.innerHTML = ''; },
+            cls() { output.innerHTML = ''; },
+            exit() { closeWindow(id); },
+            coffee() {
+                print('      ( (');
+                print('       ) )');
+                print('    .........');
+                print('    |       |]');
+                print('    \\       /');
+                print('     `-----\'    brewing . . . ☕');
+            },
+        };
+
+        function sudo(arg) {
+            const a = (arg || '').toLowerCase().trim();
+            if (a === 'hire-me' || a === 'hire me') {
+                print('[sudo] access granted. ✓');
+                print('Hunter is open to new-grad & internship roles starting May 2026.');
+                printHTML('reach him at <a href="mailto:hunterpowell99@gmail.com">hunterpowell99@gmail.com</a>');
+                openWindow('contact');
+                return;
+            }
+            print('[sudo] nice try — you are not in the sudoers file.');
+            print('       This incident will be reported. 😏', 'muted');
+        }
+
+        function run(raw) {
+            const line = raw.trim();
+            print('C:\\hunter> ' + line, 'cmd');
+            if (!line) return;
+            const parts = line.split(/\s+/);
+            const key = parts[0].toLowerCase();
+            const arg = line.slice(parts[0].length).trim();
+
+            if (key === 'sudo') return sudo(arg);
+            if (key === 'rm') return print('Nope. I worked hard on these files. 🙂');
+            if (key === 'vim' || key === 'vi' || key === 'nano' || key === 'emacs') {
+                return print('You\'re in ' + key + ' now. Good luck exiting. (kidding — try closing the window)');
+            }
+            if (key === 'fortune' || key === 'joke') {
+                return print(JOKES[Math.floor(Math.random() * JOKES.length)]);
+            }
+            if (['hi', 'hello', 'hey', 'yo'].includes(key)) {
+                return print('hey! type `help` to see what i can do.');
+            }
+            const fn = commands[key];
+            if (fn) return fn(arg);
+            print('\'' + parts[0] + '\' is not recognized as a command. type `help`.', 'muted');
+        }
+
+        // banner
+        print('HunterOS [Version 4.8]');
+        print('(c) 2026 Hunter Powell. All rights reserved.', 'muted');
+        print('Type `help` to get started.');
+        print('');
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const v = input.value;
+                if (v.trim()) { history.push(v); }
+                histIdx = history.length;
+                input.value = '';
+                run(v);
+            } else if (e.key === 'ArrowUp') {
+                if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
+                else { histIdx = history.length; input.value = ''; }
+                e.preventDefault();
+            }
+        });
+
+        // clicking anywhere in the terminal focuses the prompt
+        body.addEventListener('mousedown', (e) => {
+            if (e.target !== input) setTimeout(() => input.focus(), 0);
+        });
+        setTimeout(() => input.focus(), 0);
+
+        return null;   // nothing to tear down
     }
 
     /* ---- taskbar ------------------------------------------ */

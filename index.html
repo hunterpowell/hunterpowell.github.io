@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Boot splash (fades out to reveal the desktop) -->
+    <div id="boot" title="click to skip"><pre class="boot-screen" data-boot-screen></pre></div>
+
     <!-- Desktop surface -->
     <div id="desktop">
         <div class="icons">
@@ -34,6 +37,10 @@
                 <span class="glyph">🤖</span>
                 <span class="label">maze_solver</span>
             </button>
+            <button class="desktop-icon" data-window="terminal" title="double-click to open">
+                <span class="glyph">🖥️</span>
+                <span class="label">cmd</span>
+            </button>
         </div>
 
     </div>
@@ -47,6 +54,7 @@
         <div class="sm-sep"></div>
         <button data-window="tree"><span class="glyph">🌸</span> cherry_tree.exe</button>
         <button data-window="robots"><span class="glyph">🤖</span> maze_solver.exe</button>
+        <button data-window="terminal"><span class="glyph">🖥️</span> cmd.exe</button>
         <div class="sm-sep"></div>
         <button data-link="https://github.com/hunterpowell"><span class="glyph">🌐</span> GitHub</button>
     </div>
@@ -131,16 +139,35 @@
                         </p>
                     </article>
                     <article class="proj-card">
-                        <h3>Evolving Maze Solver</h3>
-                        <p>Population-based genetic algorithm where robots learn to solve mazes
-                           through selection and reproduction. C++ with OpenMP parallelization. 
-                           (Demo simplified and written in JS).</p>
+                        <h3>Evolving Coverage Robots</h3>
+                        <p>Genetic algorithm for the coverage problem: robots with limited energy
+                           evolve movement rules to explore as much of an unknown grid as they can
+                           before powering down. Over 500-agent generations they converge on a
+                           boustrophedon row-sweep at &gt;90% coverage; OpenMP parallelization cut a
+                           full run from 138s to 5s (27x). The live demo is a simplified JS port.</p>
                         <div class="tags">
-                            <span class="tag">C++</span><span class="tag">Genetic Algorithms</span><span class="tag">OpenMP</span>
+                            <span class="tag">C++</span><span class="tag">OpenMP</span><span class="tag">Genetic Algorithms</span>
                         </div>
                         <p class="card-actions">
                             <a href="#" class="btn" data-open="robots">▶ Run demo</a>
                             <a href="https://github.com/hunterpowell/GeneticAlg" target="_blank" class="btn">GitHub →</a>
+                        </p>
+                    </article>
+                    <article class="proj-card">
+                        <h3>Heart Disease Risk Classifier</h3>
+                        <p>Binary classifier over 320K CDC BRFSS survey records (~8.6% positive)
+                           benchmarking KNN, Logistic Regression, Random Forest, XGBoost, LightGBM,
+                           CatBoost, and an MLP. Engineered clinically grounded features (composite
+                           risk score, comorbidity counts) and selected predictors with LightGBM,
+                           fit only on training folds to avoid leakage. Handled class imbalance via
+                           <code>scale_pos_weight</code> rather than SMOTE, evaluating with stratified
+                           5-fold CV on ROC-AUC, F1, and MCC.</p>
+                        <div class="tags">
+                            <span class="tag">Python</span><span class="tag">scikit-learn</span><span class="tag">LightGBM</span>
+                            <span class="tag">XGBoost</span><span class="tag">Pandas</span><span class="tag">ML</span>
+                        </div>
+                        <p class="card-actions">
+                            <a href="https://github.com/hunterpowell/HeartDisease" target="_blank" class="btn">GitHub →</a>
                         </p>
                     </article>
                     <article class="proj-card">
@@ -267,6 +294,30 @@
         </section>
     </template>
 
+    <template id="tpl-terminal">
+        <section class="window term-window" style="width:520px;height:340px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">cmd.exe</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="window-body term-body">
+                <div class="term-output" data-term-output></div>
+                <div class="term-input-line">
+                    <span class="term-prompt">C:\hunter&gt;</span>
+                    <input class="term-input" type="text" autocomplete="off"
+                           autocapitalize="off" spellcheck="false" data-term-input
+                           aria-label="terminal input">
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <script src="boot.js"></script>
     <script src="tree.js"></script>
     <script src="robots.js"></script>
     <script src="desktop.js"></script>

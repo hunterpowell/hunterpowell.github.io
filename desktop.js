@@ -38,7 +38,8 @@
         wireWindow(win, id);
 
         const taskBtn = makeTaskButton(win, id);
-        open.set(id, { win, taskBtn });
+        const cleanup = initDemo(win);   // null for non-demo windows
+        open.set(id, { win, taskBtn, cleanup });
 
         focus(id);
     }
@@ -187,9 +188,79 @@
     function closeWindow(id) {
         const entry = open.get(id);
         if (!entry) return;
+        if (entry.cleanup) entry.cleanup();   // stop any running canvas demo
         entry.win.remove();
         entry.taskBtn.remove();
         open.delete(id);
+    }
+
+    /* ---- canvas demos (tree / robots) --------------------- */
+    // Returns a cleanup fn (to stop animation on close), or null.
+    function initDemo(win) {
+        const demo = win.querySelector('.demo');
+        if (!demo) return null;
+        if (demo.dataset.demo === 'tree') return initTree(demo);
+        if (demo.dataset.demo === 'robots') return initRobots(demo);
+        return null;
+    }
+
+    function statSetter(demo) {
+        const cache = {};
+        return (name, val) => {
+            const el = cache[name] || (cache[name] = demo.querySelector('[data-stat="' + name + '"]'));
+            if (el) el.textContent = val;
+        };
+    }
+
+    function wireDemoControls(demo, actions) {
+        demo.querySelectorAll('[data-act]').forEach((b) => {
+            b.addEventListener('click', (e) => {
+                e.preventDefault();
+                const fn = actions[b.dataset.act];
+                if (fn) fn();
+            });
+        });
+    }
+
+    function initTree(demo) {
+        if (typeof TreeSimulation === 'undefined') return null;
+        const canvas = demo.querySelector('canvas');
+        const setStat = statSetter(demo);
+        const sim = new TreeSimulation(canvas, (s) => {
+            setStat('branches', s.branches);
+            setStat('petals', s.petals);
+            setStat('progress', s.progress);
+        });
+        wireDemoControls(demo, {
+            run: () => sim.start(),
+            pause: () => sim.pause(),
+            reset: () => sim.reset(),
+        });
+        return () => sim.reset();   // cancels the animation frame
+    }
+
+    function initRobots(demo) {
+        if (typeof RobotSimulation === 'undefined') return null;
+        const gen1 = demo.querySelector('[data-canvas="gen1"]');
+        const final = demo.querySelector('[data-canvas="final"]');
+        const setStat = statSetter(demo);
+        const sim = new RobotSimulation(gen1, final, (s) => {
+            setStat('generation', s.generation);
+            setStat('total', s.totalGenerations);
+            setStat('avg', s.avgFitness);
+            setStat('best', s.bestFitness);
+            setStat('bestGen', s.bestGen);
+        });
+        wireDemoControls(demo, {
+            run: () => {
+                if (sim.running) return;            // already evolving (or paused)
+                if (sim.currentGen > 0) sim.reset(); // finished a prior run → start fresh
+                sim.start();
+            },
+            pause: () => sim.pause(),
+            reset: () => sim.reset(),
+        });
+        return () => { sim.running = false; };   // break the generation loop
     }
 
     /* ---- taskbar ------------------------------------------ */

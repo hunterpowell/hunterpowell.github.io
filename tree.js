@@ -35,12 +35,12 @@ class TreeSimulation {
         const w = this.canvas.width;
         const h = this.canvas.height;
 
-        // Sky background
-        ctx.fillStyle = '#87CEEB';
+        // Sky background — pale blue-grey, matching the window bodies
+        ctx.fillStyle = '#c9cdd6';
         ctx.fillRect(0, 0, w, h);
 
-        // Ground
-        ctx.fillStyle = '#79C05A';
+        // Ground — muted sage
+        ctx.fillStyle = '#9aae9f';
         ctx.fillRect(0, h * 0.82, w, h * 0.18);
 
         this.updateStats();
@@ -123,9 +123,9 @@ class TreeSimulation {
         else if (depth <= 5) thickness = 2;
         else thickness = 1;
 
-        // Color: darker brown at trunk, lighter at tips
+        // Color: deep mauve-brown at the trunk, lighter taupe at the tips
         const brownShade = Math.min(depth * 8, 60);
-        const color = `rgb(${101 + brownShade}, ${67 + brownShade}, ${33 + brownShade / 2})`;
+        const color = `rgb(${110 + brownShade}, ${82 + brownShade}, ${80 + brownShade / 2})`;
 
         this.drawQueue.push({
             type: 'branch',
@@ -188,7 +188,7 @@ class TreeSimulation {
         }
 
         // Center
-        ctx.fillStyle = '#FFD700';
+        ctx.fillStyle = '#e9c97a';
         ctx.beginPath();
         ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
         ctx.fill();
@@ -197,7 +197,7 @@ class TreeSimulation {
     }
 
     drawStump(ctx, item) {
-        ctx.fillStyle = '#654321';
+        ctx.fillStyle = '#6e4f54';
         ctx.beginPath();
         // Trapezoid: narrow top, wide bottom
         ctx.moveTo(item.cx - item.topWidth, item.groundY - item.stumpHeight);

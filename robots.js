@@ -13,8 +13,8 @@ class Vector2D {
     adjustY(adjustment) { this.y += adjustment; }
 }
 
-// Map class
-class Map {
+// Maze class (named Maze, not Map, to avoid shadowing the built-in Map global)
+class Maze {
     constructor() {
         this.size = 22;
         this.EMPTY = 0;
@@ -48,7 +48,7 @@ class Map {
     }
 
     clone() {
-        const newMap = new Map();
+        const newMap = new Maze();
         newMap.map = this.map.map(row => [...row]);
         return newMap;
     }
@@ -229,7 +229,7 @@ class RobotSimulation {
             const end = Math.min(batch + batchSize, CONFIG.ROBOTS_PER_GEN);
 
             for (let i = batch; i < end; i++) {
-                const map = new Map();
+                const map = new Maze();
                 this.maps.push(map);
                 this.robots[i].reset();
                 this.robots[i].randomStart(map);
@@ -377,22 +377,22 @@ class RobotSimulation {
                 const cell = map.map[y][x];
 
                 if (cell === map.WALL) {
-                    ctx.fillStyle = '#475569';
+                    ctx.fillStyle = '#8a6f7d';      // dusty plum walls
                 } else if (cell === map.BATTERY) {
-                    ctx.fillStyle = '#22c55e';
+                    ctx.fillStyle = '#7faf93';      // muted sage batteries
                 } else {
-                    ctx.fillStyle = '#1e293b';
+                    ctx.fillStyle = '#c7ccd2';      // pale blue-grey floor
                 }
 
                 ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-                ctx.strokeStyle = '#0f172a';
+                ctx.strokeStyle = 'rgba(116, 102, 110, 0.35)';
                 ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
             }
         }
 
         // Draw path
         if (robot.path && robot.path.length > 0) {
-            ctx.strokeStyle = '#3b82f6';
+            ctx.strokeStyle = '#9f6278';   // dusty rose trail
             ctx.lineWidth = 2;
             ctx.beginPath();
 
@@ -407,7 +407,7 @@ class RobotSimulation {
 
             // Draw robot at end position
             const lastPoint = robot.path[robot.path.length - 1];
-            ctx.fillStyle = '#f59e0b';
+            ctx.fillStyle = '#d39b53';     // warm gold robot
             ctx.beginPath();
             ctx.arc(lastPoint.x * cellSize + cellSize/2, lastPoint.y * cellSize + cellSize/2, cellSize/3, 0, 2 * Math.PI);
             ctx.fill();

@@ -26,6 +26,14 @@
                 <span class="glyph">✉️</span>
                 <span class="label">contact</span>
             </button>
+            <button class="desktop-icon" data-window="tree" title="double-click to open">
+                <span class="glyph">🌸</span>
+                <span class="label">cherry_tree</span>
+            </button>
+            <button class="desktop-icon" data-window="robots" title="double-click to open">
+                <span class="glyph">🤖</span>
+                <span class="label">maze_solver</span>
+            </button>
         </div>
 
     </div>
@@ -37,6 +45,9 @@
         <button data-window="projects"><span class="glyph">📁</span> projects</button>
         <button data-window="contact"><span class="glyph">✉️</span> contact</button>
         <div class="sm-sep"></div>
+        <button data-window="tree"><span class="glyph">🌸</span> cherry_tree.exe</button>
+        <button data-window="robots"><span class="glyph">🤖</span> maze_solver.exe</button>
+        <div class="sm-sep"></div>
         <button data-link="https://github.com/hunterpowell"><span class="glyph">🌐</span> GitHub</button>
     </div>
 
@@ -44,8 +55,8 @@
     <div class="taskbar">
         <button class="start-btn" id="start-btn">★ Start</button>
         <div class="task-items" id="task-items"></div>
-        <a class="credit" href="https://instagram.com/saintjulianx" target="_blank" rel="noopener">
-            Illustration by <strong>@saintjulianx</strong><span class="credit-extra">, inspiration for the site's aesthetic</span>
+        <a class="credit" href="https://instagram.com/saintjulianxv" target="_blank" rel="noopener">
+            Illustration by <strong>@saintjulianxv</strong><span class="credit-extra">, inspiration for the site's aesthetic</span>
         </a>
         <span class="clock" id="clock">--:--</span>
     </div>
@@ -103,13 +114,32 @@
                 <h2>Things I've built</h2>
                 <div class="proj-grid">
                     <article class="proj-card">
+                        <h3>Lydia's Law — Family Law Platform</h3>
+                        <p>Full-stack Django platform built from scratch with an 8-person team
+                           over 8 months for a family law firm. I helped design the 5-app modular
+                           architecture and 3-tier role-based access (Guest / Client / Admin), and
+                           built shared infrastructure - Stripe &amp; Calendly webhooks, Google OAuth,
+                           and a CKEditor admin interface that lets non-technical staff publish
+                           rich-text content site-wide without a developer.</p>
+                        <div class="tags">
+                            <span class="tag">Django</span><span class="tag">Python</span><span class="tag">MySQL</span>
+                            <span class="tag">Stripe</span><span class="tag">OAuth</span><span class="tag">Team Project</span>
+                        </div>
+                        <p class="card-actions">
+                            <a href="https://adoptionsofsac.com" target="_blank" class="btn">Visit site → (client work)</a>
+                            <a href="https://github.com/CSUS-Shell-Script/Lydias-Law-Site" target="_blank" class="btn">GitHub →</a>
+                        </p>
+                    </article>
+                    <article class="proj-card">
                         <h3>Evolving Maze Solver</h3>
                         <p>Population-based genetic algorithm where robots learn to solve mazes
-                           through selection and reproduction. C++ with OpenMP parallelization.</p>
+                           through selection and reproduction. C++ with OpenMP parallelization. 
+                           (Demo simplified and written in JS).</p>
                         <div class="tags">
                             <span class="tag">C++</span><span class="tag">Genetic Algorithms</span><span class="tag">OpenMP</span>
                         </div>
-                        <p style="margin-top:0.75rem;">
+                        <p class="card-actions">
+                            <a href="#" class="btn" data-open="robots">▶ Run demo</a>
                             <a href="https://github.com/hunterpowell/GeneticAlg" target="_blank" class="btn">GitHub →</a>
                         </p>
                     </article>
@@ -117,11 +147,12 @@
                         <h3>Procedural Tree Generator</h3>
                         <p>Recursive generator that grows unique cherry-blossom trees with
                            randomized branching, death chance, and petal placement. Python +
-                           Tkinter, with a JS canvas port.</p>
+                           Tkinter. (Demo simplified and written in JS).</p>
                         <div class="tags">
                             <span class="tag">Python</span><span class="tag">Tkinter</span><span class="tag">Procedural Gen</span>
                         </div>
-                        <p style="margin-top:0.75rem;">
+                        <p class="card-actions">
+                            <a href="#" class="btn" data-open="tree">▶ Run demo</a>
                             <a href="https://github.com/hunterpowell/tree-gen" target="_blank" class="btn">GitHub →</a>
                         </p>
                     </article>
@@ -156,6 +187,88 @@
         </section>
     </template>
 
+    <template id="tpl-tree">
+        <section class="window demo-window" style="width:440px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">cherry_tree.exe</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>V</u>iew</span><span>Run</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <div class="demo" data-demo="tree">
+                    <p class="demo-blurb">A recursive generator grows a unique cherry-blossom tree
+                       every run. Randomized branching, death chance, and petal placement.</p>
+                    <div class="demo-stage">
+                        <canvas class="demo-canvas" width="400" height="300"></canvas>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn" data-act="run">▶ Grow</button>
+                        <button class="btn" data-act="pause">⏸ Pause</button>
+                        <button class="btn" data-act="reset">⟲ Reset</button>
+                    </div>
+                    <div class="demo-stats">
+                        <span class="stat"><b data-stat="branches">0</b> branches</span>
+                        <span class="stat"><b data-stat="petals">0</b> petals</span>
+                        <span class="stat"><b data-stat="progress">0</b>% grown</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-robots">
+        <section class="window demo-window" style="width:520px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">maze_solver.exe</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>V</u>iew</span><span>Run</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <div class="demo" data-demo="robots">
+                    <p class="demo-blurb">50 robots per generation evolve over 50 generations via
+                       selection &amp; crossover. The maze renders when evolution finishes.
+                       Compare a gen-1 bot against the best evolved one.</p>
+                    <div class="demo-stage demo-stage--split">
+                        <figure>
+                            <canvas width="200" height="200" data-canvas="gen1"></canvas>
+                            <figcaption>generation 1</figcaption>
+                        </figure>
+                        <figure>
+                            <canvas width="200" height="200" data-canvas="final"></canvas>
+                            <figcaption>best evolved</figcaption>
+                        </figure>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="btn" data-act="run">▶ Evolve</button>
+                        <button class="btn" data-act="pause">⏸ Pause</button>
+                        <button class="btn" data-act="reset">⟲ Reset</button>
+                    </div>
+                    <div class="demo-stats">
+                        <span class="stat">gen <b data-stat="generation">0</b>/<b data-stat="total">50</b></span>
+                        <span class="stat">avg fit <b data-stat="avg">0</b></span>
+                        <span class="stat">best <b data-stat="best">0</b> <span class="muted">(gen <b data-stat="bestGen">0</b>)</span></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
+    <script src="tree.js"></script>
+    <script src="robots.js"></script>
     <script src="desktop.js"></script>
 </body>
 </html>

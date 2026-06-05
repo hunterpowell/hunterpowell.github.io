@@ -286,6 +286,59 @@ body {
 .contact-list a { color: var(--link); text-decoration: none; font-size: 1.02rem; }
 .contact-list a:hover { text-decoration: underline; }
 
+.card-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+
+/* ============================================================
+   Canvas demos (tree / maze solver)
+   ============================================================ */
+.demo { display: flex; flex-direction: column; gap: 0.85rem; }
+.demo-blurb { font-size: 0.86rem; color: var(--ink-soft); margin: 0; }
+
+.demo-stage {
+    /* hug the canvas and stay centered — does NOT stretch with the window */
+    align-self: center;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 8px;
+    background: var(--win-content);
+    /* sunken bevel — the canvas sits "inside" the window */
+    box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-light);
+    border: 1px solid var(--win-dark);
+}
+.demo-stage canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;   /* scale proportionally if the window gets narrower than the canvas */
+    background: var(--win-content);
+}
+.demo-stage--split figure { margin: 0; text-align: center; }
+.demo-stage--split figcaption {
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    color: var(--ink-soft);
+    margin-top: 4px;
+}
+
+.demo-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.demo-controls .btn { font-size: 0.85rem; padding: 5px 14px; }
+
+.demo-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1.1rem;
+    padding: 6px 12px;
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-light);
+}
+.demo-stats b { color: var(--accent); font-weight: normal; }
+.demo-stats .muted { color: var(--ink-soft); opacity: 0.75; }
+
 /* ============================================================
    Start menu
    ============================================================ */

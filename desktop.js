@@ -445,26 +445,175 @@
         return btn;
     }
 
-    /* ---- desktop icons ------------------------------------ */
-    document.querySelectorAll('.desktop-icon').forEach((icon) => {
-        icon.addEventListener('click', () => {
-            document.querySelectorAll('.desktop-icon.selected')
-                .forEach((i) => i.classList.remove('selected'));
-            icon.classList.add('selected');
+    /* ---- desktop icons (draggable, persisted) ------------- */
+    const ICONS = Array.from(document.querySelectorAll('.desktop-icon'));
+    const ICON_W = 84, ICON_H = 78;
+    const ICON_STORE = 'hp-icons-v1';
+
+    function clampX(x) { return Math.max(0, Math.min(x, desktop.clientWidth - ICON_W)); }
+    function clampY(y) { return Math.max(0, Math.min(y, desktop.clientHeight - ICON_H)); }
+
+    function placeIcon(icon, x, y) {
+        icon.style.left = x + 'px';
+        icon.style.top = y + 'px';
+    }
+
+    function selectIcon(icon) {
+        ICONS.forEach((i) => i.classList.toggle('selected', i === icon));
+    }
+    function clearSelection() {
+        ICONS.forEach((i) => i.classList.remove('selected'));
+    }
+
+    // default arrangement: a column at top-left, wrapping into new columns
+    function defaultLayout() {
+        const top0 = 18, left0 = 18, stepY = 92, stepX = 96;
+        const rows = Math.max(1, Math.floor((desktop.clientHeight - top0) / stepY));
+        ICONS.forEach((icon, i) => {
+            placeIcon(icon, left0 + Math.floor(i / rows) * stepX, top0 + (i % rows) * stepY);
         });
+    }
+
+    function saveIcons() {
+        const data = {};
+        ICONS.forEach((icon) => {
+            data[icon.dataset.window] = {
+                x: parseInt(icon.style.left, 10) || 0,
+                y: parseInt(icon.style.top, 10) || 0,
+            };
+        });
+        try { localStorage.setItem(ICON_STORE, JSON.stringify(data)); } catch (_) {}
+    }
+
+    function loadIcons() {
+        defaultLayout();   // baseline for every icon (incl. any newly added ones)
+        let data = null;
+        try { data = JSON.parse(localStorage.getItem(ICON_STORE) || 'null'); } catch (_) {}
+        if (!data) return;
+        ICONS.forEach((icon) => {
+            const p = data[icon.dataset.window];
+            if (p) placeIcon(icon, clampX(p.x), clampY(p.y));
+        });
+    }
+
+    ICONS.forEach((icon) => {
+        let sx, sy, ox, oy, pid = null, down = false, moved = false;
+
+        icon.addEventListener('pointerdown', (e) => {
+            if (e.button !== 0) return;        // left button only
+            down = true; moved = false;
+            sx = e.clientX; sy = e.clientY;
+            ox = icon.offsetLeft; oy = icon.offsetTop;
+            pid = e.pointerId;
+            selectIcon(icon);
+        });
+
+        icon.addEventListener('pointermove', (e) => {
+            if (!down) return;
+            const dx = e.clientX - sx, dy = e.clientY - sy;
+            if (!moved && Math.hypot(dx, dy) < 4) return;   // drag threshold
+            if (!moved) { moved = true; icon.classList.add('dragging'); icon.setPointerCapture(pid); }
+            placeIcon(icon, clampX(ox + dx), clampY(oy + dy));
+        });
+
+        const endDrag = () => {
+            if (!down) return;
+            down = false;
+            if (moved) {
+                icon.classList.remove('dragging');
+                try { icon.releasePointerCapture(pid); } catch (_) {}
+                saveIcons();
+            }
+        };
+        icon.addEventListener('pointerup', endDrag);
+        icon.addEventListener('pointercancel', endDrag);
+
         icon.addEventListener('dblclick', () => openWindow(icon.dataset.window));
-        // keyboard: Enter opens a focused icon
         icon.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') openWindow(icon.dataset.window);
         });
     });
+
+    loadIcons();
+    // keep icons on-screen (and restore saved spots) when the desktop resizes
+    let resizeT;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(loadIcons, 150);
+    });
+
     // click empty desktop clears icon selection
     desktop.addEventListener('pointerdown', (e) => {
-        if (e.target === desktop) {
-            document.querySelectorAll('.desktop-icon.selected')
-                .forEach((i) => i.classList.remove('selected'));
+        if (e.target === desktop) clearSelection();
+    });
+
+    /* ---- right-click context menu ------------------------- */
+    let activeMenu = null;
+
+    function closeContextMenu() {
+        if (activeMenu) { activeMenu.remove(); activeMenu = null; }
+    }
+
+    function showContextMenu(x, y, items) {
+        closeContextMenu();
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        items.forEach((it) => {
+            if (it.sep) {
+                const s = document.createElement('div');
+                s.className = 'cm-sep';
+                menu.appendChild(s);
+                return;
+            }
+            const b = document.createElement('button');
+            b.textContent = it.label;
+            b.addEventListener('click', () => { closeContextMenu(); if (it.action) it.action(); });
+            menu.appendChild(b);
+        });
+        document.body.appendChild(menu);
+        const r = menu.getBoundingClientRect();
+        menu.style.left = Math.max(2, Math.min(x, window.innerWidth - r.width - 4)) + 'px';
+        menu.style.top = Math.max(2, Math.min(y, window.innerHeight - r.height - 4)) + 'px';
+        activeMenu = menu;
+    }
+
+    function refreshDesktop() {
+        desktop.style.transition = 'opacity 0.12s ease';
+        desktop.style.opacity = '0.35';
+        setTimeout(() => { desktop.style.opacity = ''; }, 130);
+    }
+
+    document.addEventListener('contextmenu', (e) => {
+        if (document.getElementById('boot')) return;   // still booting
+        // leave native menus intact inside windows / taskbar / start menu
+        if (e.target.closest('.window, .taskbar, .start-menu, .context-menu')) return;
+        e.preventDefault();
+        const icon = e.target.closest('.desktop-icon');
+        if (icon) {
+            selectIcon(icon);
+            showContextMenu(e.clientX, e.clientY, [
+                { label: 'Open', action: () => openWindow(icon.dataset.window) },
+                { sep: true },
+                { label: 'Arrange icons', action: () => { defaultLayout(); saveIcons(); } },
+            ]);
+        } else {
+            clearSelection();
+            showContextMenu(e.clientX, e.clientY, [
+                { label: 'Open Terminal', action: () => openWindow('terminal') },
+                { label: 'Arrange icons', action: () => { defaultLayout(); saveIcons(); } },
+                { label: 'Refresh', action: refreshDesktop },
+                { sep: true },
+                { label: 'View Source', action: () => window.open('https://github.com/hunterpowell/hunterpowell.github.io', '_blank') },
+                { label: 'Properties', action: () => openWindow('about') },
+            ]);
         }
     });
+
+    document.addEventListener('pointerdown', (e) => {
+        if (activeMenu && !activeMenu.contains(e.target)) closeContextMenu();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeContextMenu(); });
+    window.addEventListener('blur', closeContextMenu);
 
     /* ---- start menu --------------------------------------- */
     const startBtn = document.getElementById('start-btn');

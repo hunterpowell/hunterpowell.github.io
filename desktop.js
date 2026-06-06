@@ -38,7 +38,7 @@
         wireWindow(win, id);
 
         const taskBtn = makeTaskButton(win, id);
-        const cleanup = initDemo(win) || initTerminal(win, id);   // null for plain windows
+        const cleanup = initDemo(win) || initTerminal(win, id) || initPaint(win);   // null for plain windows
         open.set(id, { win, taskBtn, cleanup });
 
         focus(id);
@@ -264,6 +264,14 @@
         return () => { sim.running = false; };   // break the generation loop
     }
 
+    /* ---- paint (paint.exe) -------------------------------- */
+    function initPaint(win) {
+        const root = win.querySelector('.paint');
+        if (!root || typeof PaintApp === 'undefined') return null;
+        new PaintApp(root);
+        return null;   // listeners live on canvas; removed when the window does
+    }
+
     /* ---- terminal (cmd.exe) ------------------------------- */
     const FILES = [
         ['about_me.txt',    'about'],
@@ -272,6 +280,7 @@
         ['cherry_tree.exe', 'tree'],
         ['maze_solver.exe', 'robots'],
         ['cmd.exe',         'terminal'],
+        ['paint.exe',       'paint'],
     ];
     const JOKES = [
         'Why do programmers prefer dark mode? Because light attracts bugs.',
@@ -316,7 +325,7 @@
                 print('  ls / dir            list desktop files');
                 print('  open <name>         open a window (try: open projects)');
                 print('  about | projects | contact    jump to a window');
-                print('  tree | maze         launch a demo .exe');
+                print('  tree | maze | paint launch an .exe');
                 print('  github              open my GitHub');
                 print('  echo <text>         repeat after me');
                 print('  date | time         current date / time');
@@ -341,6 +350,7 @@
             projects() { launch('projects', 'projects'); },
             contact() { launch('contact', 'contact'); },
             tree() { launch('tree', 'cherry_tree.exe'); },
+            paint() { launch('paint', 'paint.exe'); },
             maze() { launch('robots', 'maze_solver.exe'); },
             robots() { launch('robots', 'maze_solver.exe'); },
             github() { window.open('https://github.com/hunterpowell', '_blank'); print('Opening GitHub . . .', 'muted'); },

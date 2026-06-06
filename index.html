@@ -34,12 +34,16 @@
                 <span class="label">cherry_tree</span>
             </button>
             <button class="desktop-icon" data-window="robots" title="double-click to open">
-                <img class="glyph" src="icons/program.png" alt="">
+                <img class="glyph" src="icons/aseprite.png" alt="">
                 <span class="label">maze_solver</span>
             </button>
             <button class="desktop-icon" data-window="terminal" title="double-click to open">
                 <img class="glyph" src="icons/this_computer.png" alt="">
                 <span class="label">cmd</span>
+            </button>
+            <button class="desktop-icon" data-window="paint" title="double-click to open">
+                <img class="glyph" src="icons/paint_alt.png" alt="">
+                <span class="label">paint</span>
             </button>
         </div>
 
@@ -53,8 +57,9 @@
         <button data-window="contact"><img class="glyph" src="icons/news.png" alt=""> contact</button>
         <div class="sm-sep"></div>
         <button data-window="tree"><img class="glyph" src="icons/image_editor.png" alt=""> cherry_tree.exe</button>
-        <button data-window="robots"><img class="glyph" src="icons/program.png" alt=""> maze_solver.exe</button>
+        <button data-window="robots"><img class="glyph" src="icons/aseprite.png" alt=""> maze_solver.exe</button>
         <button data-window="terminal"><img class="glyph" src="icons/this_computer.png" alt=""> cmd.exe</button>
+        <button data-window="paint"><img class="glyph" src="icons/paint_alt.png" alt=""> paint.exe</button>
         <div class="sm-sep"></div>
         <button data-link="https://github.com/hunterpowell"><img class="glyph" src="icons/github.png" alt=""> GitHub</button>
     </div>
@@ -542,9 +547,109 @@
         </section>
     </template>
 
+    <template id="tpl-paint">
+        <section class="window paint-window" style="width:600px;height:480px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">paint.exe — untitled</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>I</u>mage</span><span><u>O</u>ptions</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <div class="paint">
+                    <div class="paint-workspace">
+                        <!-- left toolbox: 2-column tool grid + colour preview -->
+                        <div class="paint-toolbox">
+                            <div class="paint-tools">
+                                <button class="paint-tool active" data-tool="pencil" title="Pencil">
+                                    <img src="icons/paint_pencil.png" alt="Pencil">
+                                </button>
+                                <button class="paint-tool" data-tool="eraser" title="Eraser">
+                                    <img src="icons/paint_eraser.png" alt="Eraser">
+                                </button>
+                                <button class="paint-tool" data-tool="line" title="Line">
+                                    <img src="icons/paint_line.png" alt="Line">
+                                </button>
+                                <button class="paint-tool" data-tool="rect" title="Rectangle">
+                                    <img src="icons/paint_square.png" alt="Rectangle">
+                                </button>
+                                <button class="paint-tool" data-tool="ellipse" title="Ellipse">
+                                    <img src="icons/paint_oval.png" alt="Ellipse">
+                                </button>
+                                <button class="paint-tool" data-tool="fill" title="Fill bucket">
+                                    <img src="icons/paint_bucket.png" alt="Fill bucket">
+                                </button>
+                            </div>
+                            <span class="paint-current" title="current colour"></span>
+                        </div>
+
+                        <!-- canvas framed by classic (decorative) scrollbars -->
+                        <div class="paint-canvas-frame">
+                            <div class="paint-stage">
+                                <canvas class="paint-canvas" width="1200" height="900"></canvas>
+                            </div>
+                            <div class="paint-scroll paint-scroll--y" aria-hidden="true">
+                                <span class="ps-btn">▲</span>
+                                <span class="ps-track"><span class="ps-thumb"></span></span>
+                                <span class="ps-btn">▼</span>
+                            </div>
+                            <div class="paint-scroll paint-scroll--x" aria-hidden="true">
+                                <span class="ps-btn">◀</span>
+                                <span class="ps-track"><span class="ps-thumb"></span></span>
+                                <span class="ps-btn">▶</span>
+                            </div>
+                            <div class="paint-corner" aria-hidden="true"></div>
+                        </div>
+
+                        <!-- right palette: vertical swatch grid -->
+                        <div class="paint-palette">
+                            <span class="paint-swatch" data-color="#46343e"></span>
+                            <span class="paint-swatch" data-color="#ffffff"></span>
+                            <span class="paint-swatch" data-color="#6e5566"></span>
+                            <span class="paint-swatch" data-color="#f3e3ea"></span>
+                            <span class="paint-swatch" data-color="#9f6278"></span>
+                            <span class="paint-swatch" data-color="#d8a6b9"></span>
+                            <span class="paint-swatch" data-color="#b1505b"></span>
+                            <span class="paint-swatch" data-color="#e8b3c4"></span>
+                            <span class="paint-swatch" data-color="#855570"></span>
+                            <span class="paint-swatch" data-color="#c9a3c4"></span>
+                            <span class="paint-swatch" data-color="#7a5e8c"></span>
+                            <span class="paint-swatch" data-color="#b9a3d0"></span>
+                            <span class="paint-swatch" data-color="#809b8f"></span>
+                            <span class="paint-swatch" data-color="#a8c4b6"></span>
+                            <span class="paint-swatch" data-color="#5b7fa6"></span>
+                            <span class="paint-swatch" data-color="#a3c0d4"></span>
+                            <span class="paint-swatch" data-color="#c98f5a"></span>
+                            <span class="paint-swatch" data-color="#e6cca0"></span>
+                            <label class="paint-more" title="custom colour">
+                                ＋<input class="paint-picker" type="color">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="paint-controls">
+                        <label class="paint-size-wrap">size
+                            <input class="paint-size" type="range" min="1" max="30" value="4">
+                            <b data-size-label>4px</b>
+                        </label>
+                        <button class="btn" data-act="clear">⟲ Clear</button>
+                        <button class="btn" data-act="save">↓ Save</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
     <script src="boot.js"></script>
     <script src="tree.js"></script>
     <script src="robots.js"></script>
+    <script src="paint.js"></script>
     <script src="desktop.js"></script>
 </body>
 </html>

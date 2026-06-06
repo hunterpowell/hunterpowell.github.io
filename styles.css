@@ -146,6 +146,8 @@ body {
     touch-action: none;
 }
 .window.maxed .resize-handle { display: none; }
+/* maximize sets an explicit fill size — lift the normal caps so it isn't clamped short */
+.window.maxed { max-width: none; max-height: none; }
 
 .window.dragging { box-shadow: 8px 10px 0 rgba(110, 66, 88, 0.22); }
 
@@ -369,6 +371,193 @@ body {
 }
 .demo-stats b { color: var(--accent); font-weight: normal; }
 .demo-stats .muted { color: var(--ink-soft); opacity: 0.75; }
+
+/* ============================================================
+   Paint (paint.exe) — vaporwave layout, site palette
+   ============================================================ */
+/* let the paint window's body distribute its full height to .paint */
+.paint-window .window-body { display: flex; }
+.paint { display: flex; flex-direction: column; gap: 0.6rem; flex: 1 1 auto; min-height: 0; }
+
+/* toolbox │ canvas │ palette — grows to fill the height above the controls */
+.paint-workspace {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* ---- left toolbox ------------------------------------- */
+.paint-toolbox {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 4px;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+.paint-tools {
+    display: grid;
+    grid-template-columns: repeat(2, 26px);
+    gap: 3px;
+}
+.paint-tool {
+    width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+    color: var(--ink);
+    cursor: pointer;
+}
+.paint-tool img {
+    width: 16px; height: 16px;
+    object-fit: contain;
+    image-rendering: pixelated;   /* keep the retro icons crisp */
+    pointer-events: none;
+}
+.paint-tool:active,
+.paint-tool.active {
+    box-shadow: inset -1px -1px 0 var(--win-light), inset 1px 1px 0 var(--win-dark);
+    background: var(--win-content);
+}
+
+/* current-colour chip */
+.paint-current {
+    height: 22px;
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-light);
+}
+
+/* ---- canvas + decorative scrollbars ------------------- */
+.paint-canvas-frame {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 15px;
+    grid-template-rows: 1fr 15px;
+    gap: 2px;
+    padding: 2px;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-light);
+}
+.paint-stage {
+    grid-column: 1; grid-row: 1;
+    min-width: 0; min-height: 0;
+    overflow: auto;                 /* fixed canvas scrolls inside; window resize crops */
+    /* off-canvas area shows the desktop grid, not a white gap */
+    background-color: var(--win-content);
+    background-image:
+        linear-gradient(var(--grid-faint) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-faint) 1px, transparent 1px);
+    background-size: 24px 24px, 24px 24px;
+    box-shadow: inset 1px 1px 0 var(--win-dark);
+    scrollbar-width: none;          /* hide native bars — our custom ones drive scrolling */
+    -ms-overflow-style: none;
+}
+.paint-stage::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.paint-canvas {
+    display: block;                 /* renders at its fixed intrinsic pixel size */
+    background: #fff;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.paint-scroll { display: flex; gap: 2px; }
+.paint-scroll--y { grid-column: 2; grid-row: 1; flex-direction: column; }
+.paint-scroll--x { grid-column: 1; grid-row: 2; flex-direction: row; }
+.paint-corner {
+    grid-column: 2; grid-row: 2;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+}
+.ps-btn {
+    flex: 0 0 auto;
+    width: 15px; height: 15px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px;
+    color: var(--ink-soft);
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+    cursor: pointer;
+}
+.ps-btn:active { box-shadow: inset -1px -1px 0 var(--win-light), inset 1px 1px 0 var(--win-dark); }
+.ps-track {
+    flex: 1 1 auto;
+    background: var(--win-content);
+    box-shadow: inset 1px 1px 0 var(--win-dark);
+    position: relative;
+    overflow: hidden;
+    touch-action: none;
+}
+.ps-thumb { cursor: grab; touch-action: none; }
+.ps-thumb:active { cursor: grabbing; }
+.paint-scroll--y .ps-thumb {
+    position: absolute; top: 0; left: 0; right: 0; height: 38%;
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+.paint-scroll--x .ps-thumb {
+    position: absolute; top: 0; bottom: 0; left: 0; width: 32%;
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+
+/* ---- right palette ------------------------------------ */
+.paint-palette {
+    flex: 0 0 auto;
+    align-self: flex-start;
+    display: grid;
+    grid-template-columns: repeat(2, 22px);
+    gap: 3px;
+    padding: 4px;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+.paint-swatch,
+.paint-more {
+    width: 22px; height: 22px;
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.45);
+    cursor: pointer;
+}
+.paint-swatch.active { outline: 2px solid var(--ink); outline-offset: -1px; box-shadow: none; }
+.paint-more {
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    background: var(--win-face);
+    font-family: 'VT323', monospace; font-size: 1rem; color: var(--ink-soft);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+.paint-more .paint-picker {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    border: none; padding: 0;
+}
+
+/* ---- bottom controls ---------------------------------- */
+.paint-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; }
+.paint-controls .btn { font-size: 0.85rem; padding: 5px 14px; }
+.paint-size-wrap {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--ink-soft);
+}
+.paint-size-wrap b { color: var(--accent); font-weight: normal; min-width: 34px; }
+.paint-size { width: 90px; accent-color: var(--accent); }
+
+@media (max-width: 600px) {
+    .paint-workspace { flex-wrap: wrap; }
+    .paint-canvas-frame { order: 3; flex-basis: 100%; min-height: 240px; }
+}
 
 /* ============================================================
    Start menu

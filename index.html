@@ -18,27 +18,27 @@
     <div id="desktop">
         <div class="icons">
             <button class="desktop-icon" data-window="about" title="double-click to open">
-                <span class="glyph">📄</span>
+                <img class="glyph" src="icons/text_file.png" alt="">
                 <span class="label">about_me</span>
             </button>
             <button class="desktop-icon" data-window="projects" title="double-click to open">
-                <span class="glyph">📁</span>
+                <img class="glyph" src="icons/folder_closed.png" alt="">
                 <span class="label">projects</span>
             </button>
             <button class="desktop-icon" data-window="contact" title="double-click to open">
-                <span class="glyph">✉️</span>
+                <img class="glyph" src="icons/news.png" alt="">
                 <span class="label">contact</span>
             </button>
             <button class="desktop-icon" data-window="tree" title="double-click to open">
-                <span class="glyph">🌸</span>
+                <img class="glyph" src="icons/image_editor.png" alt="">
                 <span class="label">cherry_tree</span>
             </button>
             <button class="desktop-icon" data-window="robots" title="double-click to open">
-                <span class="glyph">🤖</span>
+                <img class="glyph" src="icons/program.png" alt="">
                 <span class="label">maze_solver</span>
             </button>
             <button class="desktop-icon" data-window="terminal" title="double-click to open">
-                <span class="glyph">🖥️</span>
+                <img class="glyph" src="icons/this_computer.png" alt="">
                 <span class="label">cmd</span>
             </button>
         </div>
@@ -48,15 +48,15 @@
     <!-- Start menu -->
     <div class="start-menu" id="start-menu">
         <div class="sm-head">~/hunter</div>
-        <button data-window="about"><span class="glyph">📄</span> about_me</button>
-        <button data-window="projects"><span class="glyph">📁</span> projects</button>
-        <button data-window="contact"><span class="glyph">✉️</span> contact</button>
+        <button data-window="about"><img class="glyph" src="icons/text_file.png" alt=""> about_me</button>
+        <button data-window="projects"><img class="glyph" src="icons/folder_closed.png" alt=""> projects</button>
+        <button data-window="contact"><img class="glyph" src="icons/news.png" alt=""> contact</button>
         <div class="sm-sep"></div>
-        <button data-window="tree"><span class="glyph">🌸</span> cherry_tree.exe</button>
-        <button data-window="robots"><span class="glyph">🤖</span> maze_solver.exe</button>
-        <button data-window="terminal"><span class="glyph">🖥️</span> cmd.exe</button>
+        <button data-window="tree"><img class="glyph" src="icons/image_editor.png" alt=""> cherry_tree.exe</button>
+        <button data-window="robots"><img class="glyph" src="icons/program.png" alt=""> maze_solver.exe</button>
+        <button data-window="terminal"><img class="glyph" src="icons/this_computer.png" alt=""> cmd.exe</button>
         <div class="sm-sep"></div>
-        <button data-link="https://github.com/hunterpowell"><span class="glyph">🌐</span> GitHub</button>
+        <button data-link="https://github.com/hunterpowell"><img class="glyph" src="icons/github.png" alt=""> GitHub</button>
     </div>
 
     <!-- Taskbar -->
@@ -416,8 +416,8 @@
 
                 <h3>What I learned</h3>
                 <ul class="notes-list">
-                    <li>Recursion maps perfectly onto trees: <strong>each branch is just a smaller tree
-                        at an angle</strong>. The whole generator is essentially one function calling
+                    <li>Recursion maps perfectly onto trees: each branch is just a smaller tree
+                        at an angle. The whole generator is essentially one function calling
                         itself.
                     </li>
                     <li>A chance for each branch to die before splitting is what prevents the tree from looking

@@ -93,8 +93,10 @@ body {
 .desktop-icon.dragging { opacity: 0.7; z-index: 9999; }   /* stay visible above windows while dragging */
 
 .desktop-icon .glyph {
-    font-size: 30px;
-    line-height: 1;
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    image-rendering: pixelated;   /* keep pixel-art icons crisp when scaled */
     filter: drop-shadow(1px 1px 0 rgba(110, 66, 88, 0.25));
 }
 
@@ -410,7 +412,13 @@ body {
     cursor: pointer;
 }
 .start-menu button:hover { background: var(--accent); color: #fff; }
-.start-menu button .glyph { font-size: 18px; }
+.start-menu button .glyph {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    flex: 0 0 auto;
+}
 .start-menu .sm-sep { height: 1px; background: var(--win-dark); margin: 2px 0; }
 
 /* ============================================================

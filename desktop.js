@@ -292,6 +292,19 @@
         'A SQL query walks into a bar, sidles up to two tables and asks: "may I JOIN you?"',
         '!false — it\'s funny because it\'s true.',
         'I would tell you a UDP joke, but you might not get it.',
+        'Why don\'t jokes work in octal? Because 7 10 11.',
+        'There are only two difficult problems in computer science: naming things, cache invalidation, and off-by-one errors.',
+    ];
+
+    // Undocumented terminal commands — revealed by `sudo help` (in-terminal)
+    // and the Konami code (themed dialog). Single source of truth for both.
+    const SECRET_COMMANDS = [
+        { cmd: 'sudo hire-me', desc: "grant access - I'm open to roles (opens connect.exe)" },
+        { cmd: 'coffee',       desc: 'brew a fresh cup' },
+        { cmd: 'fortune',      desc: 'a random (bad) programmer joke (alias: joke)' },
+        { cmd: 'vim',          desc: 'enter the editor war (alias: nano, emacs)' },
+        { cmd: 'rm',           desc: 'try to delete my files… good luck' },
+        { cmd: 'hi',           desc: 'say hello (alias: hey, yo)' },
     ];
 
     function initTerminal(win, id) {
@@ -376,6 +389,11 @@
 
         function sudo(arg) {
             const a = (arg || '').toLowerCase().trim();
+            if (a === 'help') {
+                print('[sudo] access granted — secret commands:', 'muted');
+                SECRET_COMMANDS.forEach((c) => print('  ' + c.cmd.padEnd(16) + ' ' + c.desc));
+                return;
+            }
             if (a === 'hire-me' || a === 'hire me') {
                 print('[sudo] access granted. ✓');
                 print('Hunter is open to new-grad & internship roles');
@@ -398,13 +416,13 @@
             if (key === 'sudo') return sudo(arg);
             if (key === 'rm') return print('Nope. I worked hard on these files. :)');
             if (key === 'vim' || key === 'vi' || key === 'nano' || key === 'emacs') {
-                return print('You\'re in ' + key + ' now. Good luck exiting. (kidding — try closing the window)');
+                return print('You\'re in my world (' + key + ') now. Good luck exiting. ');
             }
             if (key === 'fortune' || key === 'joke') {
                 return print(JOKES[Math.floor(Math.random() * JOKES.length)]);
             }
             if (['hi', 'hello', 'hey', 'yo'].includes(key)) {
-                return print('hey! type `help` to see what i can do.');
+                return print('hey nerd. type `help` to see what i can do.');
             }
             const fn = commands[key];
             if (fn) return fn(arg);
@@ -926,6 +944,27 @@
             '<p style="color:var(--ink-soft);">Tip: open <b>cmd.exe</b> and type ' +
             '<b>help</b> for terminal commands.</p>');
     }
+
+    function showSecretsDialog() {
+        const rows = SECRET_COMMANDS.map((c) =>
+            '<dt><kbd>' + c.cmd + '</kbd></dt><dd>' + c.desc + '</dd>').join('');
+        showDialog('Secret commands',
+            '<h3>🔓 Cheat codes unlocked</h3>' +
+            '<p>Undocumented things to type into <b>cmd.exe</b>:</p>' +
+            '<dl>' + rows + '</dl>' +
+            '<p style="color:var(--ink-soft);">(or just run <b>sudo help</b> in the terminal)</p>');
+    }
+
+    /* ---- konami code: ↑↑↓↓←→←→ B A reveals the secrets ---- */
+    const KONAMI = ['arrowup', 'arrowup', 'arrowdown', 'arrowdown',
+        'arrowleft', 'arrowright', 'arrowleft', 'arrowright', 'b', 'a'];
+    let konamiIdx = 0;
+    document.addEventListener('keydown', (e) => {
+        const k = e.key.toLowerCase();
+        if (k === KONAMI[konamiIdx]) konamiIdx++;
+        else konamiIdx = (k === KONAMI[0]) ? 1 : 0;
+        if (konamiIdx === KONAMI.length) { konamiIdx = 0; showSecretsDialog(); }
+    });
 
     /* ---- start menu --------------------------------------- */
     const startBtn = document.getElementById('start-btn');

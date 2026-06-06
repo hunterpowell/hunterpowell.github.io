@@ -326,7 +326,7 @@
             },
             whoami() {
                 print('Hunter Powell — CS student @ Sacramento State (graduating Dec 2026).');
-                print('Backend, Systems, and ML. Python, C++, Java, a little Rust.');
+                print('Simulation, systems, and ML. Python, C++, Java, a little Rust.');
             },
             ls() { FILES.forEach(([name]) => print('  ' + name)); },
             open(arg) {

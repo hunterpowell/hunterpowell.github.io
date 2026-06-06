@@ -13,6 +13,7 @@
 
     let zCounter = 10;            // running z-index for focus order
     let cascade = 0;             // offset so new windows don't stack exactly
+    let activeId = null;          // id of the focused window (for Alt-accelerators)
     const open = new Map();       // id -> { win, taskBtn }
 
     /* ---- open / focus ------------------------------------- */
@@ -71,6 +72,7 @@
         });
 
         makeDraggable(win, bar, controls);
+        wireMenuBar(win, id);
 
         // resize grip
         const grip = document.createElement('div');
@@ -149,6 +151,7 @@
     function focus(id) {
         const entry = open.get(id);
         if (!entry) return;
+        activeId = id;
         entry.win.style.zIndex = ++zCounter;
         for (const [oid, o] of open) {
             o.win.classList.toggle('active', oid === id);
@@ -193,6 +196,7 @@
         entry.win.remove();
         entry.taskBtn.remove();
         open.delete(id);
+        if (activeId === id) activeId = null;
     }
 
     /* ---- canvas demos (tree / robots) --------------------- */
@@ -268,7 +272,7 @@
     function initPaint(win) {
         const root = win.querySelector('.paint');
         if (!root || typeof PaintApp === 'undefined') return null;
-        new PaintApp(root);
+        win._paint = new PaintApp(root);   // kept so the menus can drive it
         return null;   // listeners live on canvas; removed when the window does
     }
 
@@ -560,9 +564,11 @@
 
     /* ---- right-click context menu ------------------------- */
     let activeMenu = null;
+    let menuBarOpen = null;   // the <span> whose menu-bar dropdown is showing
 
     function closeContextMenu() {
         if (activeMenu) { activeMenu.remove(); activeMenu = null; }
+        if (menuBarOpen) { menuBarOpen.classList.remove('open'); menuBarOpen = null; }
     }
 
     function showContextMenu(x, y, items) {
@@ -588,12 +594,6 @@
         activeMenu = menu;
     }
 
-    function refreshDesktop() {
-        desktop.style.transition = 'opacity 0.12s ease';
-        desktop.style.opacity = '0.35';
-        setTimeout(() => { desktop.style.opacity = ''; }, 130);
-    }
-
     document.addEventListener('contextmenu', (e) => {
         if (document.getElementById('boot')) return;   // still booting
         // leave native menus intact inside windows / taskbar / start menu
@@ -605,14 +605,14 @@
             showContextMenu(e.clientX, e.clientY, [
                 { label: 'Open', action: () => openWindow(icon.dataset.window) },
                 { sep: true },
-                { label: 'Arrange icons', action: () => { defaultLayout(); saveIcons(); } },
+                { label: 'Reset icons', action: () => { defaultLayout(); saveIcons(); } },
             ]);
         } else {
             clearSelection();
             showContextMenu(e.clientX, e.clientY, [
                 { label: 'Open Terminal', action: () => openWindow('terminal') },
-                { label: 'Arrange icons', action: () => { defaultLayout(); saveIcons(); } },
-                { label: 'Refresh', action: refreshDesktop },
+                { label: 'Reset icons', action: () => { defaultLayout(); saveIcons(); } },
+                crtItem(),
                 { sep: true },
                 { label: 'View Source', action: () => window.open('https://github.com/hunterpowell/hunterpowell.github.io', '_blank') },
                 { label: 'Properties', action: () => openWindow('about') },
@@ -621,10 +621,311 @@
     });
 
     document.addEventListener('pointerdown', (e) => {
-        if (activeMenu && !activeMenu.contains(e.target)) closeContextMenu();
+        // a click on a menu-bar label is handled by its own click listener
+        if (activeMenu && !activeMenu.contains(e.target) && !e.target.closest('.menu-bar span')) {
+            closeContextMenu();
+        }
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeContextMenu(); });
     window.addEventListener('blur', closeContextMenu);
+
+    /* ---- window menu bar (File / Edit / View / ...) ------- */
+    // The decorative menu labels become real dropdowns, reusing the
+    // context-menu renderer. Click to open, hover to switch between
+    // menus while one is open, Alt+<underlined letter> to open by key.
+    function wireMenuBar(win, id) {
+        const bar = win.querySelector('.menu-bar');
+        if (!bar) return;
+        bar.querySelectorAll('span').forEach((span) => {
+            span.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (menuBarOpen === span) { closeContextMenu(); return; }
+                openMenuFor(span, win, id);
+            });
+            span.addEventListener('pointerenter', () => {
+                if (menuBarOpen && menuBarOpen !== span) openMenuFor(span, win, id);
+            });
+        });
+    }
+
+    function openMenuFor(span, win, id) {
+        const name = span.textContent.trim();          // "File", "Edit", ...
+        const items = buildWindowMenu(name, win, id);
+        if (!items.length) { closeContextMenu(); return; }
+        const r = span.getBoundingClientRect();
+        showContextMenu(r.left, r.bottom, items);      // resets menuBarOpen first
+        menuBarOpen = span;
+        span.classList.add('open');
+    }
+
+    // Alt + underlined letter opens the matching menu on the active window.
+    document.addEventListener('keydown', (e) => {
+        if (!e.altKey || e.ctrlKey || e.metaKey) return;
+        const key = e.key.toLowerCase();
+        if (!/^[a-z]$/.test(key)) return;
+        const entry = activeId && open.get(activeId);
+        if (!entry) return;
+        const bar = entry.win.querySelector('.menu-bar');
+        if (!bar) return;
+        const span = Array.from(bar.querySelectorAll('span')).find((s) => {
+            const u = s.querySelector('u');
+            return u && u.textContent.toLowerCase() === key;
+        });
+        if (span) { e.preventDefault(); openMenuFor(span, entry.win, activeId); }
+    });
+
+    /* ---- menu contents (per label, per window) ------------ */
+    function buildWindowMenu(name, win, id) {
+        switch (name) {
+            case 'File':  return fileMenu(win, id);
+            case 'Edit':  return editMenu(win, id);
+            case 'View':  return viewMenu(win);
+            case 'Help':  return helpMenu();
+            case 'Open':  return openMenu();          // projects
+            case 'Run':   return runMenu(win);        // tree / robots demos
+            case 'Image': return imageMenu(win);      // paint.exe
+            default:      return [];
+        }
+    }
+
+    function fileMenu(win, id) {
+        const items = [];
+        if (id === 'paint') items.push({ label: 'Save as PNG…', action: () => paintAct(win, 'save') });
+        if (id === 'about') items.push({ label: 'Download résumé ↓', action: downloadResume });
+        if (items.length) items.push({ sep: true });
+        items.push({ label: 'Close', action: () => closeWindow(id) });
+        return items;
+    }
+
+    function editMenu(win, id) {
+        const items = [];
+        if (id === 'contact') {
+            items.push({ label: 'Copy email', action: () => copyText('hunterpowell99@gmail.com', 'Email copied') });
+            items.push({ label: 'Copy GitHub URL', action: () => copyText('https://github.com/hunterpowell', 'GitHub URL copied') });
+            items.push({ label: 'Copy LinkedIn URL', action: () => copyText('https://linkedin.com/in/hunterpowell-dev', 'LinkedIn URL copied') });
+            items.push({ sep: true });
+        }
+        if (id === 'paint') {
+            items.push({ label: 'Clear canvas', action: () => paintAct(win, 'clear') });
+            return items;
+        }
+        items.push({ label: 'Select All', action: () => selectBody(win) });
+        return items;
+    }
+
+    function viewMenu(win) {
+        return [
+            { label: 'Zoom In', action: () => zoomBody(win, 0.1) },
+            { label: 'Zoom Out', action: () => zoomBody(win, -0.1) },
+            { label: 'Actual Size', action: () => setZoom(win, 1) },
+            { sep: true },
+            crtItem(),
+        ];
+    }
+
+    // CRT toggle, shared by the window View menu and the desktop menu.
+    function crtItem() {
+        return {
+            label: (document.body.classList.contains('crt') ? '✓ ' : '   ') + 'CRT effect',
+            action: () => document.body.classList.toggle('crt'),
+        };
+    }
+
+    function helpMenu() {
+        return [
+            { label: 'About HunterOS…', action: showAboutDialog },
+            { label: 'Keyboard shortcuts…', action: showShortcutsDialog },
+            { sep: true },
+            { label: 'View source on GitHub',
+              action: () => window.open('https://github.com/hunterpowell/hunterpowell.github.io', '_blank') },
+        ];
+    }
+
+    function openMenu() {
+        return [
+            { label: "Lydia's Law — NOTES.md", action: () => openWindow('notes-lydia') },
+            { label: 'Coverage Robots — POSTMORTEM.md', action: () => openWindow('notes-robots') },
+            { label: 'Heart Classifier — NOTES.md', action: () => openWindow('notes-heart') },
+            { label: 'Cherry Tree — README.md', action: () => openWindow('notes-tree') },
+        ];
+    }
+
+    function runMenu(win) {
+        const click = (act) => { const b = win.querySelector('[data-act="' + act + '"]'); if (b) b.click(); };
+        return [
+            { label: 'Run', action: () => click('run') },
+            { label: 'Pause', action: () => click('pause') },
+            { label: 'Reset', action: () => click('reset') },
+        ];
+    }
+
+    function imageMenu(win) {
+        return [
+            { label: 'Invert colours', action: () => paintFilter(win, 'invert') },
+            { label: 'Flip horizontal', action: () => paintFilter(win, 'flip') },
+            { sep: true },
+            { label: 'Clear canvas', action: () => paintAct(win, 'clear') },
+        ];
+    }
+
+    /* ---- menu action helpers ------------------------------ */
+    function paintAct(win, act) {
+        const app = win._paint;
+        if (!app) return;
+        if (act === 'clear') app.clear();
+        else if (act === 'save') app.save();
+    }
+
+    // Direct bitmap ops on the paint canvas (PaintApp draws straight to it,
+    // with no backing buffer to clobber, so putImageData persists).
+    function paintFilter(win, kind) {
+        const canvas = win.querySelector('.paint-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width, H = canvas.height;
+        if (kind === 'invert') {
+            const img = ctx.getImageData(0, 0, W, H);
+            const d = img.data;
+            for (let i = 0; i < d.length; i += 4) {
+                d[i] = 255 - d[i]; d[i + 1] = 255 - d[i + 1]; d[i + 2] = 255 - d[i + 2];
+            }
+            ctx.putImageData(img, 0, 0);
+        } else if (kind === 'flip') {
+            const img = ctx.getImageData(0, 0, W, H);
+            ctx.save();
+            ctx.setTransform(-1, 0, 0, 1, W, 0);   // mirror across the vertical axis
+            // putImageData ignores transforms, so paint via a temp canvas
+            const tmp = document.createElement('canvas');
+            tmp.width = W; tmp.height = H;
+            tmp.getContext('2d').putImageData(img, 0, 0);
+            ctx.drawImage(tmp, 0, 0);
+            ctx.restore();
+        }
+    }
+
+    function selectBody(win) {
+        const body = win.querySelector('.window-body');
+        if (!body) return;
+        const range = document.createRange();
+        range.selectNodeContents(body);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+
+    function zoomBody(win, delta) {
+        const body = win.querySelector('.window-body');
+        if (!body) return;
+        setZoom(win, (parseFloat(body.dataset.zoom || '1') + delta));
+    }
+
+    function setZoom(win, z) {
+        const body = win.querySelector('.window-body');
+        if (!body) return;
+        z = Math.min(2, Math.max(0.6, Math.round(z * 100) / 100));
+        body.dataset.zoom = z;
+        body.style.zoom = z;   // scales text + headings (rem) uniformly
+    }
+
+    function downloadResume() {
+        const a = document.createElement('a');
+        a.href = 'Hunter_Powell_Resume.pdf';
+        a.download = 'Hunter_Powell_Resume.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    }
+
+    function copyText(text, msg) {
+        const done = () => showToast(msg || 'Copied');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+        } else {
+            fallbackCopy(text, done);
+        }
+    }
+
+    function fallbackCopy(text, done) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (_) {}
+        ta.remove();
+    }
+
+    let toastTimer = null;
+    function showToast(msg) {
+        let toast = document.querySelector('.toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.className = 'toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        requestAnimationFrame(() => toast.classList.add('show'));
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 250);
+        }, 1600);
+    }
+
+    /* ---- dialogs (Help menu) ------------------------------ */
+    function showDialog(title, html) {
+        closeContextMenu();
+        const overlay = document.createElement('div');
+        overlay.className = 'dialog-overlay';
+        overlay.innerHTML =
+            '<section class="window" role="dialog" aria-label="' + title + '">' +
+                '<div class="title-bar">' +
+                    '<span class="dot"></span>' +
+                    '<span class="title">' + title + '</span>' +
+                    '<div class="title-controls"><button aria-label="close">×</button></div>' +
+                '</div>' +
+                '<div class="window-body">' + html +
+                    '<p class="card-actions" style="margin-top:1.1rem;text-align:right;">' +
+                        '<a href="#" class="btn" data-dlg-ok>OK</a></p>' +
+                '</div>' +
+            '</section>';
+        const close = () => { overlay.remove(); document.removeEventListener('keydown', onKey); };
+        const onKey = (e) => { if (e.key === 'Escape') close(); };
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay || e.target.closest('[aria-label="close"], [data-dlg-ok]')) {
+                e.preventDefault();
+                close();
+            }
+        });
+        document.addEventListener('keydown', onKey);
+        document.body.appendChild(overlay);
+    }
+
+    function showAboutDialog() {
+        showDialog('About HunterOS',
+            '<h3>HunterOS <span class="dlg-version">v4.2</span></h3>' +
+            '<p>A retro desktop portfolio by Hunter Powell.</p>' +
+            '<p>Hand-built with vanilla HTML, CSS &amp; JavaScript — no frameworks, ' +
+            'no dependencies. The windows, taskbar, terminal and paint app are all ' +
+            'home-grown.</p>' +
+            '<p style="margin-top:0.6rem;color:var(--ink-soft);">© 2026 Hunter Powell · ' +
+            '640K of RAM ought to be enough for anybody.</p>');
+    }
+
+    function showShortcutsDialog() {
+        showDialog('Keyboard shortcuts',
+            '<dl>' +
+            '<dt><kbd>Alt</kbd>+<kbd>letter</kbd></dt><dd>open the underlined menu</dd>' +
+            '<dt><kbd>Esc</kbd></dt><dd>close a menu or dialog</dd>' +
+            '<dt>Double-click</dt><dd>open a desktop icon</dd>' +
+            '<dt>Right-click</dt><dd>desktop &amp; icon context menus</dd>' +
+            '<dt>Drag title bar</dt><dd>move a window</dd>' +
+            '<dt>Drag corner</dt><dd>resize a window</dd>' +
+            '</dl>' +
+            '<p style="color:var(--ink-soft);">Tip: open <b>cmd.exe</b> and type ' +
+            '<b>help</b> for terminal commands.</p>');
+    }
 
     /* ---- start menu --------------------------------------- */
     const startBtn = document.getElementById('start-btn');

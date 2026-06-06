@@ -22,7 +22,6 @@ class PaintApp {
         this.clear();
         this.wireTools();
         this.wireCanvas();
-        this.wireActions();
         this.setupScrollbars();
     }
 
@@ -80,19 +79,13 @@ class PaintApp {
         }
     }
 
-    wireActions() {
-        const clearBtn = this.root.querySelector('[data-act="clear"]');
-        if (clearBtn) clearBtn.addEventListener('click', () => this.clear());
-
-        const saveBtn = this.root.querySelector('[data-act="save"]');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                const a = document.createElement('a');
-                a.download = 'untitled.png';
-                a.href = this.canvas.toDataURL('image/png');
-                a.click();
-            });
-        }
+    // Clear / save now live in the window's File & Image menus (see
+    // desktop.js), so there are no dedicated buttons to wire here.
+    save() {
+        const a = document.createElement('a');
+        a.download = 'untitled.png';
+        a.href = this.canvas.toDataURL('image/png');
+        a.click();
     }
 
     /* ---- working scrollbars ------------------------------- */

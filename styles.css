@@ -211,13 +211,24 @@ body {
 
 .menu-bar {
     display: flex;
-    gap: 1rem;
-    padding: 3px 8px;
+    gap: 0.25rem;
+    padding: 2px 4px;
     background: var(--win-face);
     border-bottom: 1px solid var(--win-dark);
     font-size: 0.82rem;
     user-select: none;
 }
+.menu-bar span {
+    padding: 2px 8px;
+    cursor: default;
+    border: 1px solid transparent;
+}
+.menu-bar span:hover,
+.menu-bar span.open {
+    background: var(--accent);
+    color: #fff;
+}
+.menu-bar span.open { box-shadow: inset 1px 1px 0 var(--win-dark); }
 .menu-bar u { text-decoration: underline; }
 
 .window-body {
@@ -790,4 +801,87 @@ body {
     .credit { max-width: 60vw; }
     .window-body h1 { font-size: 2rem; }
     #boot { font-size: 1.05rem; padding: 6vh 6vw; }
+}
+
+/* ============================================================
+   Menu-bar dialogs (Help → About, Keyboard shortcuts)
+   ============================================================ */
+.dialog-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(70, 52, 62, 0.28);
+}
+.dialog-overlay .window { position: static; width: 360px; max-width: 92vw; }
+.dialog-overlay .window-body { background-image: none; }
+.dialog-overlay h3 { margin-bottom: 0.4rem; }
+.dialog-overlay .dlg-version { color: var(--accent); font-weight: 700; }
+.dialog-overlay dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0.5rem 0; }
+.dialog-overlay dt { font-weight: 700; white-space: nowrap; }
+.dialog-overlay dd { color: var(--ink-soft); }
+.dialog-overlay kbd {
+    font: inherit;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    border-radius: 2px;
+    padding: 0 5px;
+    box-shadow: inset -1px -1px 0 var(--win-dark), inset 1px 1px 0 var(--win-light);
+}
+
+/* ============================================================
+   Toast (copy confirmations, etc.)
+   ============================================================ */
+.toast {
+    position: fixed;
+    left: 50%;
+    bottom: 64px;
+    transform: translateX(-50%) translateY(8px);
+    z-index: 210000;
+    padding: 7px 16px;
+    background: var(--title-ink);
+    color: #f3e3ea;
+    font-size: 0.85rem;
+    border: 1px solid var(--win-border);
+    box-shadow: 3px 4px 0 rgba(110, 66, 88, 0.3);
+    opacity: 0;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ============================================================
+   CRT effect (View → CRT effect) — scanlines + faint flicker
+   ============================================================ */
+body.crt::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 250000;
+    pointer-events: none;
+    background:
+        repeating-linear-gradient(
+            rgba(40, 24, 34, 0.10) 0px,
+            rgba(40, 24, 34, 0.10) 1px,
+            transparent 1px,
+            transparent 3px);
+    animation: crt-flicker 4.5s steps(60) infinite;
+}
+body.crt::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 249999;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center,
+        transparent 58%, rgba(40, 24, 34, 0.22) 100%);   /* vignette */
+}
+@keyframes crt-flicker {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.92; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.crt::after { animation: none; }
 }

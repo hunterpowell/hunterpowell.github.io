@@ -705,6 +705,15 @@ body {
     color: var(--accent);
     cursor: pointer;
     flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.start-btn .glyph {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+    image-rendering: pixelated;   /* no-op for SVG, keeps a future pixel PNG crisp */
 }
 
 .task-items { display: flex; gap: 5px; flex: 1; overflow: hidden; }

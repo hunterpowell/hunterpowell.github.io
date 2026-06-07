@@ -357,6 +357,7 @@
         'I would tell you a UDP joke, but you might not get it.',
         'Why don\'t jokes work in octal? Because 7 10 11.',
         'There are only two difficult problems in computer science: naming things, cache invalidation, and off-by-one errors.',
+        '["hip", "hip]" Array!',
     ];
 
     // Undocumented terminal commands — revealed by `sudo help` (in-terminal)
@@ -411,10 +412,10 @@
                 print('  date | time         current date / time');
                 print('  clear | cls         wipe the screen');
                 print('  exit                close this window');
-                print('(a few commands are hidden — go poke around)', 'muted');
+                print('(a few commands are hidden, go poke around)', 'muted');
             },
             whoami() {
-                print('Hunter Powell — CS student @ Sacramento State (graduating Dec 2026).');
+                print('Hunter Powell, CS student @ Sacramento State (graduating Dec 2026).');
                 print('Simulation, systems, and ML. Python, C++, Java, a little Rust.');
             },
             ls() { FILES.forEach(([name]) => print('  ' + name)); },
@@ -464,7 +465,7 @@
                 openWindow('contact');
                 return;
             }
-            print('[sudo] nice try — you are not in the sudoers file.');
+            print('[sudo] nice try - you are not in the sudoers file.');
             print('       This incident will be reported. ;)', 'muted');
         }
 

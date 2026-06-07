@@ -25,9 +25,13 @@
     const STORE = 'hp-screensaver-v1';   // persisted prefs (Display Properties)
 
     const COLORS = [
-        '#DCA4AC', '#A8BBA2', '#8FA3B5',
-        '#B6A6BC', '#EAD9D9', '#9F6278',
-    ];
+        '#3EA6A4',
+        '#E5A583',
+        '#eaa0bd',
+        '#b48496',
+        '#9294BA',
+        '#6b8e7e',
+    ]
 
     // User prefs, restored from localStorage and editable via Display Properties.
     let enabled = true;

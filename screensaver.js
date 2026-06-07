@@ -20,7 +20,7 @@
     const reduce = !!(window.matchMedia &&
         window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-    const SPEED = 1;         // px per frame (~60px/s @ 60fps)
+    const SPEED = 1.2;         // px per frame (~60px/s @ 60fps)
     const GRACE = 250;       // ignore stray mousemove right after activating (ms)
     const STORE = 'hp-screensaver-v1';   // persisted prefs (Display Properties)
 
@@ -109,7 +109,6 @@
         else if (x >= maxX) { x = maxX; vx = -Math.abs(vx); bounced = true; }
         if (y <= 0)         { y = 0;    vy = Math.abs(vy);  bounced = true; }
         else if (y >= maxY) { y = maxY; vy = -Math.abs(vy); bounced = true; }
-        // if (bounced) setColor(colorIdx + 1);
         if (bounced) changeColor()
 
         logo.style.transform = 'translate(' + x + 'px,' + y + 'px)';

@@ -363,7 +363,7 @@
     // Undocumented terminal commands — revealed by `sudo help` (in-terminal)
     // and the Konami code (themed dialog). Single source of truth for both.
     const SECRET_COMMANDS = [
-        { cmd: 'sudo hire-me', desc: "grant access - I'm open to roles (opens connect.exe)" },
+        { cmd: 'sudo hire-me', desc: 'hire me :)' },
         { cmd: 'coffee',       desc: 'brew a fresh cup' },
         { cmd: 'fortune',      desc: 'a random (bad) joke (alias: joke)' },
         { cmd: 'vim',          desc: 'enter the editor war (alias: nano, emacs)' },
@@ -455,7 +455,10 @@
             const a = (arg || '').toLowerCase().trim();
             if (a === 'help') {
                 print('[sudo] access granted — secret commands:', 'muted');
-                SECRET_COMMANDS.forEach((c) => print('  ' + c.cmd.padEnd(16) + ' ' + c.desc));
+                // Grid layout (not space-padding): VT323 isn't truly monospaced,
+                // so padEnd char counts don't align visually. Columns are font-independent.
+                printHTML('<div class="term-help">' + SECRET_COMMANDS.map((c) =>
+                    '<span class="cmd">' + c.cmd + '</span><span>' + c.desc + '</span>').join('') + '</div>');
                 return;
             }
             if (a === 'hire-me' || a === 'hire me') {

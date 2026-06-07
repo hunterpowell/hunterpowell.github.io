@@ -57,7 +57,7 @@ body {
     /* wallpaper layered over a grid fallback (shows if the image is missing) */
     background-color: var(--desk);
     background-image:
-        url('wallpaper.png'),
+        url('images/wallpaper.webp'),
         linear-gradient(var(--grid-line) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: cover, 30px 30px, 30px 30px;
@@ -780,6 +780,12 @@ body {
     word-break: break-word;
 }
 .term-output .cmd { color: #f2c2d4; }      /* echoed command line */
+.term-output .term-help {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0 1.2em;
+    padding-left: 1ch;
+}
 .term-output .muted { color: #9a8a94; }
 .term-output a { color: #f3b6cb; }
 .term-input-line { display: flex; align-items: baseline; gap: 6px; flex: none; }

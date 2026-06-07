@@ -40,6 +40,10 @@
     <!-- Desktop surface -->
     <div id="desktop">
         <div class="icons">
+            <button class="desktop-icon" data-window="recycle" title="double-click to open">
+                <img class="glyph" src="icons/recycle_bin_full.png" alt="">
+                <span class="label">recycle_bin</span>
+            </button>
             <button class="desktop-icon" data-window="about" title="double-click to open">
                 <img class="glyph" src="icons/text_file.png" alt="">
                 <span class="label">about_me</span>
@@ -300,6 +304,30 @@
                 <p>Undocumented things to type into <b>cmd.exe</b>:</p>
                 <dl data-secrets></dl>
                 <p style="color:var(--ink-soft);">(or just run <b>sudo help</b> in the terminal)</p>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-recycle">
+        <section class="window" style="width:420px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">Recycle Bin</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body bin-list" data-recycle>
+                <button class="bin-item" data-open="secrets">
+                    <img class="glyph" src="icons/text_file.png" alt="">
+                    <span>secrets.md</span>
+                </button>
+                <p class="bin-empty">The Recycle Bin is empty.</p>
             </div>
         </section>
     </template>

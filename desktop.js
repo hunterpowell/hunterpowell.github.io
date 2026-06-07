@@ -42,6 +42,7 @@
         if (id === 'secrets') fillSecrets(win);
         const cleanup = initDemo(win) || initTerminal(win, id) || initPaint(win) || initSettings(win);   // null for plain windows
         open.set(id, { win, taskBtn, cleanup });
+        if (id === 'recycle') syncRecycle();
 
         focus(id);
     }
@@ -691,11 +692,15 @@
         const icon = e.target.closest('.desktop-icon');
         if (icon) {
             selectIcon(icon);
-            showContextMenu(e.clientX, e.clientY, [
-                { label: 'Open', action: () => openWindow(icon.dataset.window) },
+            const items = [{ label: 'Open', action: () => openWindow(icon.dataset.window) }];
+            if (icon.dataset.window === 'recycle') {
+                items.push({ label: 'Empty Recycle Bin', action: emptyRecycle });
+            }
+            items.push(
                 { sep: true },
                 { label: 'Reset icons', action: () => { defaultLayout(); saveIcons(); } },
-            ]);
+            );
+            showContextMenu(e.clientX, e.clientY, items);
         } else {
             clearSelection();
             showContextMenu(e.clientX, e.clientY, [
@@ -782,6 +787,7 @@
         const items = [];
         if (id === 'paint') items.push({ label: 'Save as PNG…', action: () => paintAct(win, 'save') });
         if (id === 'about') items.push({ label: 'Download résumé ↓', action: downloadResume });
+        if (id === 'recycle') items.push({ label: 'Empty Recycle Bin', action: emptyRecycle });
         if (items.length) items.push({ sep: true });
         items.push({ label: 'Close', action: () => closeWindow(id) });
         return items;
@@ -1013,6 +1019,35 @@
             '</dl>' +
             '<p style="color:var(--ink-soft);">Tip: open <b>cmd.exe</b> and type ' +
             '<b>help</b> for terminal commands.</p>');
+    }
+
+    /* ---- recycle bin (Tier 1: full/empty state + gag) ----- */
+    // The bin holds secrets.md and won't truly empty — the joke is that the
+    // secrets are "load-bearing" and come back. No persistence: full on reload.
+    let recycleFull = true;
+
+    function syncRecycle() {
+        const glyph = document.querySelector('.desktop-icon[data-window="recycle"] .glyph');
+        if (glyph) glyph.src = recycleFull ? 'icons/recycle_bin_full.png' : 'icons/recycle_bin_empty.png';
+        const entry = open.get('recycle');
+        if (entry) {
+            const body = entry.win.querySelector('[data-recycle]');
+            if (body) body.classList.toggle('is-empty', !recycleFull);
+        }
+    }
+
+    let recycleTimer = null;
+    function emptyRecycle() {
+        if (!recycleFull) { showToast('Recycle Bin is already empty'); return; }
+        recycleFull = false;
+        syncRecycle();
+        showToast('Emptying Recycle Bin . . .');
+        clearTimeout(recycleTimer);
+        recycleTimer = setTimeout(() => {
+            recycleFull = true;
+            syncRecycle();
+            showToast('…the secrets came back. must be load bearing?');
+        }, 1500);       // time in ms before bin refills
     }
 
     // Fill the secrets window's placeholder list from the single source of truth.

@@ -112,6 +112,33 @@ body {
     border: 1px dotted var(--accent);
 }
 
+/* ---- Recycle Bin folder listing ----------------------- */
+.bin-list .bin-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 8px;
+    background: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+    color: var(--ink);
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    text-align: left;
+}
+.bin-list .bin-item .glyph {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+.bin-list .bin-item:hover { background: var(--accent); color: #fff; }
+.bin-list .bin-empty { color: var(--ink-soft); font-style: italic; }
+/* empty state hides the file, shows the "empty" line; full does the reverse */
+.bin-list.is-empty .bin-item { display: none; }
+.bin-list:not(.is-empty) .bin-empty { display: none; }
+
 /* ============================================================
    Window component
    ============================================================ */

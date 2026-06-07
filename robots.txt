@@ -1,0 +1,7 @@
+# https://hunterpowell.dev/robots.txt
+# Allow every crawler to index the whole site.
+User-agent: *
+Allow: /
+
+# Point crawlers at the sitemap so they can discover pages quickly.
+Sitemap: https://hunterpowell.dev/sitemap.xml

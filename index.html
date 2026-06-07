@@ -61,6 +61,7 @@
         <button data-window="terminal"><img class="glyph" src="icons/this_computer.png" alt=""> cmd.exe</button>
         <button data-window="paint"><img class="glyph" src="icons/paint_alt.png" alt=""> paint.exe</button>
         <div class="sm-sep"></div>
+        <button data-window="display"><img class="glyph" src="icons/this_computer.png" alt=""> settings</button>
         <button data-link="https://github.com/hunterpowell"><img class="glyph" src="icons/github.png" alt=""> GitHub</button>
     </div>
 
@@ -226,6 +227,55 @@
                     <li><span class="label">Résumé</span>
                         <a href="Hunter_Powell_Resume.pdf" download>Hunter_Powell_Resume.pdf ↓</a></li>
                 </ul>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-os-about">
+        <section class="window notes-window" style="width:440px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">HunterOS.md</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <h2>HunterOS <span class="dlg-version">v4.2</span></h2>
+                <p>A retro desktop portfolio by Hunter Powell.</p>
+                <p>Hand-built with vanilla HTML, CSS &amp; JavaScript. No frameworks,
+                   no dependencies. The windows, taskbar, terminal and paint app are all
+                   home-grown.</p>
+                <p style="margin-top:0.6rem;color:var(--ink-soft);">© 2026 Hunter Powell ·
+                   640K of RAM ought to be enough for anybody.</p>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-secrets">
+        <section class="window notes-window" style="width:460px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">secrets.md</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <h2>Cheat codes unlocked</h2>
+                <p>Undocumented things to type into <b>cmd.exe</b>:</p>
+                <dl data-secrets></dl>
+                <p style="color:var(--ink-soft);">(or just run <b>sudo help</b> in the terminal)</p>
             </div>
         </section>
     </template>
@@ -647,10 +697,73 @@
         </section>
     </template>
 
+    <template id="tpl-display">
+        <section class="window settings-window" style="width:430px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">Display Properties</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="window-body">
+                <div class="settings">
+                    <div class="settings-tabs" role="tablist">
+                        <button class="settings-tab active" data-tab="saver">Screen Saver</button>
+                        <button class="settings-tab" data-tab="appearance">Appearance</button>
+                    </div>
+
+                    <div class="settings-panel active" data-panel="saver">
+                        <div class="ss-monitor">
+                            <div class="ss-screen"><div class="ss-preview"></div></div>
+                            <div class="ss-base"></div>
+                        </div>
+                        <label class="settings-row">
+                            <input type="checkbox" data-set="enabled">
+                            <span>Enable screensaver <span class="settings-muted">(bouncing DVD logo)</span></span>
+                        </label>
+                        <div class="settings-row">
+                            <span>Wait</span>
+                            <select data-set="idle">
+                                <option value="5000">5 seconds</option>
+                                <option value="15000">15 seconds</option>
+                                <option value="30000">30 seconds</option>
+                                <option value="60000">1 minute</option>
+                                <option value="120000">2 minutes</option>
+                                <option value="300000">5 minutes</option>
+                            </select>
+                            <span>of idle time</span>
+                        </div>
+                        <p class="settings-hint ss-reduced" hidden>
+                            Screensaver is off because your system has
+                            <b>reduce motion</b> turned on.
+                        </p>
+                    </div>
+
+                    <div class="settings-panel" data-panel="appearance">
+                        <label class="settings-row">
+                            <input type="checkbox" data-set="crt">
+                            <span>CRT effect <span class="settings-muted">(scanlines + flicker)</span></span>
+                        </label>
+                        <p class="settings-hint">A cathode-ray glow over the whole desktop.</p>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button class="btn" data-act="ok">OK</button>
+                        <button class="btn" data-act="cancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
     <script src="boot.js"></script>
     <script src="tree.js"></script>
     <script src="robots.js"></script>
     <script src="paint.js"></script>
     <script src="desktop.js"></script>
+    <script src="screensaver.js"></script>
 </body>
 </html>

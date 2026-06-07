@@ -39,7 +39,8 @@
         wireWindow(win, id);
 
         const taskBtn = makeTaskButton(win, id);
-        const cleanup = initDemo(win) || initTerminal(win, id) || initPaint(win);   // null for plain windows
+        if (id === 'secrets') fillSecrets(win);
+        const cleanup = initDemo(win) || initTerminal(win, id) || initPaint(win) || initSettings(win);   // null for plain windows
         open.set(id, { win, taskBtn, cleanup });
 
         focus(id);
@@ -276,6 +277,68 @@
         return null;   // listeners live on canvas; removed when the window does
     }
 
+    /* ---- Display Properties (settings) -------------------- */
+    // Staged editor: controls mutate only the form until OK applies them.
+    // Cancel / close discards, since nothing is committed before OK.
+    function initSettings(win) {
+        const root = win.querySelector('.settings');
+        if (!root) return null;
+        const ss = window.Screensaver;
+
+        // tab switching
+        const tabs = root.querySelectorAll('[data-tab]');
+        const panels = root.querySelectorAll('[data-panel]');
+        tabs.forEach((tab) => tab.addEventListener('click', () => {
+            const name = tab.dataset.tab;
+            tabs.forEach((t) => t.classList.toggle('active', t === tab));
+            panels.forEach((p) => p.classList.toggle('active', p.dataset.panel === name));
+        }));
+
+        const enableCb = root.querySelector('[data-set="enabled"]');
+        const idleSel = root.querySelector('[data-set="idle"]');
+        const crtCb = root.querySelector('[data-set="crt"]');
+        const preview = root.querySelector('.ss-preview');
+        const reduced = !!(ss && ss.reducedMotion);
+
+        // seed the form from current state
+        if (ss) {
+            enableCb.checked = ss.isEnabled();
+            idleSel.value = String(ss.getIdleMs());
+            if (preview) preview.innerHTML = ss.getLogoSVG();
+        }
+        crtCb.checked = document.body.classList.contains('crt');
+
+        // idle dropdown is meaningless while the saver is off
+        const syncIdle = () => { idleSel.disabled = reduced || !enableCb.checked; };
+        enableCb.addEventListener('change', syncIdle);
+
+        // reduce-motion overrides the screensaver entirely: lock the controls
+        // and explain, but leave the stored preference untouched.
+        if (reduced) {
+            enableCb.checked = false;
+            enableCb.disabled = true;
+            const note = root.querySelector('.ss-reduced');
+            if (note) note.hidden = false;
+        }
+        syncIdle();
+
+        root.querySelector('[data-act="ok"]').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (ss && !reduced) {
+                ss.setEnabled(enableCb.checked);
+                ss.setIdleMs(parseInt(idleSel.value, 10));
+            }
+            setCrt(crtCb.checked);
+            closeWindow('display');
+        });
+        root.querySelector('[data-act="cancel"]').addEventListener('click', (e) => {
+            e.preventDefault();
+            closeWindow('display');
+        });
+
+        return null;
+    }
+
     /* ---- terminal (cmd.exe) ------------------------------- */
     const FILES = [
         ['about_me.txt',    'about'],
@@ -301,7 +364,7 @@
     const SECRET_COMMANDS = [
         { cmd: 'sudo hire-me', desc: "grant access - I'm open to roles (opens connect.exe)" },
         { cmd: 'coffee',       desc: 'brew a fresh cup' },
-        { cmd: 'fortune',      desc: 'a random (bad) programmer joke (alias: joke)' },
+        { cmd: 'fortune',      desc: 'a random (bad) joke (alias: joke)' },
         { cmd: 'vim',          desc: 'enter the editor war (alias: nano, emacs)' },
         { cmd: 'rm',           desc: 'try to delete my files… good luck' },
         { cmd: 'hi',           desc: 'say hello (alias: hey, yo)' },
@@ -532,6 +595,10 @@
     ICONS.forEach((icon) => {
         let sx, sy, ox, oy, pid = null, down = false, moved = false;
 
+        // the icon's <img> is natively draggable; without this the browser
+        // hijacks a quick press-and-drag as an image drag (no-drop cursor)
+        icon.addEventListener('dragstart', (e) => e.preventDefault());
+
         icon.addEventListener('pointerdown', (e) => {
             if (e.button !== 0) return;        // left button only
             down = true; moved = false;
@@ -632,8 +699,9 @@
                 { label: 'Reset icons', action: () => { defaultLayout(); saveIcons(); } },
                 crtItem(),
                 { sep: true },
+                { label: 'Settings', action: () => openWindow('display') },
                 { label: 'View Source', action: () => window.open('https://github.com/hunterpowell/hunterpowell.github.io', '_blank') },
-                { label: 'Properties', action: () => openWindow('about') },
+                { label: 'Properties', action: () => openWindow('os-about') },
             ]);
         }
     });
@@ -736,16 +804,23 @@
             { label: 'Zoom In', action: () => zoomBody(win, 0.1) },
             { label: 'Zoom Out', action: () => zoomBody(win, -0.1) },
             { label: 'Actual Size', action: () => setZoom(win, 1) },
-            { sep: true },
-            crtItem(),
         ];
     }
 
-    // CRT toggle, shared by the window View menu and the desktop menu.
+    // CRT toggle, shared by the desktop right-click menu and
+    // Display Properties. Persisted so it survives a reload.
+    const CRT_STORE = 'hp-crt-v1';
+    function setCrt(on) {
+        document.body.classList.toggle('crt', on);
+        try { localStorage.setItem(CRT_STORE, on ? '1' : '0'); } catch (_) {}
+    }
+    (function restoreCrt() {
+        try { if (localStorage.getItem(CRT_STORE) === '1') document.body.classList.add('crt'); } catch (_) {}
+    })();
     function crtItem() {
         return {
             label: (document.body.classList.contains('crt') ? '✓ ' : '   ') + 'CRT effect',
-            action: () => document.body.classList.toggle('crt'),
+            action: () => setCrt(!document.body.classList.contains('crt')),
         };
     }
 
@@ -920,16 +995,7 @@
         document.body.appendChild(overlay);
     }
 
-    function showAboutDialog() {
-        showDialog('About HunterOS',
-            '<h3>HunterOS <span class="dlg-version">v4.2</span></h3>' +
-            '<p>A retro desktop portfolio by Hunter Powell.</p>' +
-            '<p>Hand-built with vanilla HTML, CSS &amp; JavaScript — no frameworks, ' +
-            'no dependencies. The windows, taskbar, terminal and paint app are all ' +
-            'home-grown.</p>' +
-            '<p style="margin-top:0.6rem;color:var(--ink-soft);">© 2026 Hunter Powell · ' +
-            '640K of RAM ought to be enough for anybody.</p>');
-    }
+    function showAboutDialog() { openWindow('os-about'); }
 
     function showShortcutsDialog() {
         showDialog('Keyboard shortcuts',
@@ -945,14 +1011,12 @@
             '<b>help</b> for terminal commands.</p>');
     }
 
-    function showSecretsDialog() {
-        const rows = SECRET_COMMANDS.map((c) =>
+    // Fill the secrets window's placeholder list from the single source of truth.
+    function fillSecrets(win) {
+        const dl = win.querySelector('[data-secrets]');
+        if (!dl) return;
+        dl.innerHTML = SECRET_COMMANDS.map((c) =>
             '<dt><kbd>' + c.cmd + '</kbd></dt><dd>' + c.desc + '</dd>').join('');
-        showDialog('Secret commands',
-            '<h3>🔓 Cheat codes unlocked</h3>' +
-            '<p>Undocumented things to type into <b>cmd.exe</b>:</p>' +
-            '<dl>' + rows + '</dl>' +
-            '<p style="color:var(--ink-soft);">(or just run <b>sudo help</b> in the terminal)</p>');
     }
 
     /* ---- konami code: ↑↑↓↓←→←→ B A reveals the secrets ---- */
@@ -963,7 +1027,7 @@
         const k = e.key.toLowerCase();
         if (k === KONAMI[konamiIdx]) konamiIdx++;
         else konamiIdx = (k === KONAMI[0]) ? 1 : 0;
-        if (konamiIdx === KONAMI.length) { konamiIdx = 0; showSecretsDialog(); }
+        if (konamiIdx === KONAMI.length) { konamiIdx = 0; openWindow('secrets'); }
     });
 
     /* ---- start menu --------------------------------------- */

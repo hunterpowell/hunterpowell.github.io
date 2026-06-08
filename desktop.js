@@ -40,7 +40,22 @@
 
         const taskBtn = makeTaskButton(win, id);
         if (id === 'secrets') fillSecrets(win);
-        const cleanup = initDemo(win) || initTerminal(win, id) || initPaint(win) || initSettings(win);   // null for plain windows
+        const initCleanup = initDemo(win) || initTerminal(win, id) || initPaint(win) || initSettings(win) || initNotepad(win) || initDefrag(win);   // null for plain windows
+
+        // Give plain content windows the shared Win9x bar on their body.
+        // Skip app/canvas/console/textarea bodies — those keep a (recolored)
+        // native scrollbar instead, since a fake bar misfits their layout.
+        let scroller = null;
+        if (typeof autoWinScroll !== 'undefined') {
+            const body = win.querySelector('.window-body');
+            if (body && !body.querySelector('.demo, .paint, .defrag, .notepad-area, .term-output')) {
+                scroller = autoWinScroll(body, 'y');
+            }
+        }
+
+        const cleanup = (initCleanup || scroller)
+            ? () => { if (initCleanup) initCleanup(); if (scroller) scroller.destroy(); }
+            : null;
         open.set(id, { win, taskBtn, cleanup });
         if (id === 'recycle') syncRecycle();
 
@@ -275,7 +290,15 @@
         const root = win.querySelector('.paint');
         if (!root || typeof PaintApp === 'undefined') return null;
         win._paint = new PaintApp(root);   // kept so the menus can drive it
-        return null;   // listeners live on canvas; removed when the window does
+        return () => win._paint.destroy();   // disconnect the scrollbar observers
+    }
+
+    /* ---- brain defrag (media player) ---------------------- */
+    function initDefrag(win) {
+        const root = win.querySelector('.defrag');
+        if (!root || typeof DefragPlayer === 'undefined') return null;
+        const player = new DefragPlayer(root, DEFRAG_TRACKS);
+        return () => player.destroy();   // stop audio + viz on close
     }
 
     /* ---- Display Properties (settings) -------------------- */
@@ -340,6 +363,65 @@
         return null;
     }
 
+    /* ---- Notepad (notepad.exe) ---------------------------- */
+    // A plain text editor that autosaves to localStorage, so a note
+    // survives a reload and reopening the window. Autosave is silent
+    // (debounced while typing); the "Saved" badge only flashes on a
+    // manual File → Save, then fades out.
+    const NOTEPAD_STORE = 'hp-notepad-v1';
+    function initNotepad(win) {
+        const area = win.querySelector('.notepad-area');
+        if (!area) return null;
+        const status = win.querySelector('[data-notepad-status]');
+
+        try { area.value = localStorage.getItem(NOTEPAD_STORE) || ''; } catch (_) {}
+
+        const persist = () => {
+            try { localStorage.setItem(NOTEPAD_STORE, area.value); } catch (_) {}
+        };
+
+        // brief "Saved" badge on a manual save, then fades after 1.5s
+        let hideTimer = null;
+        const flashSaved = () => {
+            if (!status) return;
+            status.classList.add('show');
+            clearTimeout(hideTimer);
+            hideTimer = setTimeout(() => status.classList.remove('show'), 1500);
+        };
+
+        // silent autosave keeps the note safe without the typing chatter
+        let saveTimer = null;
+        area.addEventListener('input', () => {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(persist, 400);
+        });
+
+        win._notepad = { area, persist, save: () => { persist(); flashSaved(); } };
+
+        // flush the pending debounce so the last keystrokes survive a quick close
+        return () => { clearTimeout(saveTimer); persist(); };
+    }
+
+    function notepadAct(win, what) {
+        const np = win._notepad;
+        if (!np) return;
+        if (what === 'selectAll') { np.area.focus(); np.area.select(); return; }
+        if (what === 'new') { np.area.value = ''; np.persist(); np.area.focus(); return; }
+        if (what === 'download') {
+            const blob = new Blob([np.area.value], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.download = 'untitled.txt';
+            a.href = URL.createObjectURL(blob);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(a.href);
+            return;
+        }
+        np.save();   // File → Save: persist + flash the badge
+        np.area.focus();
+    }
+
     /* ---- terminal (cmd.exe) ------------------------------- */
     const FILES = [
         ['about_me.txt',    'about'],
@@ -349,6 +431,8 @@
         ['maze_solver.exe', 'robots'],
         ['cmd.exe',         'terminal'],
         ['paint.exe',       'paint'],
+        ['notepad.exe',     'notepad'],
+        ['brain_defrag.exe', 'defrag'],
     ];
     const JOKES = [
         'Why do programmers prefer dark mode? Because light attracts bugs.',
@@ -407,7 +491,7 @@
                 print('  ls / dir            list desktop files');
                 print('  open <name>         open a window (try: open projects)');
                 print('  about | projects | contact    jump to a window');
-                print('  tree | maze | paint launch an .exe');
+                print('  tree | maze | paint | notepad | defrag   launch an .exe');
                 print('  github              open my GitHub');
                 print('  echo <text>         repeat after me');
                 print('  date | time         current date / time');
@@ -433,6 +517,8 @@
             contact() { launch('contact', 'contact'); },
             tree() { launch('tree', 'cherry_tree.exe'); },
             paint() { launch('paint', 'paint.exe'); },
+            notepad() { launch('notepad', 'notepad.exe'); },
+            defrag() { launch('defrag', 'brain_defrag.exe'); },
             maze() { launch('robots', 'maze_solver.exe'); },
             robots() { launch('robots', 'maze_solver.exe'); },
             github() { window.open('https://github.com/hunterpowell', '_blank'); print('Opening GitHub . . .', 'muted'); },
@@ -788,6 +874,11 @@
         if (id === 'paint') items.push({ label: 'Save as PNG…', action: () => paintAct(win, 'save') });
         if (id === 'about') items.push({ label: 'Download résumé ↓', action: downloadResume });
         if (id === 'recycle') items.push({ label: 'Empty Recycle Bin', action: emptyRecycle });
+        if (id === 'notepad') {
+            items.push({ label: 'New', action: () => notepadAct(win, 'new') });
+            items.push({ label: 'Save', action: () => notepadAct(win, 'save') });
+            items.push({ label: 'Save as .txt…', action: () => notepadAct(win, 'download') });
+        }
         if (items.length) items.push({ sep: true });
         items.push({ label: 'Close', action: () => closeWindow(id) });
         return items;
@@ -803,6 +894,10 @@
         }
         if (id === 'paint') {
             items.push({ label: 'Clear canvas', action: () => paintAct(win, 'clear') });
+            return items;
+        }
+        if (id === 'notepad') {
+            items.push({ label: 'Select All', action: () => notepadAct(win, 'selectAll') });
             return items;
         }
         items.push({ label: 'Select All', action: () => selectBody(win) });

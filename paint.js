@@ -90,100 +90,17 @@ class PaintApp {
 
     /* ---- working scrollbars ------------------------------- */
     // The canvas is a fixed size; the stage is a smaller viewport.
-    // Native scrolling drives the position; we mirror it onto the
-    // custom Win9x thumbs and let the arrows / thumb drags scroll it.
+    // Both axes are driven by the shared Win9x scrollbar module.
     setupScrollbars() {
         const vp = this.viewport;
-        const yBar = this.root.querySelector('.paint-scroll--y');
-        const xBar = this.root.querySelector('.paint-scroll--x');
-        if (!vp || !yBar || !xBar) return;
-
-        const yTrack = yBar.querySelector('.ps-track');
-        const yThumb = yBar.querySelector('.ps-thumb');
-        const xTrack = xBar.querySelector('.ps-track');
-        const xThumb = xBar.querySelector('.ps-thumb');
-        const yBtns = yBar.querySelectorAll('.ps-btn');   // [up, down]
-        const xBtns = xBar.querySelectorAll('.ps-btn');   // [left, right]
-        const STEP = 40;
-
-        const update = () => {
-            const vh = vp.clientHeight, ch = vp.scrollHeight, th = yTrack.clientHeight;
-            if (ch <= vh) {
-                yThumb.style.height = '100%'; yThumb.style.top = '0';
-            } else {
-                const h = Math.max(16, th * vh / ch);
-                yThumb.style.height = h + 'px';
-                yThumb.style.top = (vp.scrollTop / (ch - vh)) * (th - h) + 'px';
-            }
-            const vw = vp.clientWidth, cw = vp.scrollWidth, tw = xTrack.clientWidth;
-            if (cw <= vw) {
-                xThumb.style.width = '100%'; xThumb.style.left = '0';
-            } else {
-                const w = Math.max(16, tw * vw / cw);
-                xThumb.style.width = w + 'px';
-                xThumb.style.left = (vp.scrollLeft / (cw - vw)) * (tw - w) + 'px';
-            }
-        };
-
-        vp.addEventListener('scroll', update);
-        if (window.ResizeObserver) {
-            new ResizeObserver(update).observe(vp);
-        }
-
-        yBtns[0].addEventListener('click', () => vp.scrollBy({ top: -STEP }));
-        yBtns[1].addEventListener('click', () => vp.scrollBy({ top: STEP }));
-        xBtns[0].addEventListener('click', () => vp.scrollBy({ left: -STEP }));
-        xBtns[1].addEventListener('click', () => vp.scrollBy({ left: STEP }));
-
-        // click the empty track = page up/down (or left/right)
-        yTrack.addEventListener('pointerdown', (e) => {
-            if (e.target === yThumb) return;
-            vp.scrollBy({ top: (e.clientY < yThumb.getBoundingClientRect().top ? -1 : 1) * vp.clientHeight });
-        });
-        xTrack.addEventListener('pointerdown', (e) => {
-            if (e.target === xThumb) return;
-            vp.scrollBy({ left: (e.clientX < xThumb.getBoundingClientRect().left ? -1 : 1) * vp.clientWidth });
-        });
-
-        this.dragThumb(yThumb, yTrack, 'y');
-        this.dragThumb(xThumb, xTrack, 'x');
-
-        requestAnimationFrame(update);   // size the thumbs once laid out
+        if (!vp || typeof window.winScroll === 'undefined') return;
+        this.scrollY = window.winScroll(vp, { axis: 'y', bar: this.root.querySelector('.paint-scroll--y') });
+        this.scrollX = window.winScroll(vp, { axis: 'x', bar: this.root.querySelector('.paint-scroll--x') });
     }
 
-    dragThumb(thumb, track, axis) {
-        const vp = this.viewport;
-        let active = false, start = 0, startScroll = 0;
-
-        thumb.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            e.stopPropagation();   // don't trigger track paging
-            active = true;
-            start = axis === 'y' ? e.clientY : e.clientX;
-            startScroll = axis === 'y' ? vp.scrollTop : vp.scrollLeft;
-            thumb.setPointerCapture(e.pointerId);
-        });
-
-        thumb.addEventListener('pointermove', (e) => {
-            if (!active) return;
-            if (axis === 'y') {
-                const room = track.clientHeight - thumb.offsetHeight;
-                const scroll = vp.scrollHeight - vp.clientHeight;
-                vp.scrollTop = startScroll + (e.clientY - start) / (room || 1) * scroll;
-            } else {
-                const room = track.clientWidth - thumb.offsetWidth;
-                const scroll = vp.scrollWidth - vp.clientWidth;
-                vp.scrollLeft = startScroll + (e.clientX - start) / (room || 1) * scroll;
-            }
-        });
-
-        const end = (e) => {
-            if (!active) return;
-            active = false;
-            try { thumb.releasePointerCapture(e.pointerId); } catch (_) {}
-        };
-        thumb.addEventListener('pointerup', end);
-        thumb.addEventListener('pointercancel', end);
+    destroy() {
+        if (this.scrollY) this.scrollY.destroy();
+        if (this.scrollX) this.scrollX.destroy();
     }
 
     /* ---- pointer → canvas coords -------------------------- */

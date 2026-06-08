@@ -272,6 +272,208 @@ body {
 }
 
 /* ============================================================
+   Notepad (notepad.exe)
+   ============================================================ */
+.notepad-window .window-body {
+    position: relative;
+    padding: 0;
+    background: var(--win-light);
+    background-image: none;
+    display: flex;
+    flex-direction: column;
+}
+.notepad-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    resize: none;
+    border: 0;
+    outline: none;
+    padding: 0.6rem 0.75rem;
+    background: var(--win-light);
+    color: var(--ink);
+    font-family: 'VT323', monospace;
+    font-size: 1.15rem;
+    line-height: 1.4;
+}
+.notepad-area::placeholder { color: var(--ink-soft); }
+/* Recolored native scrollbar for surfaces that can't host the fake bar:
+   the notepad textarea and the canvas demo windows (cherry_tree/maze_solver). */
+.notepad-area,
+.demo-window .window-body { scrollbar-color: var(--win-face) var(--win-content); }
+.notepad-area::-webkit-scrollbar,
+.demo-window .window-body::-webkit-scrollbar { width: 15px; }
+.notepad-area::-webkit-scrollbar-track,
+.demo-window .window-body::-webkit-scrollbar-track {
+    background: var(--win-content);
+    box-shadow: inset 1px 1px 0 var(--win-dark);
+}
+.notepad-area::-webkit-scrollbar-thumb,
+.demo-window .window-body::-webkit-scrollbar-thumb {
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+.notepad-area::-webkit-scrollbar-button:single-button,
+.demo-window .window-body::-webkit-scrollbar-button:single-button {
+    height: 15px;
+    background: var(--win-face) center no-repeat;
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+.notepad-area::-webkit-scrollbar-button:vertical:decrement,
+.demo-window .window-body::-webkit-scrollbar-button:vertical:decrement {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path fill='%23645a64' d='M4 2L7 6H1z'/></svg>");
+}
+.notepad-area::-webkit-scrollbar-button:vertical:increment,
+.demo-window .window-body::-webkit-scrollbar-button:vertical:increment {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path fill='%23645a64' d='M1 2h6L4 6z'/></svg>");
+}
+.notepad-area::-webkit-scrollbar-button:vertical:start:increment,
+.notepad-area::-webkit-scrollbar-button:vertical:end:decrement,
+.demo-window .window-body::-webkit-scrollbar-button:vertical:start:increment,
+.demo-window .window-body::-webkit-scrollbar-button:vertical:end:decrement { display: none; }
+
+/* floating "Saved" badge — hidden until a manual save flashes it */
+.notepad-status {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    padding: 2px 10px;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    border-radius: 2px;
+    color: #6f9a82;             /* muted sage */
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+.notepad-status.show { opacity: 1; }
+
+/* ============================================================
+   brain defrag (media player)
+   ============================================================ */
+/* let the defrag body distribute its full height to .defrag (like paint) */
+.defrag-window .window-body { display: flex; }
+.defrag { display: flex; flex-direction: column; gap: 0.6rem; flex: 1 1 auto; min-height: 0; }
+.defrag-viz {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--win-content);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-light);
+    image-rendering: pixelated;
+}
+.defrag-track {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    min-height: 2.4em;          /* reserve room so layout doesn't jump */
+}
+.defrag-title {
+    font-family: 'VT323', monospace;
+    font-size: 1.25rem;
+    color: var(--accent);
+}
+.defrag-artist { font-size: 0.85rem; color: var(--ink-soft); }
+
+.defrag-seek { display: flex; align-items: center; gap: 0.5rem; }
+.defrag-time {
+    font-family: 'VT323', monospace;
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    min-width: 2.6em;
+    text-align: center;
+}
+.defrag-bar {
+    flex: 1 1 auto;
+    height: 10px;
+    background: var(--win-content);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-dark);
+    cursor: pointer;
+}
+.defrag-bar-fill {
+    height: 100%;
+    width: 0;
+    background: var(--accent);
+}
+
+.defrag-controls { display: flex; align-items: center; gap: 0.4rem; }
+.defrag-btn {
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 4px 10px;
+    color: var(--ink);
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+    cursor: pointer;
+}
+.defrag-btn:active {
+    box-shadow: inset -1px -1px 0 var(--win-light), inset 1px 1px 0 var(--win-dark);
+}
+.defrag-vol { width: 90px; accent-color: var(--accent); }   /* matches .paint-size */
+.defrag-link {
+    margin-left: auto;   /* hug the right edge now that the slider is fixed-width */
+    text-decoration: none;
+    color: var(--link);
+    font-size: 1.1rem;
+    padding: 0 2px;
+}
+
+/* list + scrollbar share one beveled frame, exactly like .paint-canvas-frame */
+.defrag-list-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-light);
+}
+.defrag-list {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    list-style: none;
+    margin: 0;
+    padding: 2px;
+    overflow-y: auto;
+    background: var(--win-content);
+    box-shadow: inset 1px 1px 0 var(--win-dark);
+    scrollbar-width: none;          /* hide native bar — the shared .wb-bar drives it */
+    -ms-overflow-style: none;
+}
+.defrag-list::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+.defrag-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: baseline;
+    padding: 2px 6px;
+    font-family: 'VT323', monospace;
+    font-size: 1.05rem;
+    color: var(--ink);
+    cursor: pointer;
+}
+.defrag-row:hover { background: var(--accent); color: #fff; }
+.defrag-row:hover .defrag-row-num { color: #fff; }
+.defrag-row.is-active { background: var(--accent); color: #fff; }
+.defrag-row.is-active .defrag-row-num { color: #fff; }
+.defrag-row-num { color: var(--ink-soft); }
+.defrag-row-title {
+    flex: 1 1 auto;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* ============================================================
    Content typography
    ============================================================ */
 .window-body h1 {
@@ -537,18 +739,31 @@ body {
 }
 .ps-thumb { cursor: grab; touch-action: none; }
 .ps-thumb:active { cursor: grabbing; }
-.paint-scroll--y .ps-thumb {
+.paint-scroll--y .ps-thumb,
+.wb-bar--y .ps-thumb {
     position: absolute; top: 0; left: 0; right: 0; height: 38%;
     background: var(--win-face);
     border: 1px solid var(--win-border);
     box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
 }
-.paint-scroll--x .ps-thumb {
+.paint-scroll--x .ps-thumb,
+.wb-bar--x .ps-thumb {
     position: absolute; top: 0; bottom: 0; left: 0; width: 32%;
     background: var(--win-face);
     border: 1px solid var(--win-border);
     box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
 }
+
+/* ---- shared Win9x scrollbar (winscroll.js) ------------ */
+/* wraps any native-scrolling element beside a .wb-bar */
+.wb-frame { display: flex; flex: 1 1 auto; min-width: 0; min-height: 0; }
+.wb-clipped { scrollbar-width: none; -ms-overflow-style: none; }
+.wb-clipped::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.wb-bar { flex: 0 0 auto; display: flex; gap: 2px; background: var(--win-face); }
+.wb-bar--y { flex-direction: column; width: 15px; }
+.wb-bar--x { flex-direction: row; height: 15px; }
+/* reserve the bottom-right corner for the resize grip (classic Win9x size box) */
+.window > .wb-frame > .wb-bar--y { margin-bottom: 16px; }
 
 /* ---- right palette ------------------------------------ */
 .paint-palette {
@@ -815,6 +1030,32 @@ body {
     white-space: pre-wrap;
     word-break: break-word;
 }
+/* native scrollbar recolored for the dark plum console */
+.term-output { scrollbar-color: #5a4a58 #221b29; }
+.term-output::-webkit-scrollbar { width: 15px; }
+.term-output::-webkit-scrollbar-track {
+    background: #221b29;
+    box-shadow: inset 1px 1px 0 #15101b;
+}
+.term-output::-webkit-scrollbar-thumb {
+    background: #4a3f4d;
+    border: 1px solid #5a4a58;
+    box-shadow: inset 1px 1px 0 #6b5868, inset -1px -1px 0 #15101b;
+}
+.term-output::-webkit-scrollbar-button:single-button {
+    height: 15px;
+    background: #4a3f4d center no-repeat;
+    border: 1px solid #5a4a58;
+    box-shadow: inset 1px 1px 0 #6b5868, inset -1px -1px 0 #15101b;
+}
+.term-output::-webkit-scrollbar-button:vertical:decrement {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path fill='%23d8c4d0' d='M4 2L7 6H1z'/></svg>");
+}
+.term-output::-webkit-scrollbar-button:vertical:increment {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'><path fill='%23d8c4d0' d='M1 2h6L4 6z'/></svg>");
+}
+.term-output::-webkit-scrollbar-button:vertical:start:increment,
+.term-output::-webkit-scrollbar-button:vertical:end:decrement { display: none; }
 .term-output .cmd { color: #f2c2d4; }      /* echoed command line */
 .term-output .term-help {
     display: grid;

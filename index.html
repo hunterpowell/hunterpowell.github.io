@@ -73,6 +73,14 @@
                 <img class="glyph" src="icons/paint_alt.png" alt="">
                 <span class="label">paint</span>
             </button>
+            <button class="desktop-icon" data-window="notepad" title="double-click to open">
+                <img class="glyph" src="icons/notepad.png" alt="">
+                <span class="label">notepad</span>
+            </button>
+            <button class="desktop-icon" data-window="defrag" title="double-click to open">
+                <img class="glyph" src="icons/music.png" alt="">
+                <span class="label">brain_defrag</span>
+            </button>
         </div>
 
     </div>
@@ -88,6 +96,8 @@
         <button data-window="robots"><img class="glyph" src="icons/aseprite.png" alt=""> maze_solver.exe</button>
         <button data-window="terminal"><img class="glyph" src="icons/this_computer.png" alt=""> cmd.exe</button>
         <button data-window="paint"><img class="glyph" src="icons/paint_alt.png" alt=""> paint.exe</button>
+        <button data-window="notepad"><img class="glyph" src="icons/notepad.png" alt=""> notepad.exe</button>
+        <button data-window="defrag"><img class="glyph" src="icons/music.png" alt=""> brain_defrag.exe</button>
         <div class="sm-sep"></div>
         <button data-window="display"><img class="glyph" src="icons/this_computer.png" alt=""> settings</button>
         <button data-link="https://github.com/hunterpowell"><img class="glyph" src="icons/github.png" alt=""> GitHub</button>
@@ -750,6 +760,69 @@
         </section>
     </template>
 
+    <template id="tpl-notepad">
+        <section class="window notepad-window" style="width:480px;height:380px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">notepad.exe — untitled</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <textarea class="notepad-area" spellcheck="false" placeholder="Type away — your note saves automatically and waits here when you come back."></textarea>
+                <div class="notepad-status" data-notepad-status>Saved</div>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-defrag">
+        <section class="window defrag-window" style="width:340px; height:440px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">brain_defrag.exe</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="window-body">
+                <div class="defrag">
+                    <canvas class="defrag-viz" width="304" height="120"></canvas>
+                    <div class="defrag-track">
+                        <span class="defrag-title" data-df-title>—</span>
+                        <span class="defrag-artist" data-df-artist></span>
+                    </div>
+                    <div class="defrag-seek">
+                        <span class="defrag-time" data-df-elapsed>0:00</span>
+                        <div class="defrag-bar" data-df-bar><div class="defrag-bar-fill" data-df-fill></div></div>
+                        <span class="defrag-time" data-df-duration>0:00</span>
+                    </div>
+                    <div class="defrag-controls">
+                        <button class="defrag-btn" data-df="prev" title="Previous">⏮</button>
+                        <button class="defrag-btn" data-df="play" title="Play / Pause">▶</button>
+                        <button class="defrag-btn" data-df="next" title="Next">⏭</button>
+                        <input class="defrag-vol" type="range" min="0" max="1" step="0.01" value="0.32" title="Volume">
+                        <a class="defrag-link" data-df-link target="_blank" rel="noopener" title="Open full track" hidden>↗</a>
+                    </div>
+                    <div class="defrag-list-frame">
+                        <ul class="defrag-list" data-df-list></ul>
+                        <div class="wb-bar wb-bar--y" aria-hidden="true">
+                            <span class="ps-btn">▲</span>
+                            <span class="ps-track"><span class="ps-thumb"></span></span>
+                            <span class="ps-btn">▼</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+
     <template id="tpl-display">
         <section class="window settings-window" style="width:430px;">
             <div class="title-bar">
@@ -812,10 +885,13 @@
         </section>
     </template>
 
+    <script src="console-greeting.js"></script>
     <script src="boot.js"></script>
     <script src="tree.js"></script>
     <script src="robots.js"></script>
+    <script src="winscroll.js"></script>
     <script src="paint.js"></script>
+    <script src="defrag.js"></script>
     <script src="desktop.js"></script>
     <script src="screensaver.js"></script>
 </body>

@@ -2,7 +2,7 @@
 
 Hunter Powell - Software Engineer 
 
-A Windows 98–flavored desktop portfolio. Boot it up, double-click around,
+An aesthetic Windows 9x flavored desktop portfolio. Boot it up, double-click around,
 and poke through the apps. Built by **Hunter Powell**, CS student at
 Sacramento State.
 
@@ -12,6 +12,7 @@ Sacramento State.
 
 - A draggable, windowed desktop UI with a working Start menu
 - Portfolio with a few highlight projects, and a short write-up for each project
+- Live demos of a select few projects
 - A functional terminal
 - MS Paint clone
 - A Recycle Bin (wonder what's in there?)

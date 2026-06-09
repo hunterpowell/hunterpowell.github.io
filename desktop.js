@@ -684,7 +684,7 @@
     }
 
     ICONS.forEach((icon) => {
-        let sx, sy, ox, oy, pid = null, down = false, moved = false;
+        let sx, sy, pid = null, down = false, moved = false, group = [];
 
         // the icon's <img> is natively draggable; without this the browser
         // hijacks a quick press-and-drag as an image drag (no-drop cursor)
@@ -694,27 +694,36 @@
             if (e.button !== 0) return;        // left button only
             down = true; moved = false;
             sx = e.clientX; sy = e.clientY;
-            ox = icon.offsetLeft; oy = icon.offsetTop;
             pid = e.pointerId;
-            selectIcon(icon);
+            // pressing an unselected icon makes it the sole selection; pressing
+            // one that's already selected keeps the whole group for a multi-drag
+            if (!icon.classList.contains('selected')) selectIcon(icon);
+            // snapshot the start position of every icon we'll move together
+            group = ICONS.filter((i) => i.classList.contains('selected'))
+                .map((i) => ({ icon: i, ox: i.offsetLeft, oy: i.offsetTop }));
         });
 
         icon.addEventListener('pointermove', (e) => {
             if (!down) return;
             const dx = e.clientX - sx, dy = e.clientY - sy;
             if (!moved && Math.hypot(dx, dy) < 4) return;   // drag threshold
-            if (!moved) { moved = true; icon.classList.add('dragging'); icon.setPointerCapture(pid); }
-            placeIcon(icon, clampX(ox + dx), clampY(oy + dy));
+            if (!moved) {
+                moved = true;
+                icon.setPointerCapture(pid);
+                group.forEach((g) => g.icon.classList.add('dragging'));
+            }
+            group.forEach((g) => placeIcon(g.icon, clampX(g.ox + dx), clampY(g.oy + dy)));
         });
 
         const endDrag = () => {
             if (!down) return;
             down = false;
             if (moved) {
-                icon.classList.remove('dragging');
+                group.forEach((g) => g.icon.classList.remove('dragging'));
                 try { icon.releasePointerCapture(pid); } catch (_) {}
                 saveIcons();
             }
+            group = [];
         };
         icon.addEventListener('pointerup', endDrag);
         icon.addEventListener('pointercancel', endDrag);
@@ -733,10 +742,48 @@
         resizeT = setTimeout(loadIcons, 150);
     });
 
-    // click empty desktop clears icon selection
+    /* ---- lasso (rubber-band) selection -------------------- */
+    // drag across the empty desktop to draw a band; every icon it touches
+    // becomes selected (and can then be dragged as a group). A bare click
+    // with no drag just clears the selection.
+    let lasso = null, lassoX0 = 0, lassoY0 = 0, lassoPid = null;
+
     desktop.addEventListener('pointerdown', (e) => {
-        if (e.target === desktop) clearSelection();
+        if (e.button !== 0 || e.target !== desktop) return;
+        clearSelection();
+        lassoX0 = e.clientX; lassoY0 = e.clientY;
+        lassoPid = e.pointerId;
+        lasso = document.createElement('div');
+        lasso.className = 'lasso';
+        desktop.appendChild(lasso);
+        try { desktop.setPointerCapture(lassoPid); } catch (_) {}
     });
+
+    desktop.addEventListener('pointermove', (e) => {
+        if (!lasso) return;
+        const rect = desktop.getBoundingClientRect();
+        const left = Math.min(lassoX0, e.clientX), top = Math.min(lassoY0, e.clientY);
+        const right = Math.max(lassoX0, e.clientX), bottom = Math.max(lassoY0, e.clientY);
+        lasso.style.left = (left - rect.left) + 'px';
+        lasso.style.top = (top - rect.top) + 'px';
+        lasso.style.width = (right - left) + 'px';
+        lasso.style.height = (bottom - top) + 'px';
+        // hit-test each icon's box against the band (both in viewport coords)
+        ICONS.forEach((icon) => {
+            const r = icon.getBoundingClientRect();
+            const hit = r.left < right && r.right > left && r.top < bottom && r.bottom > top;
+            icon.classList.toggle('selected', hit);
+        });
+    });
+
+    const endLasso = () => {
+        if (!lasso) return;
+        lasso.remove();
+        lasso = null;
+        try { desktop.releasePointerCapture(lassoPid); } catch (_) {}
+    };
+    desktop.addEventListener('pointerup', endLasso);
+    desktop.addEventListener('pointercancel', endLasso);
 
     /* ---- right-click context menu ------------------------- */
     let activeMenu = null;

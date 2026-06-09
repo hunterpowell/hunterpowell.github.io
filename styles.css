@@ -112,6 +112,15 @@ body {
     border: 1px dotted var(--accent);
 }
 
+/* rubber-band drawn while lasso-selecting icons on the desktop */
+.lasso {
+    position: absolute;
+    z-index: 9998;
+    border: 1px dotted var(--accent);
+    background: rgba(201, 138, 166, 0.18);
+    pointer-events: none;       /* never swallow the clicks driving it */
+}
+
 /* ---- Recycle Bin folder listing ----------------------- */
 .bin-list .bin-item {
     display: flex;

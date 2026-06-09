@@ -654,7 +654,7 @@
 
     // default arrangement: a column at top-left, wrapping into new columns
     function defaultLayout() {
-        const top0 = 18, left0 = 18, stepY = 92, stepX = 96;
+        const top0 = 18, left0 = 18, stepY = 80, stepX = 88;
         const rows = Math.max(1, Math.floor((desktop.clientHeight - top0) / stepY));
         ICONS.forEach((icon, i) => {
             placeIcon(icon, left0 + Math.floor(i / rows) * stepX, top0 + (i % rows) * stepY);
@@ -974,31 +974,10 @@
         else if (act === 'save') app.save();
     }
 
-    // Direct bitmap ops on the paint canvas (PaintApp draws straight to it,
-    // with no backing buffer to clobber, so putImageData persists).
+    // Bitmap ops route through PaintApp so they hit its backing pixel buffer;
+    // otherwise the next stroke/fill would blit the stale buffer back over them.
     function paintFilter(win, kind) {
-        const canvas = win.querySelector('.paint-canvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const W = canvas.width, H = canvas.height;
-        if (kind === 'invert') {
-            const img = ctx.getImageData(0, 0, W, H);
-            const d = img.data;
-            for (let i = 0; i < d.length; i += 4) {
-                d[i] = 255 - d[i]; d[i + 1] = 255 - d[i + 1]; d[i + 2] = 255 - d[i + 2];
-            }
-            ctx.putImageData(img, 0, 0);
-        } else if (kind === 'flip') {
-            const img = ctx.getImageData(0, 0, W, H);
-            ctx.save();
-            ctx.setTransform(-1, 0, 0, 1, W, 0);   // mirror across the vertical axis
-            // putImageData ignores transforms, so paint via a temp canvas
-            const tmp = document.createElement('canvas');
-            tmp.width = W; tmp.height = H;
-            tmp.getContext('2d').putImageData(img, 0, 0);
-            ctx.drawImage(tmp, 0, 0);
-            ctx.restore();
-        }
+        if (win._paint) win._paint.filter(kind);
     }
 
     function selectBody(win) {
@@ -1117,8 +1096,6 @@
     }
 
     /* ---- recycle bin (Tier 1: full/empty state + gag) ----- */
-    // The bin holds secrets.md and won't truly empty — the joke is that the
-    // secrets are "load-bearing" and come back. No persistence: full on reload.
     let recycleFull = true;
 
     function syncRecycle() {
@@ -1141,7 +1118,7 @@
         recycleTimer = setTimeout(() => {
             recycleFull = true;
             syncRecycle();
-            showToast('…the secrets came back. must be load bearing?');
+            showToast('…it all came back. must be load bearing?');
         }, 1500);       // time in ms before bin refills
     }
 

@@ -139,8 +139,8 @@
                 <p>Off the keyboard: movies, books, games, and wandering around outside.</p>
                 <div class="tags">
                     <span class="tag">Python</span><span class="tag">C++</span>
-                    <span class="tag">Simulation</span><span class="tag">Systems</span>
-                    <span class="tag">ML</span><span class="tag">Algorithms</span>
+                    <span class="tag">Systems</span><span class="tag">ML</span>
+                    <span class="tag">Algorithms</span>
                 </div>
                 <p class="card-actions" style="margin-top:1.25rem;">
                     <a href="#" class="btn" data-open="projects">See my work →</a>
@@ -338,7 +338,121 @@
                     <img class="glyph" src="icons/text_file.png" alt="">
                     <span>secrets.md</span>
                 </button>
+                <button class="bin-item" data-open="passwords">
+                    <img class="glyph" src="icons/password_manager.png" alt="">
+                    <span>passwords.txt</span>
+                </button>
+                <button class="bin-item" data-open="old-resume">
+                    <img class="glyph" src="icons/rich_text_file.png" alt="">
+                    <span>resume_FINAL_v2_FINAL.docx</span>
+                </button>
+                <button class="bin-item" data-open="img-corrupt">
+                    <img class="glyph" src="icons/image_file.png" alt="">
+                    <span>IMG_0423.jpg</span>
+                </button>
+                <button class="bin-item" data-open="taxes">
+                    <img class="glyph" src="icons/spreadsheet_file.png" alt="">
+                    <span>taxes_2025.xlsx</span>
+                </button>
                 <p class="bin-empty">The Recycle Bin is empty.</p>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-passwords">
+        <section class="window notes-window" style="width:380px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">passwords.txt</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="window-body gag-body">
+                <h2 class="gag-big">lol no</h2>
+                <p>nice try though.</p>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-old-resume">
+        <section class="window notes-window" style="width:480px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">resume_FINAL_v2_FINAL.docx</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <h2>Hunter Powell</h2>
+                <p class="subtitle">Aspiring Webmaster &amp; Computer Enthusiast</p>
+                <h3>Objective</h3>
+                <p>To leverage synergies in a fast-paced, dynamic environment while
+                   growing as a professional and also as a person.</p>
+                <h3>Skills</h3>
+                <ul class="notes-list">
+                    <li>Microsoft Word (Advanced)</li>
+                    <li>Microsoft Word (Intermediate)</li>
+                    <li>HTML &amp; possibly CSS</li>
+                    <li>Team player / hard worker / quick learner</li>
+                    <li>Typing: 69 WPM (and climbing)</li>
+                </ul>
+                <p style="color:var(--ink-soft);">(deleted for a reason. moving on.)</p>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-img-corrupt">
+        <section class="window notes-window" style="width:420px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">IMG_0423.jpg</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="window-body gag-body">
+                <pre class="gag-glitch">▓▒░ J̷F̸I̴F̷ ░▒▓
+█▀▄ CORRUPT ▄▀█
+░░ 0x4A46 ?? ░░</pre>
+                <p>This image could not be displayed.</p>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-taxes">
+        <section class="window notes-window" style="width:440px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">taxes_2025.xlsx</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <span><u>F</u>ile</span><span><u>E</u>dit</span><span><u>V</u>iew</span><span><u>H</u>elp</span>
+            </div>
+            <div class="window-body">
+                <table class="gag-sheet">
+                    <tr><th></th><th>A</th><th>B</th></tr>
+                    <tr><th>1</th><td>Income</td><td>$0.00</td></tr>
+                    <tr><th>2</th><td>Domain renewal</td><td>-$12.00</td></tr>
+                    <tr><th>3</th><td>Coffee (business)</td><td>-$847.00</td></tr>
+                    <tr><th>4</th><td>Net</td><td>don't ask</td></tr>
+                </table>
+                <p style="color:var(--ink-soft);">#REF! do not file.</p>
             </div>
         </section>
     </template>
@@ -373,8 +487,7 @@
                     <li>Role-based access (Guest / Client / Admin) has to be enforced server-side at
                         the view layer, hiding a button in the UI isn't security.</li>
                     <li>Stripe and Calendly webhooks are async and can fire more than once, so the
-                        handlers had to be idempotent
-                    </li>
+                        handlers had to be idempotent.</li>
                 </ul>
 
                 <h3>Pitfalls &amp; gotchas</h3>

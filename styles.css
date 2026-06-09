@@ -139,6 +139,40 @@ body {
 .bin-list.is-empty .bin-item { display: none; }
 .bin-list:not(.is-empty) .bin-empty { display: none; }
 
+/* ---- gag files (passwords.txt, do_not_open.exe, etc.) ---- */
+.gag-body { text-align: center; padding: 24px 16px; }
+.gag-body .gag-big {
+    font-size: 3rem;
+    line-height: 1.1;
+    margin: 8px 0 12px;
+}
+.gag-glitch {
+    font-family: 'VT323', monospace;
+    font-size: 1.4rem;
+    line-height: 1.3;
+    color: var(--accent);
+    margin: 4px 0 16px;
+    white-space: pre;
+}
+.gag-sheet {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: 'VT323', monospace;
+    font-size: 1.05rem;
+    margin-bottom: 10px;
+}
+.gag-sheet th, .gag-sheet td {
+    border: 1px solid var(--ink-soft);
+    padding: 3px 8px;
+    text-align: left;
+}
+.gag-sheet th {
+    background: rgba(0, 0, 0, 0.06);
+    text-align: center;
+    font-weight: normal;
+    color: var(--ink-soft);
+}
+
 /* ============================================================
    Window component
    ============================================================ */

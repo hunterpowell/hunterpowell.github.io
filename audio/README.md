@@ -7,7 +7,7 @@ Tracks for the **brain_defrag** media player live here.
 1. Drop an audio file in this folder, e.g. `audio/midnight.mp3`.
    - MP3 is safest for browser support. ~112kbps is plenty for mellow tracks
      and keeps the repo lean.
-2. Add an entry to the `DEFRAG_TRACKS` array at the top of [`../defrag.js`](../defrag.js):
+2. Add an entry to the `DEFRAG_TRACKS` array at the top of [`../js/defrag.js`](../js/defrag.js):
 
    ```js
    const DEFRAG_TRACKS = [

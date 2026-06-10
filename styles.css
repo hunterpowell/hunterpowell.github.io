@@ -11,6 +11,7 @@
     --desk:        #9ca5ab;   /* dim slate blue-grey */
     --grid-line:   rgba(68, 78, 86, 0.16);
     --grid-faint:  rgba(68, 78, 86, 0.07);   /* fainter, for window bodies */
+    --wallpaper:   url('images/wallpaper.webp');   /* swapped per theme */
 
     /* window chrome — dimmed, dusty */
     --win-face:    #cabfc8;   /* lavender-grey frame */
@@ -31,6 +32,45 @@
     --ink-soft:    #645a64;
     --link:        #855570;
     --close:       #b1505b;   /* close-button X */
+}
+
+/* ============================================================
+   Dark theme — re-declares the same palette variables, so the
+   whole desktop, windows, title bars and grid recolour with no
+   per-element edits. Toggled via `body.dark` (see setTheme in
+   desktop.js), mirroring the CRT effect's body-class pattern.
+
+   NOTE: these are starting values — tune to taste. The bevel
+   pair (--win-light / --win-dark) matters most: keep --win-light
+   lighter and --win-dark darker than --win-face or the Win9x 3D
+   frames stop reading as raised.
+   ============================================================ */
+body.dark {
+    /* desktop — dark graph paper; grid lines go light-on-dark */
+    --desk:        #20262b;
+    --grid-line:   rgba(150, 165, 180, 0.10);
+    --grid-faint:  rgba(150, 165, 180, 0.05);
+    --wallpaper:   url('images/wallpaper_dark.webp');  /* your darker bg goes here */
+
+    /* window chrome */
+    --win-face:    #352f37;
+    --win-content: #2a2f34;
+    --win-light:   #564e58;   /* bevel highlight (lighter than face) */
+    --win-dark:    #1c191f;   /* bevel shadow (darker than face) */
+    --win-border:  #8a5f72;
+
+    /* title bar */
+    --title-bar:   #7a4f63;
+    --title-off:   #4a444c;
+    --title-ink:   #f0dde6;
+
+    /* accents + text */
+    --accent:      #b06e86;
+    --accent-2:    #6e8a7e;
+    --ink:         #e6dfe4;
+    --ink-soft:    #a89aa6;
+    --link:        #c98fa8;
+    --close:       #c66571;
 }
 
 html, body { height: 100%; }
@@ -57,7 +97,7 @@ body {
     /* wallpaper layered over a grid fallback (shows if the image is missing) */
     background-color: var(--desk);
     background-image:
-        url('images/wallpaper.webp'),
+        var(--wallpaper),
         linear-gradient(var(--grid-line) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size: cover, 30px 30px, 30px 30px;
@@ -1181,6 +1221,12 @@ body {
     pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* dark mode reuses --title-ink as light title-bar text, so pin the toast
+   chip to a dark plum here to keep it dark-box / light-text. */
+body.dark .toast {
+    background: #2a2230;
+    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4);
+}
 
 /* ============================================================
    CRT effect (View → CRT effect) — scanlines + faint flicker

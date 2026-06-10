@@ -321,6 +321,7 @@
         const enableCb = root.querySelector('[data-set="enabled"]');
         const idleSel = root.querySelector('[data-set="idle"]');
         const crtCb = root.querySelector('[data-set="crt"]');
+        const themeCb = root.querySelector('[data-set="theme"]');
         const preview = root.querySelector('.ss-preview');
         const reduced = !!(ss && ss.reducedMotion);
 
@@ -331,6 +332,7 @@
             if (preview) preview.innerHTML = ss.getLogoSVG();
         }
         crtCb.checked = document.body.classList.contains('crt');
+        themeCb.checked = document.body.classList.contains('dark');
 
         // idle dropdown is meaningless while the saver is off
         const syncIdle = () => { idleSel.disabled = reduced || !enableCb.checked; };
@@ -353,6 +355,7 @@
                 ss.setIdleMs(parseInt(idleSel.value, 10));
             }
             setCrt(crtCb.checked);
+            setTheme(themeCb.checked);
             closeWindow('display');
         });
         root.querySelector('[data-act="cancel"]').addEventListener('click', (e) => {
@@ -839,6 +842,7 @@
             showContextMenu(e.clientX, e.clientY, [
                 { label: 'Open Terminal', action: () => openWindow('terminal') },
                 { label: 'Reset icons', action: () => { defaultLayout(); saveIcons(); } },
+                themeItem(),
                 crtItem(),
                 { sep: true },
                 { label: 'Settings', action: () => openWindow('display') },
@@ -973,6 +977,24 @@
         return {
             label: (document.body.classList.contains('crt') ? '✓ ' : '   ') + 'CRT effect',
             action: () => setCrt(!document.body.classList.contains('crt')),
+        };
+    }
+
+    // Dark theme toggle, shared by the desktop right-click menu and
+    // Display Properties. Persisted so it survives a reload. Defaults
+    // to light (no stored value = light).
+    const THEME_STORE = 'hp-theme-v1';
+    function setTheme(dark) {
+        document.body.classList.toggle('dark', dark);
+        try { localStorage.setItem(THEME_STORE, dark ? 'dark' : 'light'); } catch (_) {}
+    }
+    (function restoreTheme() {
+        try { if (localStorage.getItem(THEME_STORE) === 'dark') document.body.classList.add('dark'); } catch (_) {}
+    })();
+    function themeItem() {
+        return {
+            label: (document.body.classList.contains('dark') ? '✓ ' : '   ') + 'Dark mode',
+            action: () => setTheme(!document.body.classList.contains('dark')),
         };
     }
 

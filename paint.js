@@ -12,7 +12,8 @@ class PaintApp {
         this.tool = 'pencil';
         this.color = '#46343e';   // dark plum to match the site ink
         this.size = 4;
-        this.bg = '#ffffff';
+        // canvas starts dark in dark mode, white otherwise (eraser/clear use it too)
+        this.bg = document.body.classList.contains('dark') ? '#2a2f34' : '#ffffff';
 
         this.drawing = false;
         this.startX = 0;

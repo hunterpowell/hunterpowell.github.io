@@ -12,7 +12,10 @@ class PaintApp {
         this.tool = 'pencil';
         this.color = '#46343e';   // dark plum to match the site ink
         this.size = 4;
-        // canvas starts dark in dark mode, white otherwise (eraser/clear use it too)
+        // Canvas background: dark in dark mode, white otherwise. Sampled once
+        // per open and frozen — a mid-session theme toggle must NOT recolor
+        // it, since the pixels already drawn keep the old background; eraser
+        // and clear stay consistent with the canvas, and reopening resamples.
         this.bg = document.body.classList.contains('dark') ? '#2a2f34' : '#ffffff';
 
         this.drawing = false;

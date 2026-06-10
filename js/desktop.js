@@ -26,11 +26,16 @@
         const win = tpl.content.firstElementChild.cloneNode(true);
         win.dataset.id = id;
 
-        // position: centred-ish with a cascading offset
-        const w = win.offsetWidth || parseInt(win.style.width, 10) || 440;
+        // position: centred-ish with a cascading offset, clamped so the
+        // window always spawns fully on-screen (on phones the cascade could
+        // otherwise push it past the right edge; no-op at desktop sizes)
+        const w = Math.min(win.offsetWidth || parseInt(win.style.width, 10) || 440,
+            desktop.clientWidth - 16);   // CSS max-width clamps it the same way
+        const h = parseInt(win.style.height, 10) || 0;
         const baseX = Math.max(20, (desktop.clientWidth - w) / 2 - 40);
-        const x = baseX + cascade;
-        const y = 40 + cascade;
+        const x = Math.max(8, Math.min(baseX + cascade, desktop.clientWidth - w - 8));
+        let y = 40 + cascade;
+        if (h) y = Math.max(8, Math.min(y, desktop.clientHeight - h - 8));
         win.style.left = x + 'px';
         win.style.top = y + 'px';
         cascade = (cascade + 28) % 140;
@@ -743,7 +748,10 @@
         icon.addEventListener('pointermove', (e) => {
             if (!down) return;
             const dx = e.clientX - sx, dy = e.clientY - sy;
-            if (!moved && Math.hypot(dx, dy) < 4) return;   // drag threshold
+            // drag threshold — fingers jitter more than a mouse, so give
+            // touch/pen extra slop or sloppy taps turn into 2px drags
+            const slop = e.pointerType === 'mouse' ? 4 : 10;
+            if (!moved && Math.hypot(dx, dy) < slop) return;
             if (!moved) {
                 moved = true;
                 icon.setPointerCapture(pid);
@@ -752,13 +760,18 @@
             group.forEach((g) => placeIcon(g.icon, clampX(g.ox + dx), clampY(g.oy + dy)));
         });
 
-        const endDrag = () => {
+        const endDrag = (e) => {
             if (!down) return;
             down = false;
             if (moved) {
                 group.forEach((g) => g.icon.classList.remove('dragging'));
                 try { icon.releasePointerCapture(pid); } catch (_) {}
                 saveIcons();
+            } else if (e.type === 'pointerup' && e.pointerType !== 'mouse') {
+                // touch/pen: a plain tap opens — double-tap works but is
+                // undiscoverable (the title-attribute hint never shows).
+                // Mouse keeps the classic select-then-double-click.
+                openWindow(icon.dataset.window);
             }
             group = [];
         };
@@ -888,7 +901,7 @@
 
     document.addEventListener('pointerdown', (e) => {
         // a click on a menu-bar label is handled by its own click listener
-        if (activeMenu && !activeMenu.contains(e.target) && !e.target.closest('.menu-bar span')) {
+        if (activeMenu && !activeMenu.contains(e.target) && !e.target.closest('.menu-bar button')) {
             closeContextMenu();
         }
     });
@@ -902,7 +915,8 @@
     function wireMenuBar(win, id) {
         const bar = win.querySelector('.menu-bar');
         if (!bar) return;
-        bar.querySelectorAll('span').forEach((span) => {
+        bar.querySelectorAll('button').forEach((span) => {
+            span.setAttribute('aria-haspopup', 'menu');
             span.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (menuBarOpen === span) { closeContextMenu(); return; }
@@ -933,7 +947,7 @@
         if (!entry) return;
         const bar = entry.win.querySelector('.menu-bar');
         if (!bar) return;
-        const span = Array.from(bar.querySelectorAll('span')).find((s) => {
+        const span = Array.from(bar.querySelectorAll('button')).find((s) => {
             const u = s.querySelector('u');
             return u && u.textContent.toLowerCase() === key;
         });
@@ -1189,7 +1203,7 @@
             '<dl>' +
             '<dt><kbd>Alt</kbd>+<kbd>letter</kbd></dt><dd>open the underlined menu</dd>' +
             '<dt><kbd>Esc</kbd></dt><dd>close a menu or dialog</dd>' +
-            '<dt>Double-click</dt><dd>open a desktop icon</dd>' +
+            '<dt>Double-click / tap</dt><dd>open a desktop icon</dd>' +
             '<dt>Right-click</dt><dd>desktop &amp; icon context menus</dd>' +
             '<dt>Drag title bar</dt><dd>move a window</dd>' +
             '<dt>Drag corner</dt><dd>resize a window</dd>' +
@@ -1251,6 +1265,7 @@
     function setMenu(state) {
         startMenu.classList.toggle('open', state);
         startBtn.classList.toggle('active', state);
+        startBtn.setAttribute('aria-expanded', state ? 'true' : 'false');
     }
 
     if (startBtn && startMenu) {
@@ -1275,13 +1290,20 @@
 
     /* ---- clock -------------------------------------------- */
     const clock = document.getElementById('clock');
+    let clockTimer = null;
     function tick() {
         const d = new Date();
         const h = d.getHours() % 12 || 12;
         const m = String(d.getMinutes()).padStart(2, '0');
         clock.textContent = `${h}:${m} ${d.getHours() < 12 ? 'AM' : 'PM'}`;
+        // wake just past the next minute boundary — no drift, no idle polling
+        clockTimer = setTimeout(tick, 60050 - (d.getSeconds() * 1000 + d.getMilliseconds()));
     }
-    tick(); setInterval(tick, 10000);
+    tick();
+    // background tabs throttle timers; repaint the moment we're visible again
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) { clearTimeout(clockTimer); tick(); }
+    });
 
     /* ---- open the intro window on load -------------------- */
     window.addEventListener('load', () => openWindow('about'));

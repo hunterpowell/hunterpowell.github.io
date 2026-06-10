@@ -178,7 +178,7 @@ body {
 /* rubber-band drawn while lasso-selecting icons on the desktop */
 .lasso {
     position: absolute;
-    z-index: 9998;
+    z-index: 5;                 /* above the desktop, but behind windows (z >= 11) */
     border: 1px dotted var(--accent);
     background: rgba(201, 138, 166, 0.18);
     pointer-events: none;       /* never swallow the clicks driving it */
@@ -279,6 +279,22 @@ body {
     touch-action: none;
 }
 .window.maxed .resize-handle { display: none; }
+
+/* touch devices: a 16px grip is too small for a finger — grow the hit
+   area but keep the 16px ridge art pinned to the corner. Desktop mice
+   (pointer: fine) never match this block. */
+@media (pointer: coarse) {
+    .resize-handle {
+        width: 32px;
+        height: 32px;
+        background-size: 16px 16px;
+        background-position: bottom right;
+        background-repeat: no-repeat;
+    }
+    /* stop the browser swallowing touch drags into pull-to-refresh /
+       overscroll glow (lasso drags on the desktop background, mostly) */
+    body { overscroll-behavior: none; }
+}
 /* maximize sets an explicit fill size — lift the normal caps so it isn't clamped short */
 .window.maxed { max-width: none; max-height: none; }
 
@@ -294,6 +310,7 @@ body {
     border-bottom: 1px solid var(--win-border);
     cursor: grab;
     user-select: none;
+    touch-action: none;     /* touch-drag moves the window, not pull-to-refresh */
 }
 .window.dragging .title-bar { cursor: grabbing; }
 
@@ -351,17 +368,26 @@ body {
     font-size: 0.82rem;
     user-select: none;
 }
-.menu-bar span {
+/* real <button>s so the menus are tabbable / Enter-able, styled flat
+   so they still read as classic menu labels */
+.menu-bar button {
+    font: inherit;
+    color: inherit;
+    background: none;
     padding: 2px 8px;
     cursor: default;
     border: 1px solid transparent;
 }
-.menu-bar span:hover,
-.menu-bar span.open {
+.menu-bar button:hover,
+.menu-bar button.open {
     background: var(--accent);
     color: #fff;
 }
-.menu-bar span.open { box-shadow: inset 1px 1px 0 var(--win-dark); }
+.menu-bar button.open { box-shadow: inset 1px 1px 0 var(--win-dark); }
+.menu-bar button:focus-visible {
+    outline: 1px dotted var(--ink);   /* period-correct marching-ants focus */
+    outline-offset: -2px;
+}
 .menu-bar u { text-decoration: underline; }
 
 .window-body {

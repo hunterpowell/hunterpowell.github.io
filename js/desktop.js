@@ -272,6 +272,7 @@
             setStat('avg', s.avgFitness);
             setStat('best', s.bestFitness);
             setStat('bestGen', s.bestGen);
+            setStat('cov', s.coverage);
         });
         wireDemoControls(demo, {
             run: () => {
@@ -431,7 +432,7 @@
         ['projects',        'projects'],
         ['contact',         'contact'],
         ['cherry_tree.exe', 'tree'],
-        ['maze_solver.exe', 'robots'],
+        ['coverage_bots.exe', 'robots'],
         ['cmd.exe',         'terminal'],
         ['paint.exe',       'paint'],
         ['notepad.exe',     'notepad'],
@@ -492,9 +493,11 @@
                 print('  help                this list');
                 print('  whoami              short bio');
                 print('  ls / dir            list desktop files');
+                print('  cat <name>          print a file (try: cat about_me.txt)');
                 print('  open <name>         open a window (try: open projects)');
+                print('  resume              download my résumé (pdf)');
                 print('  about | projects | contact    jump to a window');
-                print('  tree | maze | paint | notepad | defrag   launch an .exe');
+                print('  tree | bots | paint | notepad | defrag   launch an .exe');
                 print('  github              open my GitHub');
                 print('  echo <text>         repeat after me');
                 print('  date | time         current date / time');
@@ -506,14 +509,44 @@
                 print('Hunter Powell, CS student @ Sacramento State (graduating Dec 2026).');
                 print('Simulation, systems, and ML. Python, C++, Java, a little Rust.');
             },
-            ls() { FILES.forEach(([name]) => print('  ' + name)); },
+            ls() {
+                FILES.forEach(([name]) => print('  ' + name));
+                print('  Hunter_Powell_Resume.pdf');
+            },
+            dir() { commands.ls(); },   // help promises it, DOS muscle memory expects it
             open(arg) {
                 if (!arg) { print('usage: open <name>   (try `ls`)', 'muted'); return; }
                 const a = arg.toLowerCase().replace(/\.(exe|txt)$/, '');
+                if (/^(hunter_powell_)?resume(\.pdf)?$/.test(a)) { commands.resume(); return; }
                 const hit = FILES.find(([name, wid]) =>
                     wid === a || name.toLowerCase().replace(/\.(exe|txt)$/, '') === a);
                 if (hit) launch(hit[1], hit[0]);
                 else print('open: cannot find "' + arg + '". try `ls`.', 'muted');
+            },
+            cat(arg) {
+                if (!arg) { print('usage: cat <file>   (try `ls`)', 'muted'); return; }
+                const a = arg.toLowerCase();
+                if (a === 'about_me.txt' || a === 'about_me' || a === 'about.txt') {
+                    commands.whoami();
+                    print('Off the keyboard: movies, books, games, and wandering around outside.');
+                    return;
+                }
+                if (/^(hunter_powell_)?resume(\.pdf)?$/.test(a)) { commands.resume(); return; }
+                if (a === 'projects' || a === 'contact') {
+                    print('cat: ' + a + ': Is a directory   (try `open ' + a + '`)', 'muted');
+                    return;
+                }
+                const exe = FILES.find(([name]) => name.toLowerCase() === a && name.endsWith('.exe'));
+                if (exe) {
+                    print('MZ▒▐PE█°··L☺▄▀▒ . . . it\'s a binary. what did you expect?');
+                    print('(try `open ' + exe[0] + '` instead)', 'muted');
+                    return;
+                }
+                print('cat: ' + arg + ': No such file   (try `ls`)', 'muted');
+            },
+            resume() {
+                downloadResume();
+                print('Downloading Hunter_Powell_Resume.pdf . . .', 'muted');
             },
             about() { launch('about', 'about_me.txt'); },
             projects() { launch('projects', 'projects'); },
@@ -522,8 +555,9 @@
             paint() { launch('paint', 'paint.exe'); },
             notepad() { launch('notepad', 'notepad.exe'); },
             defrag() { launch('defrag', 'brain_defrag.exe'); },
-            maze() { launch('robots', 'maze_solver.exe'); },
-            robots() { launch('robots', 'maze_solver.exe'); },
+            bots() { launch('robots', 'coverage_bots.exe'); },
+            robots() { launch('robots', 'coverage_bots.exe'); },
+            maze() { launch('robots', 'coverage_bots.exe'); },   // legacy alias
             github() { window.open('https://github.com/hunterpowell', '_blank'); print('Opening GitHub . . .', 'muted'); },
             echo(arg) { print(arg || ''); },
             date() { print(new Date().toDateString()); },

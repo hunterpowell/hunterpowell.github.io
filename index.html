@@ -65,7 +65,7 @@
             </button>
             <button class="desktop-icon" data-window="robots" title="double-click to open">
                 <img class="glyph" src="icons/aseprite.png" alt="">
-                <span class="label">maze_solver</span>
+                <span class="label">coverage_bots</span>
             </button>
             <button class="desktop-icon" data-window="terminal" title="double-click to open">
                 <img class="glyph" src="icons/this_computer.png" alt="">
@@ -95,7 +95,7 @@
         <button data-window="contact"><img class="glyph" src="icons/news.png" alt=""> contact</button>
         <div class="sm-sep"></div>
         <button data-window="tree"><img class="glyph" src="icons/image_editor.png" alt=""> cherry_tree.exe</button>
-        <button data-window="robots"><img class="glyph" src="icons/aseprite.png" alt=""> maze_solver.exe</button>
+        <button data-window="robots"><img class="glyph" src="icons/aseprite.png" alt=""> coverage_bots.exe</button>
         <button data-window="terminal"><img class="glyph" src="icons/this_computer.png" alt=""> cmd.exe</button>
         <button data-window="paint"><img class="glyph" src="icons/paint_alt.png" alt=""> paint.exe</button>
         <button data-window="notepad"><img class="glyph" src="icons/notepad.png" alt=""> notepad.exe</button>
@@ -194,7 +194,8 @@
                            before powering down. Over 200 generations of 500 agents they converge on a
                            boustrophedon row-sweep at &gt;90% average coverage; OpenMP parallelization cut a
                            full run from 138s to 5s (27x) in testing, and down to &lt;1s on the release build.
-                           The live demo is a simplified JS port.</p>
+                           The live demo is a scaled-down JS port of the same algorithm —
+                           wildcard genes, VISITED-cell sensing and all.</p>
                         <div class="tags">
                             <span class="tag">C++</span><span class="tag">OpenMP</span><span class="tag">Genetic Algorithms</span>
                         </div>
@@ -715,7 +716,7 @@
         <section class="window demo-window" style="width:520px;">
             <div class="title-bar">
                 <span class="dot"></span>
-                <span class="title">maze_solver.exe</span>
+                <span class="title">coverage_bots.exe</span>
                 <div class="title-controls">
                     <button aria-label="minimize">_</button>
                     <button aria-label="maximize">□</button>
@@ -723,17 +724,20 @@
                 </div>
             </div>
             <div class="menu-bar">
-                <span><u>F</u>ile</span><span><u>V</u>iew</span><span><u>R</u>un</span><span><u>H</u>elp</span>
+                <button><u>F</u>ile</button><button><u>V</u>iew</button><button><u>R</u>un</button><button><u>H</u>elp</button>
             </div>
             <div class="window-body">
                 <div class="demo" data-demo="robots">
-                    <p class="demo-blurb">50 robots per generation evolve over 50 generations via
-                       selection &amp; crossover. The maze renders when evolution finishes.
-                       Compare a gen-1 bot against the best evolved one.</p>
+                    <p class="demo-blurb">A scaled-down port of the real C++ sim (500 bots ×
+                       2000 generations, OpenMP). Each bot runs a fresh battery-scattered grid
+                       until its energy dies; the top 5% survive and the rest are bred by
+                       tournament + crossover. <b>Rose</b> = cells swept, <b>sage</b> =
+                       batteries left, <b>gold</b> = where it powered down. Watch the right
+                       map as a sweep strategy takes shape.</p>
                     <div class="demo-stage demo-stage--split">
                         <figure>
                             <canvas width="200" height="200" data-canvas="gen1"></canvas>
-                            <figcaption>generation 1</figcaption>
+                            <figcaption>random gen-1 bot</figcaption>
                         </figure>
                         <figure>
                             <canvas width="200" height="200" data-canvas="final"></canvas>
@@ -746,9 +750,10 @@
                         <button class="btn" data-act="reset">⟲ Reset</button>
                     </div>
                     <div class="demo-stats">
-                        <span class="stat">gen <b data-stat="generation">0</b>/<b data-stat="total">50</b></span>
+                        <span class="stat">gen <b data-stat="generation">0</b>/<b data-stat="total">250</b></span>
                         <span class="stat">avg fit <b data-stat="avg">0</b></span>
                         <span class="stat">best <b data-stat="best">0</b> <span class="muted">(gen <b data-stat="bestGen">0</b>)</span></span>
+                        <span class="stat">coverage <b data-stat="cov">0</b>%</span>
                     </div>
                 </div>
             </div>

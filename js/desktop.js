@@ -1062,6 +1062,7 @@
             { label: 'Coverage Robots — POSTMORTEM.md', action: () => openWindow('notes-robots') },
             { label: 'Heart Classifier — NOTES.md', action: () => openWindow('notes-heart') },
             { label: 'Cherry Tree — README.md', action: () => openWindow('notes-tree') },
+            { label: 'HunterOS — README.md', action: () => openWindow('notes-site') },
         ];
     }
 

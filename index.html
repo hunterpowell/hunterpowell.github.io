@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hunter Powell - Software Engineer</title>
+    <title>Hunter Powell – Software Engineer</title>
 
     <!-- SEO: search-engine snippet + crawl rules -->
-    <meta name="description" content="Hunter Powell - Computer Science student at Sacramento State building simulations, systems, and ML in Python, C++, and Rust. Explore my projects in a retro desktop portfolio.">
+    <meta name="description" content="Hunter Powell – Computer Science student at Sacramento State building simulations, systems, and ML in Python, C++, and Rust. Explore my projects in a retro desktop portfolio.">
     <meta name="author" content="Hunter Powell">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://hunterpowell.dev/">
@@ -15,7 +15,7 @@
     <!-- Open Graph: link previews on Discord, iMessage, LinkedIn, Facebook, Slack -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Hunter Powell">
-    <meta property="og:title" content="Hunter Powell - Software Engineer">
+    <meta property="og:title" content="Hunter Powell – Software Engineer">
     <meta property="og:description" content="A retro desktop portfolio. Computer Science student building simulations, systems, and ML in Python, C++, and Rust.">
     <meta property="og:url" content="https://hunterpowell.dev/">
     <meta property="og:image" content="https://hunterpowell.dev/images/og.png">
@@ -23,7 +23,7 @@
 
     <!-- Twitter (Xitter?) card (mirrors the Open Graph tags) -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Hunter Powell - Software Engineer">
+    <meta name="twitter:title" content="Hunter Powell – Software Engineer">
     <meta name="twitter:description" content="A retro desktop portfolio. Computer Science student building simulations, systems, and ML in Python, C++, and Rust.">
     <meta name="twitter:image" content="https://hunterpowell.dev/images/og.png">
 
@@ -135,8 +135,8 @@
                 <h1>Hunter Powell</h1>
                 <p class="subtitle">software engineer · simulation, systems &amp; ML</p>
                 <p>Computer Science student at Sacramento State (graduating Dec 2026).
-                   I like turning hard problems into things you can watch run - evolutionary
-                   simulations, parallelized systems, and machine-learning models - mostly in
+                   I like turning difficult problems into things you can watch run – evolutionary
+                   simulations, parallelized systems, and machine-learning models – mostly in
                    Python and C++, with side trips into Java and lately Rust.</p>
                 <p>Off the keyboard: movies, books, games, and wandering around outside.</p>
                 <div class="tags">
@@ -174,7 +174,7 @@
                         <p>Full-stack Django platform built from scratch with an 8-person team
                            over 8 months for a family law firm. I helped design the 5-app modular
                            architecture and 3-tier role-based access (Guest / Client / Admin), and
-                           built shared infrastructure - Stripe &amp; Calendly webhooks, Google OAuth,
+                           built shared infrastructure – Stripe &amp; Calendly webhooks, Google OAuth,
                            and a CKEditor admin interface that lets non-technical staff publish
                            rich-text content site-wide without a developer.</p>
                         <div class="tags">
@@ -235,6 +235,22 @@
                             <a href="#" class="btn" data-open="tree">▶ Run demo</a>
                             <a href="https://github.com/hunterpowell/tree-gen" target="_blank" class="btn">GitHub →</a>
                             <a href="#" class="btn" data-open="notes-tree">Read more →</a>
+                        </p>
+                    </article>
+                    <article class="proj-card">
+                        <h3>HunterOS — This Portfolio</h3>
+                        <p>The site you're looking at: a retro Win9x-style desktop, hand-built
+                           with vanilla HTML, CSS &amp; JavaScript; no frameworks, no build step,
+                           no dependencies. Draggable windows, a taskbar and Start menu, a working
+                           terminal, a paint app, a notepad with autosave, and the
+                           live project demos are all home-grown from scratch. The "no dependencies"
+                           rule is the whole point, every pixel and interaction is mine to explain.</p>
+                        <div class="tags">
+                            <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span>
+                        </div>
+                        <p class="card-actions">
+                            <a href="https://github.com/hunterpowell/hunterpowell.github.io" target="_blank" class="btn">GitHub →</a>
+                            <a href="#" class="btn" data-open="notes-site">Read more →</a>
                         </p>
                     </article>
                 </div>
@@ -475,7 +491,7 @@
                 <button><u>F</u>ile</button><button><u>E</u>dit</button><button><u>V</u>iew</button><button><u>H</u>elp</button>
             </div>
             <div class="window-body">
-                <h2>Lydia's Law - build notes</h2>
+                <h2>Lydia's Law – build notes</h2>
                 <p class="subtitle">Shipping a real product for a real client, with a team of 8.</p>
 
                 <h3>Why it mattered</h3>
@@ -500,12 +516,11 @@
                         they may need to add, and sanitizing against any potentially problematic inputs, we created a product 
                         that will remain usable and receive consistent updates with minimal developer oversight. 
                     </li>
-                    <li>Migrating to MySQL: I personally nuked all of the tables that held the content displayed on every text entry 
-                        throughout the entire site. We had everything living in the same table, and in the process of modularizing and 
-                        organizing, I ran the migrate command without seeding the content into the new tables. This, to my utter horror, 
-                        also returned the monotable to its initial state, and it was ALSO unseeded. It took several hours and more cups of coffee,
-                        but we found backups of all the content we needed and re-entered it manually. I also took great care to fix the database seeding
-                        and backups so nothing like this can happen again.
+                    <li>Migrating to MySQL, I personally nuked every table holding the text content shown across the entire site.
+                        We'd had everything living in one big table, and while modularizing it I ran the migrate command without
+                        seeding the content into the new tables. This, to my utter horror, also wiped the original monotable back
+                        to an empty state. Several hours and many cups of coffee later, we'd recovered everything from backups and
+                        re-entered it by hand. Then I fixed the seeding and backups for good, so nothing like that can happen again.
                     </li>
                 </ul>
             </div>
@@ -527,7 +542,7 @@
                 <button><u>F</u>ile</button><button><u>E</u>dit</button><button><u>V</u>iew</button><button><u>H</u>elp</button>
             </div>
             <div class="window-body">
-                <h2>Evolving Coverage Robots - notes</h2>
+                <h2>Evolving Coverage Robots – notes</h2>
                 <p class="subtitle">Letting selection discover a strategy I never coded.</p>
 
                 <h3>Why I built it</h3>
@@ -542,13 +557,13 @@
                         The catalyst for this behavior was the addition of the <code>VISITED</code> cell state. 
                         This gave each bot the ability to learn that there was no benefit to visiting a cell twice. 
                     </li>
-                    <li>I accidentally stumbled upon the single most powerful tool my robots had: wildcard genes. I 
-                        initially introduced wildcards as one of the random states of every gene upon the generation of each individual,
-                        but I quickly found that it created "lazy" bots that plateaued much earlier than before I had added wildcards. I removed
-                        the wildcard genes upon bot initialization and performance SKYROCKETED, hitting numbers that were several times higher 
-                        than even before I had added the wildcards. I did some testing, and found that wildcards were still finding their way into 
-                        the gene pool. It was in the mutation function. There was still a very small chance for each gene to mutate, and wildcards 
-                        were still a viable state according to that function. I had only removed them as a valid option in initialization, never in mutation.
+                    <li>I accidentally stumbled onto the single most powerful tool my robots had: wildcard genes.
+                        I first introduced them as one of the random states every gene could take at initialization, but that just
+                        bred "lazy" bots that plateaued early. So I pulled wildcards out of initialization entirely &ndash; and
+                        performance SKYROCKETED, several times past anything I'd seen before.
+                        Then testing turned up something strange: wildcards were still finding their way into the gene pool.
+                        The culprit was the mutation function. Every gene still had a tiny chance to mutate, and a wildcard was
+                        still a valid result &ndash; I'd only removed it as an option at initialization, never in mutation.
                     </li>
                     <li>Fitness evaluation and gene crossover are both embarrassingly parallel, each genome runs independently and each child bot
                         relies on exactly 2 distinct parents. OpenMP integration in these two loops took a full run 
@@ -590,7 +605,7 @@
                 <button><u>F</u>ile</button><button><u>E</u>dit</button><button><u>V</u>iew</button><button><u>H</u>elp</button>
             </div>
             <div class="window-body">
-                <h2>Heart Disease Classifier - notes</h2>
+                <h2>Heart Disease Classifier – notes</h2>
                 <p class="subtitle">Doing the evaluation honestly on 320K messy survey records.</p>
 
                 <h3>Why I built it</h3>
@@ -602,10 +617,11 @@
                     <li>On an 8.6%-positive dataset, accuracy is a trap: a model that
                         predicts "no" for everyone scores ~91%. That's why I tracked ROC-AUC, F1, and
                         MCC instead.</li>
-                    <li>Gradient-boosted trees (LightGBM / XGBoost / CatBoost) consistently beat KNN
-                        and the MLP here. LightGBM consistently had the highest ROC-AUC, which tends to be
-                        the most resilient benchmark when adjusting threshold, which is particularly valuable
-                        in a medical context.
+                    <li>Gradient-boosted trees (LightGBM / XGBoost / CatBoost) clearly beat KNN and the MLP
+                        here, and LightGBM took the highest ROC-AUC of the bunch. ROC-AUC doesn't depend on
+                        where you set the decision threshold, so it stays honest when you know you'll tune for
+                        recall later &ndash; exactly the case in a medical context, where a missed positive
+                        costs far more than a false alarm.
                     </li>
                     <li>Engineered features (a composite risk score, comorbidity counts, etc.) carried real
                         signal, domain framing mattered as much as the model.</li>
@@ -643,7 +659,7 @@
                 <button><u>F</u>ile</button><button><u>E</u>dit</button><button><u>V</u>iew</button><button><u>H</u>elp</button>
             </div>
             <div class="window-body">
-                <h2>Procedural Tree Generator - notes</h2>
+                <h2>Procedural Tree Generator – notes</h2>
                 <p class="subtitle">A handful of simple rules, a different tree every run.</p>
 
                 <h3>Why I built it</h3>
@@ -670,6 +686,68 @@
                     </li>
                     <li>At one point, a typo in max branch depth caused the program to recurse several orders of magnitude
                         deeper than intended. That had my laptop begging for mercy.
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-notes-site">
+        <section class="window notes-window" style="width:500px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">hunteros - README.md</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <button><u>F</u>ile</button><button><u>E</u>dit</button><button><u>V</u>iew</button><button><u>H</u>elp</button>
+            </div>
+            <div class="window-body">
+                <h2>HunterOS – build notes</h2>
+                <p class="subtitle">A portfolio that's also the project it's showing off.</p>
+
+                <h3>Why I built it</h3>
+                <p>A templated site showing TODO app clone #543 felt like everyone else's. I wanted 
+                    to create a portfolio that is evidence in itself. If I claim that I like turning 
+                    difficult problems into thing you can watch run, this site should prove that. So no framework,
+                    no build step, no dependencies, just an "OS" I could built window by window. 
+                </p>
+
+                <h3>What I learned</h3>
+                <ul class="notes-list">
+                    <li>The first 90% of a project takes 10% of the time, and the last 10% takes 90% of the time. 
+                        Getting a working demo took no time at all, but refining the site to really <i>feel</i> like 
+                        a retro OS took a lot of work. The real engine lies in dragging windows, focus/z-order, 
+                        minimize/maximize, and the taskbar. Getting these to feel native took more care than any single demo. 
+                    </li>
+                    <li>Vanilla JS scales further than people expect (particularly if you lean on the &lt;template&gt; elements and a few 
+                        shared conventions). I anticipated needing a number of libraries to successfully emulate 
+                        the behavior I wanted, but doing it from scratch gave me a better result. 
+                    </li>
+                    <li>The live demos are faithful ports of real C++/Python projects, not separate toys. I tried to ensure 
+                        that the behavior matched, if at a smaller scale due to the computational constraints of a web environment.
+                    </li>
+                </ul>
+
+                <h3>Pitfalls &amp; gotchas</h3>
+                <ul class="notes-list">
+                    <li>Emulating a desktop environment on a mobile device is difficult. Several sacrifices had to be made 
+                        (particularly in the right click menu), and in the end the mobile experience is still not
+                        quite as rich as it is on desktop, but I'm still proud of the result. 
+                    </li>
+                    <li>It was important to me to avoid any possible immersion breaking traps, and doing so ended up
+                        taking a lot of my time. In particular, the native confirm()/alert() dialogue box shatters the illusion,
+                        and I had to create workarounds or build in solutions. Another was the scroll bars. Given that those are 
+                        browser dependent, I had to create my own and insert them everywhere. It's surprisingly difficult to home 
+                        grow a scroll bar!
+                    </li>
+                    <li>I don't own any Apple devices, so I wasn't able to easily test in that environment. 
+                        To all of my friends/family that acted as guinea pigs for me- you have my gratitude 
+                        and your next cup of coffee is on me. 
                     </li>
                 </ul>
             </div>

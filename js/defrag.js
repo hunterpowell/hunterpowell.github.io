@@ -7,8 +7,6 @@
 // Drop audio files in /audio and list them here. `link` is
 // optional — when present, a small ↗ links out to the full track.
 const DEFRAG_TRACKS = [
-    // { title: 'Song Name', artist: 'Artist', src: 'audio/song.mp3',
-    //   link: 'https://open.spotify.com/track/...' },
     {   title: 'blocks',
         artist: 'C418',
         src: 'audio/blocks.mp3',

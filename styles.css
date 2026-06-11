@@ -822,6 +822,7 @@ body {
 .paint-stage {
     grid-column: 1; grid-row: 1;
     min-width: 0; min-height: 0;
+    display: flex;                  /* lets the canvas center via auto margins (below) */
     overflow: auto;                 /* fixed canvas scrolls inside; window resize crops */
     /* off-canvas area shows the desktop grid, not a white gap */
     background-color: var(--win-content);
@@ -836,6 +837,9 @@ body {
 .paint-stage::-webkit-scrollbar { width: 0; height: 0; display: none; }
 .paint-canvas {
     display: block;                 /* renders at its fixed intrinsic pixel size */
+    flex: 0 0 auto;                 /* never shrink below intrinsic size — overflow & scroll instead */
+    margin: auto;                   /* centers when the stage is bigger; collapses to 0 on overflow,
+                                       so scroll still reaches the top-left edge */
     background: #fff;
     cursor: crosshair;
     touch-action: none;
@@ -1328,6 +1332,12 @@ body.crt::before {
 .screensaver.on {
     opacity: 1;
     pointer-events: auto;
+}
+/* "Dim desktop" mode: a translucent veil so the desktop stays
+   faintly visible behind the bouncing logo, instead of a blackout. */
+.screensaver.dim {
+    background: rgba(10, 7, 12, 0.632);
+    backdrop-filter: saturate(0.8) brightness(0.9);
 }
 .screensaver-logo {
     position: absolute;

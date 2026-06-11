@@ -5,9 +5,10 @@
      (its path uses fill="currentColor"), so a single shape can
      be any colour — it switches to the next palette colour on
      every wall bounce, just like the real thing
-   - enable/disable and idle time are user prefs, persisted to
-     localStorage and edited via Display Properties (desktop.js);
-     exposed through window.Screensaver
+   - enable/disable, idle time and background mode (black out vs.
+     dim the desktop) are user prefs, persisted to localStorage and
+     edited via Display Properties (desktop.js); exposed through
+     window.Screensaver
    - skipped while booting, while the tab is hidden, and under
      prefers-reduced-motion
    ============================================================ */
@@ -36,17 +37,20 @@
     // User prefs, restored from localStorage and editable via Display Properties.
     let enabled = true;
     let idleMs = 60000;      // time of no activity before the screensaver starts
+    let mode = 'blackout';   // 'blackout' (opaque) | 'dim' (desktop shows through, dimmed)
+    const MODES = ['blackout', 'dim'];
     (function loadPrefs() {
         try {
             const s = JSON.parse(localStorage.getItem(STORE) || 'null');
             if (s) {
                 if (typeof s.enabled === 'boolean') enabled = s.enabled;
                 if (typeof s.idleMs === 'number' && s.idleMs >= 1000) idleMs = s.idleMs;
+                if (MODES.indexOf(s.mode) !== -1) mode = s.mode;
             }
         } catch (_) {}
     })();
     function savePrefs() {
-        try { localStorage.setItem(STORE, JSON.stringify({ enabled, idleMs })); } catch (_) {}
+        try { localStorage.setItem(STORE, JSON.stringify({ enabled, idleMs, mode })); } catch (_) {}
     }
 
     // The visible DVD-logo path from images/DVD_logo.svg, inlined so it needs
@@ -130,6 +134,7 @@
 
         active = true;
         activatedAt = performance.now();
+        overlay.classList.toggle('dim', mode === 'dim');
         overlay.classList.add('on');
         rafId = requestAnimationFrame(loop);
     }
@@ -175,6 +180,7 @@
         reducedMotion: reduce,
         isEnabled: () => enabled,
         getIdleMs: () => idleMs,
+        getMode: () => mode,
         getLogoSVG: () => LOGO_SVG,
         setEnabled(on) {
             enabled = !!on;
@@ -187,6 +193,12 @@
             idleMs = ms;
             savePrefs();
             scheduleIdle();
+        },
+        setMode(m) {
+            if (MODES.indexOf(m) === -1) return;
+            mode = m;
+            savePrefs();
+            if (overlay) overlay.classList.toggle('dim', mode === 'dim');
         },
     };
 })();

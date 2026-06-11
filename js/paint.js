@@ -16,7 +16,7 @@ class PaintApp {
         // per open and frozen — a mid-session theme toggle must NOT recolor
         // it, since the pixels already drawn keep the old background; eraser
         // and clear stay consistent with the canvas, and reopening resamples.
-        this.bg = document.body.classList.contains('dark') ? '#2a2f34' : '#ffffff';
+        this.bg = document.body.classList.contains('dark') ? '#15191e' : '#ffffff';
 
         this.drawing = false;
         this.startX = 0;

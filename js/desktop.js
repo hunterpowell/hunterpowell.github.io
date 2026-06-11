@@ -326,6 +326,7 @@
 
         const enableCb = root.querySelector('[data-set="enabled"]');
         const idleSel = root.querySelector('[data-set="idle"]');
+        const modeSel = root.querySelector('[data-set="mode"]');
         const crtCb = root.querySelector('[data-set="crt"]');
         const themeCb = root.querySelector('[data-set="theme"]');
         const preview = root.querySelector('.ss-preview');
@@ -335,13 +336,18 @@
         if (ss) {
             enableCb.checked = ss.isEnabled();
             idleSel.value = String(ss.getIdleMs());
+            modeSel.value = ss.getMode();
             if (preview) preview.innerHTML = ss.getLogoSVG();
         }
         crtCb.checked = document.body.classList.contains('crt');
         themeCb.checked = document.body.classList.contains('dark');
 
-        // idle dropdown is meaningless while the saver is off
-        const syncIdle = () => { idleSel.disabled = reduced || !enableCb.checked; };
+        // idle / background controls are meaningless while the saver is off
+        const syncIdle = () => {
+            const off = reduced || !enableCb.checked;
+            idleSel.disabled = off;
+            modeSel.disabled = off;
+        };
         enableCb.addEventListener('change', syncIdle);
 
         // reduce-motion overrides the screensaver entirely: lock the controls
@@ -359,6 +365,7 @@
             if (ss && !reduced) {
                 ss.setEnabled(enableCb.checked);
                 ss.setIdleMs(parseInt(idleSel.value, 10));
+                ss.setMode(modeSel.value);
             }
             setCrt(crtCb.checked);
             setTheme(themeCb.checked);

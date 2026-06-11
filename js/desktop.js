@@ -458,8 +458,16 @@
         'I would tell you a UDP joke, but you might not get it.',
         'Why don\'t jokes work in octal? Because 7 10 11.',
         'There are only two difficult problems in computer science: naming things, cache invalidation, and off-by-one errors.',
-        '["hip", "hip]" Array!',
+        '["hip", "hip"] Array!',
     ];
+
+    // The editor war — one flame per combatant. (vi aliases vim.)
+    const EDITOR_FLAMES = {
+        vim:   'vim. bold. real ones never leave — they just open more splits.',
+        vi:    'vim. bold. real ones never leave — they just open more splits.',
+        nano:  'nano? cute. the training wheels are at the bottom of the screen.',
+        emacs: 'emacs — a great operating system, lacking only a decent text editor.',
+    };
 
     // Undocumented terminal commands — revealed by `sudo help` (in-terminal)
     // and the Konami code (themed dialog). Single source of truth for both.
@@ -538,7 +546,7 @@
             cat(arg) {
                 if (!arg) { print('usage: cat <file>   (try `ls`)', 'muted'); return; }
                 const a = arg.toLowerCase();
-                if (a === 'about_me.txt' || a === 'about_me' || a === 'about.txt') {
+                if (a === 'about_me.txt' || a === 'about_me' || a === 'about.txt' || a === 'about') {
                     commands.whoami();
                     print('Off the keyboard: movies, books, games, and wandering around outside.');
                     return;
@@ -587,6 +595,40 @@
             },
         };
 
+        // `rm` never actually deletes anything — it just reacts in character.
+        function rm(arg) {
+            const a = (arg || '').toLowerCase();
+            const tgt = a.replace(/(^|\s)-\S+/g, '').trim();   // strip flags, keep the target
+            const nuke = a.includes('-') && /r/.test(a) && /f/.test(a);
+
+            // rm -rf / — the one everyone tries first. give them a fright,
+            // staggered so the "deleting" lines tick by like it's really working.
+            if (nuke && ['', '/', '/*', '~', '.', '*'].includes(tgt)) {
+                const lines = [
+                    ['rm: descending into / — this will remove EVERYTHING.'],
+                    ['deleting /home/hunter . . .', 'muted'],
+                    ['deleting /home/hunter/dreams . . .', 'muted'],
+                    ['deleting /home/hunter/free_time . . .', 'muted'],
+                    ['. . . psych. these stay. nice try though. ;)'],
+                ];
+                lines.forEach(([text, cls], i) => setTimeout(() => print(text, cls), i * 500));
+                return;
+            }
+            // deleting the terminal you're currently typing in
+            if (tgt === 'cmd' || tgt === 'cmd.exe' || tgt === 'terminal') {
+                print('rm: cannot remove \'cmd.exe\': you are literally typing in it.', 'muted');
+                return;
+            }
+            // targeting a real desktop file — name-drop it so they know I noticed
+            const hit = FILES.find(([name]) => name.toLowerCase() === tgt);
+            if (hit) {
+                print('rm: \'' + hit[0] + '\'? i worked hard on that one. denied.');
+                return;
+            }
+            if (!tgt) { print('usage: rm <file>   (spoiler: it won\'t work)', 'muted'); return; }
+            print('rm: \'' + tgt + '\' . . . nope. my files stay put. :)');
+        }
+
         function sudo(arg) {
             const a = (arg || '').toLowerCase().trim();
             if (a === 'help') {
@@ -617,9 +659,9 @@
             const arg = line.slice(parts[0].length).trim();
 
             if (key === 'sudo') return sudo(arg);
-            if (key === 'rm') return print('Nope. I worked hard on these files. :)');
-            if (key === 'vim' || key === 'vi' || key === 'nano' || key === 'emacs') {
-                return print('You\'re in my world (' + key + ') now. Good luck exiting. ');
+            if (key === 'rm') return rm(arg);
+            if (EDITOR_FLAMES[key]) {
+                return print(EDITOR_FLAMES[key]);
             }
             if (key === 'fortune' || key === 'joke') {
                 return print(JOKES[Math.floor(Math.random() * JOKES.length)]);

@@ -745,6 +745,104 @@ body {
 .demo-stats .muted { color: var(--ink-soft); opacity: 0.75; }
 
 /* ============================================================
+   Minesweeper (minesweeper.exe) — pastel take on the classic.
+   Covered cells are raised Win9x buttons; opened cells go flat
+   and sunken. The LED readouts borrow the VT323 face.
+   ============================================================ */
+.mines {
+    --cell: 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px;
+    width: max-content;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+
+/* counter | smiley | timer, in a sunken tray */
+.mines-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 8px;
+    background: var(--win-content);
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-light);
+}
+.mines-led {
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    line-height: 1;
+    letter-spacing: 1px;
+    min-width: 3ch;
+    padding: 2px 6px;
+    text-align: center;
+    color: #d98a96;                 /* soft coral digits */
+    background: #2b2026;            /* dim plum panel */
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 #000;
+}
+.mines-face {
+    font-size: 1.2rem;
+    line-height: 1;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    cursor: pointer;
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+}
+.mines-face:active { box-shadow: inset -1px -1px 0 var(--win-light), inset 1px 1px 0 var(--win-dark); }
+
+.mines-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--cell));
+    width: max-content;
+    gap: 0;
+    border: 1px solid var(--win-dark);
+    box-shadow: inset 1px 1px 0 var(--win-dark), inset -1px -1px 0 var(--win-light);
+}
+
+.mine-cell {
+    width: var(--cell);
+    height: var(--cell);
+    padding: 0;
+    margin: 0;
+    font-family: 'VT323', monospace;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--ink);
+    background: var(--win-face);
+    border: 1px solid;
+    border-color: var(--win-light) var(--win-dark) var(--win-dark) var(--win-light);
+}
+.mine-cell:hover:not(.open) { background: var(--win-content); }
+.mine-cell.flagged { color: var(--close); }
+.mine-cell.open {
+    background: var(--win-content);
+    border: 1px solid var(--grid-line);
+    cursor: default;
+}
+.mine-cell.mine { background: var(--win-content); color: var(--ink); }
+.mine-cell.boom { background: var(--close); color: #2b2026; }   /* the one you hit */
+.mine-cell.wrong { color: var(--close); }                        /* a mis-flag */
+
+/* number colours — pastel but distinguishable */
+.mine-cell.n1 { color: #6b7fb0; }
+.mine-cell.n2 { color: #5f8a6e; }
+.mine-cell.n3 { color: #b06a78; }
+.mine-cell.n4 { color: #6a5a8a; }
+.mine-cell.n5 { color: #9a5a52; }
+.mine-cell.n6 { color: #4e8a8a; }
+.mine-cell.n7 { color: var(--ink); }
+.mine-cell.n8 { color: #7a7080; }
+
+/* ============================================================
    Paint (paint.exe) — vaporwave layout, site palette
    ============================================================ */
 /* let the paint window's body distribute its full height to .paint */
@@ -900,6 +998,23 @@ body {
 .wb-bar--x { flex-direction: row; height: 15px; }
 /* reserve the bottom-right corner for the resize grip (classic Win9x size box) */
 .window > .wb-frame > .wb-bar--y { margin-bottom: 16px; }
+
+/* two-axis variant: content + both bars + a corner, in a 2×2 grid */
+.wb-frame-xy {
+    flex: 1 1 auto;
+    min-width: 0; min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 15px;
+    grid-template-rows: 1fr 15px;
+}
+.wb-frame-xy > .wb-clipped { grid-column: 1; grid-row: 1; min-width: 0; min-height: 0; }
+.wb-frame-xy > .wb-bar--y { grid-column: 2; grid-row: 1; }
+.wb-frame-xy > .wb-bar--x { grid-column: 1; grid-row: 2; }
+.wb-corner {
+    grid-column: 2; grid-row: 2;
+    background: var(--win-face);
+    border: 1px solid var(--win-dark);
+}
 
 /* ---- right palette ------------------------------------ */
 .paint-palette {
@@ -1264,8 +1379,8 @@ body {
     transform: translateX(-50%) translateY(8px);
     z-index: 210000;
     padding: 7px 16px;
-    background: var(--title-ink);
-    color: #f3e3ea;
+    background: var(--win-face);
+    color: var(--ink);
     font-size: 0.85rem;
     border: 1px solid var(--win-border);
     box-shadow: 3px 4px 0 rgba(110, 66, 88, 0.3);
@@ -1274,12 +1389,8 @@ body {
     pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-/* dark mode reuses --title-ink as light title-bar text, so pin the toast
-   chip to a dark plum here to keep it dark-box / light-text. */
-body.dark .toast {
-    background: #2a2230;
-    box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4);
-}
+/* shadow only — background/text ride the theme palette via the vars above */
+body.dark .toast { box-shadow: 3px 4px 0 rgba(0, 0, 0, 0.4); }
 
 /* ============================================================
    CRT effect (View → CRT effect) — scanlines + faint flicker

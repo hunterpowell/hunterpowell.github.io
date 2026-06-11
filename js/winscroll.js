@@ -133,6 +133,33 @@
         return winScroll(vp, { axis, bar });
     }
 
+    // Two-axis sibling of autoWinScroll: wraps the viewport in a 2×2 grid
+    // (content | y-bar / x-bar | corner) so both bars ride the element's
+    // edges. Used by windows whose content can outgrow them on either axis
+    // (minesweeper's wide boards), where a single bottom bar should just
+    // sit there by default and come alive when the content overflows.
+    function autoWinScrollXY(vp) {
+        if (!vp || !vp.parentNode) return { update() {}, destroy() {} };
+        const frame = document.createElement('div');
+        frame.className = 'wb-frame-xy';
+        vp.parentNode.insertBefore(frame, vp);
+        frame.appendChild(vp);
+        const ybar = buildBar('y');
+        const xbar = buildBar('x');
+        const corner = document.createElement('div');
+        corner.className = 'wb-corner';
+        corner.setAttribute('aria-hidden', 'true');
+        frame.append(ybar, xbar, corner);
+        vp.classList.add('wb-clipped');
+        const sy = winScroll(vp, { axis: 'y', bar: ybar });
+        const sx = winScroll(vp, { axis: 'x', bar: xbar });
+        return {
+            update() { sy.update(); sx.update(); },
+            destroy() { sy.destroy(); sx.destroy(); },
+        };
+    }
+
     global.winScroll = winScroll;
     global.autoWinScroll = autoWinScroll;
+    global.autoWinScrollXY = autoWinScrollXY;
 })(window);

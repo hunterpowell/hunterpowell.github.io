@@ -45,7 +45,7 @@
 
         const taskBtn = makeTaskButton(win, id);
         if (id === 'secrets') fillSecrets(win);
-        const initCleanup = initDemo(win) || initTerminal(win, id) || initPaint(win) || initSettings(win) || initNotepad(win) || initDefrag(win);   // null for plain windows
+        const initCleanup = initDemo(win) || initTerminal(win, id) || initPaint(win) || initSettings(win) || initNotepad(win) || initDefrag(win) || initMines(win);   // null for plain windows
 
         // Give plain content windows the shared Win9x bar on their body.
         // Skip app/canvas/console/textarea bodies — those keep a (recolored)
@@ -53,7 +53,7 @@
         let scroller = null;
         if (typeof autoWinScroll !== 'undefined') {
             const body = win.querySelector('.window-body');
-            if (body && !body.querySelector('.demo, .paint, .defrag, .notepad-area, .term-output')) {
+            if (body && !body.querySelector('.demo, .paint, .defrag, .notepad-area, .term-output, .mines')) {
                 scroller = autoWinScroll(body, 'y');
             }
         }
@@ -307,6 +307,23 @@
         return () => player.destroy();   // stop audio + viz on close
     }
 
+    /* ---- minesweeper (minesweeper.exe) -------------------- */
+    function initMines(win) {
+        const root = win.querySelector('.mines');
+        if (!root || typeof MinesweeperGame === 'undefined') return null;
+        const game = new MinesweeperGame(root);
+        win._mines = game;   // kept so the Game menu can drive it
+
+        // Wide boards (Expert) outgrow the window horizontally, so give the
+        // whole window both bars — the bottom one sits there by default and
+        // scrolls once the board is wider than the window.
+        let bars = null;
+        const body = win.querySelector('.window-body');
+        if (body && typeof window.autoWinScrollXY !== 'undefined') bars = window.autoWinScrollXY(body);
+
+        return () => { game.destroy(); if (bars) bars.destroy(); };
+    }
+
     /* ---- Display Properties (settings) -------------------- */
     // Staged editor: controls mutate only the form until OK applies them.
     // Cancel / close discards, since nothing is committed before OK.
@@ -449,6 +466,7 @@
         ['paint.exe',       'paint'],
         ['notepad.exe',     'notepad'],
         ['brain_defrag.exe', 'defrag'],
+        ['minesweeper.exe', 'mines'],
     ];
     const JOKES = [
         'Why do programmers prefer dark mode? Because light attracts bugs.',
@@ -517,7 +535,7 @@
                 print('  open <name>         open a window (try: open projects)');
                 print('  resume              download my résumé (pdf)');
                 print('  about | projects | contact    jump to a window');
-                print('  tree | bots | paint | notepad | defrag   launch an .exe');
+                print('  tree | bots | paint | notepad | defrag | mines   launch an .exe');
                 print('  github              open my GitHub');
                 print('  echo <text>         repeat after me');
                 print('  date | time         current date / time');
@@ -578,6 +596,8 @@
             bots() { launch('robots', 'coverage_bots.exe'); },
             robots() { launch('robots', 'coverage_bots.exe'); },
             maze() { launch('robots', 'coverage_bots.exe'); },   // legacy alias
+            mines() { launch('mines', 'minesweeper.exe'); },
+            minesweeper() { launch('mines', 'minesweeper.exe'); },
             github() { window.open('https://github.com/hunterpowell', '_blank'); print('Opening GitHub . . .', 'muted'); },
             echo(arg) { print(arg || ''); },
             date() { print(new Date().toDateString()); },
@@ -1012,6 +1032,7 @@
             case 'Help':  return helpMenu();
             case 'Open':  return openMenu();          // projects
             case 'Run':   return runMenu(win);        // tree / robots demos
+            case 'Game':  return gameMenu(win);       // minesweeper.exe
             case 'Image': return imageMenu(win);      // paint.exe
             default:      return [];
         }
@@ -1122,6 +1143,21 @@
             { label: 'Pause', action: () => click('pause') },
             { label: 'Reset', action: () => click('reset') },
         ];
+    }
+
+    function gameMenu(win) {
+        const game = win._mines;
+        const items = [{ label: 'New game', action: () => game && game.newGame() }, { sep: true }];
+        const levels = [
+            ['Beginner', 'beginner'],
+            ['Intermediate', 'intermediate'],
+            ['Expert', 'expert'],
+        ];
+        levels.forEach(([label, key]) => items.push({
+            label: (game && game.level === key ? '✓ ' : '   ') + label,
+            action: () => game && game.newGame(key),
+        }));
+        return items;
     }
 
     function imageMenu(win) {

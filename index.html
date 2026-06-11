@@ -43,10 +43,6 @@
     <!-- Desktop surface -->
     <div id="desktop">
         <div class="icons">
-            <button class="desktop-icon" data-window="recycle" title="double-click to open">
-                <img class="glyph" src="icons/recycle_bin_full.png" alt="">
-                <span class="label">recycle_bin</span>
-            </button>
             <button class="desktop-icon" data-window="about" title="double-click to open">
                 <img class="glyph" src="icons/text_file.png" alt="">
                 <span class="label">about_me</span>
@@ -56,7 +52,7 @@
                 <span class="label">projects</span>
             </button>
             <button class="desktop-icon" data-window="contact" title="double-click to open">
-                <img class="glyph" src="icons/news.png" alt="">
+                <img class="glyph" src="icons/contact_book.png" alt="">
                 <span class="label">contact</span>
             </button>
             <button class="desktop-icon" data-window="tree" title="double-click to open">
@@ -67,9 +63,9 @@
                 <img class="glyph" src="icons/aseprite.png" alt="">
                 <span class="label">coverage_bots</span>
             </button>
-            <button class="desktop-icon" data-window="terminal" title="double-click to open">
-                <img class="glyph" src="icons/this_computer.png" alt="">
-                <span class="label">cmd</span>
+            <button class="desktop-icon" data-window="defrag" title="double-click to open">
+                <img class="glyph" src="icons/music.png" alt="">
+                <span class="label">brain_defrag</span>
             </button>
             <button class="desktop-icon" data-window="paint" title="double-click to open">
                 <img class="glyph" src="icons/paint_alt.png" alt="">
@@ -79,9 +75,17 @@
                 <img class="glyph" src="icons/notepad.png" alt="">
                 <span class="label">notepad</span>
             </button>
-            <button class="desktop-icon" data-window="defrag" title="double-click to open">
-                <img class="glyph" src="icons/music.png" alt="">
-                <span class="label">brain_defrag</span>
+            <button class="desktop-icon" data-window="terminal" title="double-click to open">
+                <img class="glyph" src="icons/this_computer.png" alt="">
+                <span class="label">cmd</span>
+            </button>
+            <button class="desktop-icon" data-window="mines" title="double-click to open">
+                <img class="glyph" src="icons/minesweeper.png" alt="">
+                <span class="label">minesweeper</span>
+            </button>
+            <button class="desktop-icon" data-window="recycle" title="double-click to open">
+                <img class="glyph" src="icons/recycle_bin_full.png" alt="">
+                <span class="label">recycle_bin</span>
             </button>
         </div>
 
@@ -92,16 +96,17 @@
         <div class="sm-head">~/hunter</div>
         <button data-window="about"><img class="glyph" src="icons/text_file.png" alt=""> about_me</button>
         <button data-window="projects"><img class="glyph" src="icons/folder_closed.png" alt=""> projects</button>
-        <button data-window="contact"><img class="glyph" src="icons/news.png" alt=""> contact</button>
+        <button data-window="contact"><img class="glyph" src="icons/contact_book.png" alt=""> contact</button>
         <div class="sm-sep"></div>
         <button data-window="tree"><img class="glyph" src="icons/image_editor.png" alt=""> cherry_tree.exe</button>
         <button data-window="robots"><img class="glyph" src="icons/aseprite.png" alt=""> coverage_bots.exe</button>
-        <button data-window="terminal"><img class="glyph" src="icons/this_computer.png" alt=""> cmd.exe</button>
+        <button data-window="defrag"><img class="glyph" src="icons/music.png" alt=""> brain_defrag.exe</button>
         <button data-window="paint"><img class="glyph" src="icons/paint_alt.png" alt=""> paint.exe</button>
         <button data-window="notepad"><img class="glyph" src="icons/notepad.png" alt=""> notepad.exe</button>
-        <button data-window="defrag"><img class="glyph" src="icons/music.png" alt=""> brain_defrag.exe</button>
+        <button data-window="terminal"><img class="glyph" src="icons/this_computer.png" alt=""> cmd.exe</button>
+        <button data-window="mines"><img class="glyph" src="icons/minesweeper.png" alt=""> minesweeper.exe</button>
         <div class="sm-sep"></div>
-        <button data-window="display"><img class="glyph" src="icons/this_computer.png" alt=""> settings</button>
+        <button data-window="display"><img class="glyph" src="icons/tools.png" alt=""> settings</button>
         <button data-link="https://github.com/hunterpowell"><img class="glyph" src="icons/github.png" alt=""> GitHub</button>
     </div>
 
@@ -361,17 +366,17 @@
                     <img class="glyph" src="icons/password_manager.png" alt="">
                     <span>passwords.txt</span>
                 </button>
-                <button class="bin-item" data-open="old-resume">
-                    <img class="glyph" src="icons/rich_text_file.png" alt="">
-                    <span>resume_FINAL_v2_FINAL.docx</span>
+                <button class="bin-item" data-open="taxes">
+                    <img class="glyph" src="icons/spreadsheet_file.png" alt="">
+                    <span>taxes_2025.xlsx</span>
                 </button>
                 <button class="bin-item" data-open="img-corrupt">
                     <img class="glyph" src="icons/image_file.png" alt="">
                     <span>IMG_0423.jpg</span>
                 </button>
-                <button class="bin-item" data-open="taxes">
-                    <img class="glyph" src="icons/spreadsheet_file.png" alt="">
-                    <span>taxes_2025.xlsx</span>
+                <button class="bin-item" data-open="old-resume">
+                    <img class="glyph" src="icons/rich_text_file.png" alt="">
+                    <span>resume_FINAL_v2_FINAL.docx</span>
                 </button>
                 <p class="bin-empty">The Recycle Bin is empty.</p>
             </div>
@@ -838,6 +843,34 @@
         </section>
     </template>
 
+    <template id="tpl-mines">
+        <section class="window mines-window" style="width:max-content;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">minesweeper.exe</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <button><u>G</u>ame</button><button><u>H</u>elp</button>
+            </div>
+            <div class="window-body">
+                <div class="mines">
+                    <div class="mines-head">
+                        <span class="mines-led" data-mines-count>010</span>
+                        <button class="mines-face" type="button" data-mines-face
+                                aria-label="new game">🙂</button>
+                        <span class="mines-led" data-mines-time>000</span>
+                    </div>
+                    <div class="mines-grid" data-mines-grid></div>
+                </div>
+            </div>
+        </section>
+    </template>
+
     <template id="tpl-terminal">
         <section class="window term-window" style="width:520px;height:340px;">
             <div class="title-bar">
@@ -1101,6 +1134,7 @@
     <script src="js/winscroll.js"></script>
     <script src="js/paint.js"></script>
     <script src="js/defrag.js"></script>
+    <script src="js/minesweeper.js"></script>
     <script src="js/desktop.js"></script>
     <script src="js/screensaver.js"></script>
 </body>

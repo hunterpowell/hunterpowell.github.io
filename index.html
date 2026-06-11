@@ -37,6 +37,39 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- No-JS fallback: the desktop needs JavaScript, so give visitors
+         (and crawlers) the essentials as plain HTML instead. -->
+    <noscript>
+        <div class="noscript-fallback">
+            <h1>Hunter Powell</h1>
+            <p>Software engineer · simulation, systems &amp; ML. Computer Science
+               student at Sacramento State (graduating Dec 2026), working mostly
+               in Python and C++, with side trips into Java and Rust.</p>
+            <p>This site is normally a retro Win9x-style desktop built with
+               vanilla HTML, CSS &amp; JavaScript — no frameworks, no build step.
+               JavaScript is off in your browser, so here's the short version:</p>
+            <ul>
+                <li><a href="https://github.com/CSUS-Shell-Script/Lydias-Law-Site">Lydia's Law</a> —
+                    full-stack Django platform for a family law firm, built with an 8-person team
+                    (<a href="https://adoptionsofsac.com">live site</a>)</li>
+                <li><a href="https://github.com/hunterpowell/GeneticAlg">Evolving Coverage Robots</a> —
+                    C++ genetic algorithm for grid coverage, 27x speedup with OpenMP</li>
+                <li><a href="https://github.com/hunterpowell/HeartDisease">Heart Disease Risk Classifier</a> —
+                    ML benchmark over 320K CDC survey records</li>
+                <li><a href="https://github.com/hunterpowell/tree-gen">Procedural Tree Generator</a> —
+                    recursive cherry-blossom trees in Python/Tkinter</li>
+                <li><a href="https://github.com/hunterpowell/hunterpowell.github.io">HunterOS</a> —
+                    this site itself</li>
+            </ul>
+            <p>
+                <a href="mailto:hunterpowell99@gmail.com">hunterpowell99@gmail.com</a> ·
+                <a href="https://github.com/hunterpowell">GitHub</a> ·
+                <a href="https://linkedin.com/in/hunterpowell-dev">LinkedIn</a> ·
+                <a href="Hunter_Powell_Resume.pdf">Résumé (PDF)</a>
+            </p>
+        </div>
+    </noscript>
+
     <!-- Boot splash (fades out to reveal the desktop) -->
     <div id="boot" title="click to skip"><pre class="boot-screen" data-boot-screen></pre></div>
 
@@ -187,8 +220,8 @@
                             <span class="tag">Stripe</span><span class="tag">OAuth</span><span class="tag">Team Project</span>
                         </div>
                         <p class="card-actions">
-                            <a href="https://adoptionsofsac.com" target="_blank" class="btn">Visit site → (client work)</a>
-                            <a href="https://github.com/CSUS-Shell-Script/Lydias-Law-Site" target="_blank" class="btn">GitHub →</a>
+                            <a href="https://adoptionsofsac.com" target="_blank" rel="noopener" class="btn">Visit site → (client work)</a>
+                            <a href="https://github.com/CSUS-Shell-Script/Lydias-Law-Site" target="_blank" rel="noopener" class="btn">GitHub →</a>
                             <a href="#" class="btn" data-open="notes-lydia">Read more →</a>
                         </p>
                     </article>
@@ -206,7 +239,7 @@
                         </div>
                         <p class="card-actions">
                             <a href="#" class="btn" data-open="robots">▶ Run demo</a>
-                            <a href="https://github.com/hunterpowell/GeneticAlg" target="_blank" class="btn">GitHub →</a>
+                            <a href="https://github.com/hunterpowell/GeneticAlg" target="_blank" rel="noopener" class="btn">GitHub →</a>
                             <a href="#" class="btn" data-open="notes-robots">Read more →</a>
                         </p>
                     </article>
@@ -224,7 +257,7 @@
                             <span class="tag">XGBoost</span><span class="tag">Pandas</span><span class="tag">ML</span>
                         </div>
                         <p class="card-actions">
-                            <a href="https://github.com/hunterpowell/HeartDisease" target="_blank" class="btn">GitHub →</a>
+                            <a href="https://github.com/hunterpowell/HeartDisease" target="_blank" rel="noopener" class="btn">GitHub →</a>
                             <a href="#" class="btn" data-open="notes-heart">Read more →</a>
                         </p>
                     </article>
@@ -238,7 +271,7 @@
                         </div>
                         <p class="card-actions">
                             <a href="#" class="btn" data-open="tree">▶ Run demo</a>
-                            <a href="https://github.com/hunterpowell/tree-gen" target="_blank" class="btn">GitHub →</a>
+                            <a href="https://github.com/hunterpowell/tree-gen" target="_blank" rel="noopener" class="btn">GitHub →</a>
                             <a href="#" class="btn" data-open="notes-tree">Read more →</a>
                         </p>
                     </article>
@@ -254,7 +287,7 @@
                             <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span>
                         </div>
                         <p class="card-actions">
-                            <a href="https://github.com/hunterpowell/hunterpowell.github.io" target="_blank" class="btn">GitHub →</a>
+                            <a href="https://github.com/hunterpowell/hunterpowell.github.io" target="_blank" rel="noopener" class="btn">GitHub →</a>
                             <a href="#" class="btn" data-open="notes-site">Read more →</a>
                         </p>
                     </article>
@@ -284,9 +317,9 @@
                     <li><span class="label">Email</span>
                         <a href="mailto:hunterpowell99@gmail.com">hunterpowell99@gmail.com</a></li>
                     <li><span class="label">GitHub</span>
-                        <a href="https://github.com/hunterpowell" target="_blank">@hunterpowell</a></li>
+                        <a href="https://github.com/hunterpowell" target="_blank" rel="noopener">@hunterpowell</a></li>
                     <li><span class="label">LinkedIn</span>
-                        <a href="https://linkedin.com/in/hunterpowell-dev" target="_blank">hunterpowell-dev</a></li>
+                        <a href="https://linkedin.com/in/hunterpowell-dev" target="_blank" rel="noopener">hunterpowell-dev</a></li>
                     <li><span class="label">Résumé</span>
                         <a href="Hunter_Powell_Resume.pdf" download>Hunter_Powell_Resume.pdf ↓</a></li>
                 </ul>
@@ -717,9 +750,9 @@
 
                 <h3>Why I built it</h3>
                 <p>A templated site showing TODO app clone #543 felt like everyone else's. I wanted 
-                    to create a portfolio that is evidence in itself. If I claim that I like turning 
-                    difficult problems into thing you can watch run, this site should prove that. So no framework,
-                    no build step, no dependencies, just an "OS" I could built window by window. 
+                    to create a portfolio that is evidence in itself. If I claim that I like turning
+                    difficult problems into things you can watch run, this site should prove that. So no framework,
+                    no build step, no dependencies, just an "OS" I could build window by window.
                 </p>
 
                 <h3>What I learned</h3>
@@ -745,7 +778,7 @@
                         quite as rich as it is on desktop, but I'm still proud of the result. 
                     </li>
                     <li>It was important to me to avoid any possible immersion breaking traps, and doing so ended up
-                        taking a lot of my time. In particular, the native confirm()/alert() dialogue box shatters the illusion,
+                        taking a lot of my time. In particular, the native confirm()/alert() dialog box shatters the illusion,
                         and I had to create workarounds or build in solutions. Another was the scroll bars. Given that those are 
                         browser dependent, I had to create my own and insert them everywhere. It's surprisingly difficult to home 
                         grow a scroll bar!

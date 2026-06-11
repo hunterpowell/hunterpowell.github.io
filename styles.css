@@ -1257,6 +1257,25 @@ body {
 }
 @keyframes boot-blink { 50% { opacity: 0; } }
 
+/* No-JS fallback — covers the (otherwise stuck) boot splash and gives
+   visitors the essentials in the same plum-terminal look. */
+.noscript-fallback {
+    position: fixed;
+    inset: 0;
+    z-index: 300000;            /* above #boot (200000) */
+    background: #1d1822;
+    color: #d8c7d2;
+    font-family: 'VT323', monospace;
+    font-size: 1.25rem;
+    line-height: 1.5;
+    padding: 7vh 8vw;
+    overflow: auto;
+}
+.noscript-fallback h1 { font-size: 2rem; font-weight: 400; margin-bottom: 0.5rem; }
+.noscript-fallback p, .noscript-fallback ul { margin-bottom: 0.9rem; max-width: 60ch; }
+.noscript-fallback ul { padding-left: 1.5rem; }
+.noscript-fallback a { color: var(--title-bar); }
+
 /* ============================================================
    Terminal (cmd.exe)
    ============================================================ */

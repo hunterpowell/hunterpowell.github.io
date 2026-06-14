@@ -1059,8 +1059,30 @@ body {
 .paint-size { width: 90px; accent-color: var(--accent); }
 
 @media (max-width: 600px) {
-    .paint-workspace { flex-wrap: wrap; }
-    .paint-canvas-frame { order: 3; flex-basis: 100%; min-height: 240px; }
+    /* paint.exe on phones: stack toolbox → palette → canvas vertically.
+       Toolbox and palette take their natural height; the canvas frame
+       flex-grows to fill the remaining window height and clips/scrolls its
+       oversized canvas inside — so it fits the window instead of spilling
+       past the bottom. (A plain flex column, no wrap: the old wrap let the
+       canvas overflow its box and collide with the size control.) */
+    .paint-workspace { flex-direction: column; flex-wrap: nowrap; }
+    .paint-toolbox {
+        order: 1;
+        flex: 0 0 auto;
+        flex-direction: row;
+        align-items: center;
+        align-self: stretch;
+    }
+    .paint-tools { grid-template-columns: repeat(6, 26px); }
+    .paint-current { flex: 1 1 auto; height: 26px; }
+    .paint-palette {
+        order: 2;
+        flex: 0 0 auto;
+        align-self: stretch;
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .paint-canvas-frame { order: 3; flex: 1 1 auto; min-height: 120px; }
 }
 
 /* ============================================================
@@ -1185,11 +1207,11 @@ body {
 .task-items { display: flex; gap: 5px; flex: 1; overflow: hidden; }
 
 .task-btn {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    display: block;          /* block (not flex) so text-overflow: ellipsis works */
+    min-width: 0;            /* let it shrink inside .task-items instead of hard-clipping */
     max-width: 180px;
     padding: 3px 10px;
+    line-height: 1.5;
     font-size: 0.85rem;
     font-family: 'Inter', Tahoma, sans-serif;
     background: var(--win-face);
@@ -1350,8 +1372,13 @@ body {
 
 @media (max-width: 600px) {
     .clock { display: none; }
-    .credit-extra { display: none; }   /* keep the handle, drop the tagline */
-    .credit { max-width: 60vw; }
+    /* taskbar is tight on phones: drop the tagline AND the "Illustration by"
+       lead so only the @handle remains, and let the credit shrink so the
+       task switcher keeps usable room instead of stubbing to 2 chars. */
+    .credit-extra,
+    .credit-lead { display: none; }
+    .credit { max-width: 40vw; flex: 0 1 auto; min-width: 0; padding: 0 8px; }
+    .task-items { min-width: 0; }
     .window-body h1 { font-size: 2rem; }
     #boot { font-size: 1.05rem; padding: 6vh 6vw; }
 }

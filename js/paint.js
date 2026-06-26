@@ -33,6 +33,7 @@ class PaintApp {
 
         // WebSocket — null until connect() succeeds
         this.ws = null;
+        this._clientId = null;
         this._userCount = 0;
         this._statusEl = root.querySelector('.paint-status-text');
 
@@ -171,7 +172,9 @@ class PaintApp {
             let msg;
             try { msg = JSON.parse(evt.data); } catch (_) { return; }
 
-            if (msg.type === 'init') {
+            if (msg.type === 'hello') {
+                this._clientId = msg.clientId;
+            } else if (msg.type === 'init') {
                 this.bg = '#ffffff';
                 this._applyReset(msg.strokes);
                 this._setStatus(1);
@@ -204,10 +207,8 @@ class PaintApp {
     }
 
     undo() {
-        if (this._userCount !== 1) return;
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            this.ws.send(JSON.stringify({ type: 'undo' }));
-        }
+        if (!this._clientId || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+        this.ws.send(JSON.stringify({ type: 'undo', clientId: this._clientId }));
     }
 
     _setStatus(count) {
@@ -227,7 +228,7 @@ class PaintApp {
     // Emit a completed stroke to the room.
     _emitStroke(stroke) {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-        this.ws.send(JSON.stringify({ type: 'stroke', stroke }));
+        this.ws.send(JSON.stringify({ type: 'stroke', stroke: { ...stroke, clientId: this._clientId } }));
     }
 
     // Replay a stroke received from another client (or from init history).

@@ -1063,9 +1063,7 @@
             items.push({ sep: true });
         }
         if (id === 'paint') {
-            const app = win.app;
-            const canUndo = app && app._userCount === 1;
-            items.push({ label: canUndo ? 'Undo' : 'Undo (solo only)', action: () => app?.undo(), disabled: !canUndo });
+            items.push({ label: 'Undo', action: () => win.app?.undo() });
             items.push({ sep: true });
             items.push({ label: 'Clear canvas', action: () => paintAct(win, 'clear') });
             return items;

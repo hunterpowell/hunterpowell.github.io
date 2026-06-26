@@ -20,7 +20,8 @@ export class PaintRoom {
 
         this.clients.add(server);
 
-        // Bring the new client up to speed, then tell everyone the count.
+        const clientId = crypto.randomUUID();
+        server.send(JSON.stringify({ type: 'hello', clientId }));
         server.send(JSON.stringify({ type: 'init', strokes: this.strokes }));
         this.broadcast({ type: 'users', count: this.clients.size });
 
@@ -31,7 +32,13 @@ export class PaintRoom {
                     this.strokes.push(msg.stroke);
                     this.broadcastExcept(server, { type: 'stroke', stroke: msg.stroke });
                 } else if (msg.type === 'undo') {
-                    this.strokes.pop();
+                    // Remove the last stroke belonging to this client.
+                    for (let i = this.strokes.length - 1; i >= 0; i--) {
+                        if (this.strokes[i].clientId === msg.clientId) {
+                            this.strokes.splice(i, 1);
+                            break;
+                        }
+                    }
                     this.broadcast({ type: 'reset', strokes: this.strokes });
                 } else if (msg.type === 'clear') {
                     this.strokes = [];

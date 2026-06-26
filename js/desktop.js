@@ -1063,7 +1063,7 @@
             items.push({ sep: true });
         }
         if (id === 'paint') {
-            items.push({ label: 'Undo', action: () => win.app?.undo() });
+            items.push({ label: 'Undo', action: () => win._paint?.undo() });
             items.push({ sep: true });
             items.push({ label: 'Clear canvas', action: () => paintAct(win, 'clear') });
             return items;

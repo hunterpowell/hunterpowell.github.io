@@ -1,0 +1,11 @@
+name = "hunterpowell-paint"
+main = "worker/paint-worker.js"
+compatibility_date = "2024-09-23"
+
+[[durable_objects.bindings]]
+name = "PAINT_ROOM"
+class_name = "PaintRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["PaintRoom"]

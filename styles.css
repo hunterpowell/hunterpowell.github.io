@@ -1058,6 +1058,19 @@ body {
 .paint-size-wrap b { color: var(--accent); font-weight: normal; min-width: 34px; }
 .paint-size { width: 90px; accent-color: var(--accent); }
 
+/* ---- multiplayer status bar --------------------------- */
+.paint-status {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'VT323', monospace; font-size: 1rem; color: var(--ink-soft);
+    border-top: 1px solid var(--border); padding-top: 5px; margin-top: 2px;
+}
+.paint-status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #bbb; flex-shrink: 0;
+    transition: background 0.3s;
+}
+.paint-status.connected .paint-status-dot { background: #5cb85c; }
+
 @media (max-width: 600px) {
     /* paint.exe on phones: stack toolbox → palette → canvas vertically.
        Toolbox and palette take their natural height; the canvas frame

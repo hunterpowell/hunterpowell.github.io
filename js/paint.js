@@ -1,6 +1,9 @@
-// paint.js — a cute, barebones MS Paint clone for paint.exe
+// paint.js — MS Paint clone for paint.exe, with optional multiplayer via WebSocket.
 // Tools: pencil, eraser, line, rectangle, ellipse, flood fill.
 // Mirrors the demo/sim class style used by tree.js / robots.js.
+
+// Deployed Cloudflare Worker endpoint. Swap this after `wrangler deploy`.
+const PAINT_WS_URL = 'https://hunterpowell-paint.hunterpowell99.workers.dev';
 
 class PaintApp {
     constructor(root) {
@@ -10,46 +13,48 @@ class PaintApp {
         this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
         this.tool = 'pencil';
-        this.color = '#46343e';   // dark plum to match the site ink
+        this.color = '#46343e';
         this.size = 4;
-        // Canvas background: dark in dark mode, white otherwise. Sampled once
-        // per open and frozen — a mid-session theme toggle must NOT recolor
-        // it, since the pixels already drawn keep the old background; eraser
-        // and clear stay consistent with the canvas, and reopening resamples.
+        // In solo mode, bg matches the site theme. In multiplayer it is fixed
+        // to white so eraser strokes are consistent across all clients.
         this.bg = document.body.classList.contains('dark') ? '#15191e' : '#ffffff';
 
         this.drawing = false;
         this.startX = 0;
         this.startY = 0;
+        this.lastP = null;        // end-point for shape tools (set in pointermove)
+        this.currentPoints = [];  // accumulated points for pencil/eraser strokes
 
-        // Persistent pixel buffer is the source of truth: every tool plots
-        // into it and we blit to the canvas. Keeps all rendering aliased
-        // (no antialiased fringe) so the flood fill reaches clean edges.
         this.W = this.canvas.width;
         this.H = this.canvas.height;
         this.img = this.ctx.createImageData(this.W, this.H);
         this.buf = new Uint32Array(this.img.data.buffer);
-        this.base = null;         // buffer copy for live shape previews
+        this.base = null;
+
+        // WebSocket — null until connect() succeeds
+        this.ws = null;
+        this._statusEl = root.querySelector('.paint-status-text');
 
         this.clear();
         this.wireTools();
         this.wireCanvas();
         this.setupScrollbars();
+        this.connect();
     }
 
     /* ---- setup -------------------------------------------- */
     clear() {
         this.buf.fill(this.packColor(this.bg));
         this.blit();
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ type: 'clear' }));
+        }
     }
 
-    // push the pixel buffer to the visible canvas
     blit() {
         this.ctx.putImageData(this.img, 0, 0);
     }
 
-    // menu-driven bitmap ops — applied to the buffer so they persist
-    // through subsequent strokes/fills (which blit the buffer back out).
     filter(kind) {
         const W = this.W, H = this.H, px = this.buf;
         if (kind === 'invert') {
@@ -70,7 +75,6 @@ class PaintApp {
     }
 
     wireTools() {
-        // tool buttons
         this.root.querySelectorAll('[data-tool]').forEach((b) => {
             b.addEventListener('click', () => {
                 this.tool = b.dataset.tool;
@@ -79,7 +83,6 @@ class PaintApp {
             });
         });
 
-        // colour swatches
         const swatch = this.root.querySelector('.paint-current');
         this.root.querySelectorAll('[data-color]').forEach((s) => {
             s.style.background = s.dataset.color;
@@ -92,7 +95,6 @@ class PaintApp {
         });
         if (swatch) swatch.style.background = this.color;
 
-        // custom colour picker
         const picker = this.root.querySelector('.paint-picker');
         if (picker) {
             picker.value = this.color;
@@ -104,7 +106,6 @@ class PaintApp {
             });
         }
 
-        // brush size
         const sizeInput = this.root.querySelector('.paint-size');
         const sizeLabel = this.root.querySelector('[data-size-label]');
         if (sizeInput) {
@@ -117,8 +118,6 @@ class PaintApp {
         }
     }
 
-    // Clear / save now live in the window's File & Image menus (see
-    // desktop.js), so there are no dedicated buttons to wire here.
     save() {
         const a = document.createElement('a');
         a.download = 'untitled.png';
@@ -127,8 +126,6 @@ class PaintApp {
     }
 
     /* ---- working scrollbars ------------------------------- */
-    // The canvas is a fixed size; the stage is a smaller viewport.
-    // Both axes are driven by the shared Win9x scrollbar module.
     setupScrollbars() {
         const vp = this.viewport;
         if (!vp || typeof window.winScroll === 'undefined') return;
@@ -139,6 +136,101 @@ class PaintApp {
     destroy() {
         if (this.scrollY) this.scrollY.destroy();
         if (this.scrollX) this.scrollX.destroy();
+        if (this.ws) { this.ws.onclose = null; this.ws.close(); this.ws = null; }
+    }
+
+    /* ---- multiplayer -------------------------------------- */
+    connect() {
+        let ws;
+        try {
+            ws = new WebSocket(PAINT_WS_URL);
+        } catch (_) {
+            return; // Non-fatal: stay in local-only mode
+        }
+
+        ws.addEventListener('open', () => {
+            this.ws = ws;
+        });
+
+        ws.addEventListener('message', (evt) => {
+            let msg;
+            try { msg = JSON.parse(evt.data); } catch (_) { return; }
+
+            if (msg.type === 'init') {
+                // Fix bg to white for the shared session before replaying history.
+                this.bg = '#ffffff';
+                this.buf.fill(this.packColor(this.bg));
+                for (const stroke of msg.strokes) this.replayStroke(stroke);
+                this.blit();
+                this._setStatus(1); // updated below when 'users' arrives
+            } else if (msg.type === 'stroke') {
+                this.replayStroke(msg.stroke);
+            } else if (msg.type === 'clear') {
+                this.buf.fill(this.packColor(this.bg));
+                this.blit();
+            } else if (msg.type === 'users') {
+                this._setStatus(msg.count);
+            }
+        });
+
+        ws.addEventListener('close', () => {
+            this.ws = null;
+            this._setStatus(0);
+        });
+
+        ws.addEventListener('error', () => {
+            // Error fires before close; let close handler clean up.
+        });
+    }
+
+    _setStatus(count) {
+        if (!this._statusEl) return;
+        const bar = this._statusEl.closest('.paint-status');
+        if (count === 0) {
+            this._statusEl.textContent = 'not connected';
+            if (bar) bar.classList.remove('connected');
+            return;
+        }
+        if (bar) bar.classList.add('connected');
+        const label = count === 1 ? 'user' : 'users';
+        this._statusEl.textContent = `${count} ${label} connected  —  canvas clears when all disconnect`;
+    }
+
+    // Emit a completed stroke to the room.
+    _emitStroke(stroke) {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+        this.ws.send(JSON.stringify({ type: 'stroke', stroke }));
+    }
+
+    // Replay a stroke received from another client (or from init history).
+    replayStroke(stroke) {
+        const saved = { tool: this.tool, color: this.color, size: this.size, bg: this.bg };
+
+        this.size = stroke.size;
+        this.color = stroke.color;
+
+        if (stroke.tool === 'fill') {
+            this.floodFill(stroke.x, stroke.y, stroke.color);
+        } else if (stroke.tool === 'pencil' || stroke.tool === 'eraser') {
+            this.tool = stroke.tool;
+            if (stroke.tool === 'eraser') this.bg = stroke.color;
+            const pts = stroke.points;
+            if (pts.length === 1) {
+                this.stroke(pts[0][0], pts[0][1], pts[0][0], pts[0][1]);
+            } else {
+                for (let i = 1; i < pts.length; i++) {
+                    this.stroke(pts[i - 1][0], pts[i - 1][1], pts[i][0], pts[i][1]);
+                }
+            }
+        } else if (stroke.tool === 'line' || stroke.tool === 'rect' || stroke.tool === 'ellipse') {
+            this.tool = stroke.tool;
+            this.shape(stroke.x0, stroke.y0, stroke.x1, stroke.y1);
+        }
+
+        this.tool = saved.tool;
+        this.color = saved.color;
+        this.size = saved.size;
+        this.bg = saved.bg;
     }
 
     /* ---- pointer → canvas coords -------------------------- */
@@ -161,15 +253,17 @@ class PaintApp {
 
             if (this.tool === 'fill') {
                 this.floodFill(p.x, p.y, this.color);
+                this._emitStroke({ tool: 'fill', color: this.color, size: this.size, x: p.x, y: p.y });
                 return;
             }
 
             this.drawing = true;
+            this.lastP = null;
+            this.currentPoints = [[p.x, p.y]];
             c.setPointerCapture(e.pointerId);
-            this.base = this.buf.slice();   // frozen base for shape previews
+            this.base = this.buf.slice();
 
             if (this.tool === 'pencil' || this.tool === 'eraser') {
-                // a single click should leave a dot
                 this.stroke(p.x, p.y, p.x, p.y);
             }
         });
@@ -182,8 +276,9 @@ class PaintApp {
                 this.stroke(this.startX, this.startY, p.x, p.y);
                 this.startX = p.x;
                 this.startY = p.y;
+                this.currentPoints.push([p.x, p.y]);
             } else {
-                // live shape preview: restore the frozen base, redraw shape
+                this.lastP = p;
                 this.buf.set(this.base);
                 this.shape(this.startX, this.startY, p.x, p.y);
             }
@@ -193,15 +288,33 @@ class PaintApp {
             if (!this.drawing) return;
             this.drawing = false;
             try { c.releasePointerCapture(e.pointerId); } catch (_) {}
+
+            if (this.tool === 'pencil' || this.tool === 'eraser') {
+                this._emitStroke({
+                    tool: this.tool,
+                    // For eraser, send the actual bg color so remote clients
+                    // erase to the same background regardless of their theme.
+                    color: this.tool === 'eraser' ? this.bg : this.color,
+                    size: this.size,
+                    points: this.currentPoints,
+                });
+            } else if (this.lastP) {
+                this._emitStroke({
+                    tool: this.tool,
+                    color: this.color,
+                    size: this.size,
+                    x0: this.startX,
+                    y0: this.startY,
+                    x1: this.lastP.x,
+                    y1: this.lastP.y,
+                });
+            }
         };
         c.addEventListener('pointerup', end);
         c.addEventListener('pointercancel', end);
     }
 
     /* ---- drawing primitives ------------------------------- */
-    // Everything plots straight into the pixel buffer with NO antialiasing,
-    // the way MS Paint does. A stroke is a Bresenham line with a round brush
-    // stamped at each step; the eraser is the same thing painted in bg.
     stroke(x0, y0, x1, y1) {
         const color = this.packColor(this.tool === 'eraser' ? this.bg : this.color);
         this.line(x0, y0, x1, y1, color);
@@ -215,24 +328,21 @@ class PaintApp {
         } else if (this.tool === 'rect') {
             const xa = Math.min(x0, x1), xb = Math.max(x0, x1);
             const ya = Math.min(y0, y1), yb = Math.max(y0, y1);
-            this.line(xa, ya, xb, ya, color);   // top
-            this.line(xa, yb, xb, yb, color);   // bottom
-            this.line(xa, ya, xa, yb, color);   // left
-            this.line(xb, ya, xb, yb, color);   // right
+            this.line(xa, ya, xb, ya, color);
+            this.line(xa, yb, xb, yb, color);
+            this.line(xa, ya, xa, yb, color);
+            this.line(xb, ya, xb, yb, color);
         } else if (this.tool === 'ellipse') {
             this.ellipseOutline(x0, y0, x1, y1, color);
         }
         this.blit();
     }
 
-    // ---- pixel-level helpers ------------------------------
-    // set one pixel (bounds-checked)
     set(x, y, color) {
         if (x < 0 || y < 0 || x >= this.W || y >= this.H) return;
         this.buf[y * this.W + x] = color;
     }
 
-    // round brush: a filled disc of diameter `size` centred on (cx, cy)
     brush(cx, cy, color) {
         const r = this.size / 2;
         if (r <= 0.5) { this.set(cx, cy, color); return; }
@@ -244,7 +354,6 @@ class PaintApp {
         }
     }
 
-    // Bresenham line, stamping the brush at every step
     line(x0, y0, x1, y1, color) {
         const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
         const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
@@ -258,7 +367,6 @@ class PaintApp {
         }
     }
 
-    // Midpoint-ellipse outline within the bounding box, brush-stamped
     ellipseOutline(x0, y0, x1, y1, color) {
         const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
         const a = Math.abs(x1 - x0) / 2, b = Math.abs(y1 - y0) / 2;
@@ -271,7 +379,6 @@ class PaintApp {
             this.brush(Math.round(cx + x), Math.round(cy - y), color);
             this.brush(Math.round(cx - x), Math.round(cy - y), color);
         };
-        // region 1: slope > -1
         let d1 = b2 - a2 * b + 0.25 * a2;
         while (dx < dy) {
             plot();
@@ -279,7 +386,6 @@ class PaintApp {
             if (d1 < 0) { d1 += dx + b2; }
             else { y--; dy -= 2 * a2; d1 += dx - dy + b2; }
         }
-        // region 2: slope < -1
         let d2 = b2 * (x + 0.5) * (x + 0.5) + a2 * (y - 1) * (y - 1) - a2 * b2;
         while (y >= 0) {
             plot();
@@ -289,9 +395,7 @@ class PaintApp {
         }
     }
 
-    /* ---- flood fill (4-connected, typed-array fast path) -- */
-    // Operates directly on the live buffer. Exact-match is correct now that
-    // every edge is hard — there are no antialiased fringe pixels to leak past.
+    /* ---- flood fill --------------------------------------- */
     floodFill(x, y, hex) {
         const W = this.W, H = this.H;
         if (x < 0 || y < 0 || x >= W || y >= H) return;
@@ -302,7 +406,7 @@ class PaintApp {
         const fill = this.packColor(hex);
         if (target === fill) return;
 
-        const stack = [start];   // flat numeric stack of pixel indices
+        const stack = [start];
         while (stack.length) {
             const i = stack.pop();
             if (px[i] !== target) continue;
@@ -316,14 +420,13 @@ class PaintApp {
         this.blit();
     }
 
-    // pack #rrggbb into a 32-bit pixel in the platform's byte order
     packColor(hex) {
         const n = parseInt(hex.slice(1), 16);
         const probe = new Uint8Array(4);
-        probe[0] = (n >> 16) & 255;  // r
-        probe[1] = (n >> 8) & 255;   // g
-        probe[2] = n & 255;          // b
-        probe[3] = 255;              // a
+        probe[0] = (n >> 16) & 255;
+        probe[1] = (n >> 8) & 255;
+        probe[2] = n & 255;
+        probe[3] = 255;
         return new Uint32Array(probe.buffer)[0];
     }
 }

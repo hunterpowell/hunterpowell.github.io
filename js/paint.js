@@ -33,6 +33,7 @@ class PaintApp {
 
         // WebSocket — null until connect() succeeds
         this.ws = null;
+        this._userCount = 0;
         this._statusEl = root.querySelector('.paint-status-text');
 
         this.clear();
@@ -40,6 +41,7 @@ class PaintApp {
         this.wireCanvas();
         this.setupScrollbars();
         this.connect();
+        this._wireKeys();
     }
 
     /* ---- setup -------------------------------------------- */
@@ -137,6 +139,19 @@ class PaintApp {
         if (this.scrollY) this.scrollY.destroy();
         if (this.scrollX) this.scrollX.destroy();
         if (this.ws) { this.ws.onclose = null; this.ws.close(); this.ws = null; }
+        document.removeEventListener('keydown', this._onKey);
+    }
+
+    /* ---- keyboard shortcuts ------------------------------- */
+    _wireKeys() {
+        this._onKey = (e) => {
+            if (!(e.ctrlKey || e.metaKey) || e.key !== 'z' || e.shiftKey) return;
+            const tag = document.activeElement?.tagName;
+            if (tag === 'TEXTAREA' || tag === 'INPUT') return;
+            e.preventDefault();
+            this.undo();
+        };
+        document.addEventListener('keydown', this._onKey);
     }
 
     /* ---- multiplayer -------------------------------------- */
@@ -157,14 +172,13 @@ class PaintApp {
             try { msg = JSON.parse(evt.data); } catch (_) { return; }
 
             if (msg.type === 'init') {
-                // Fix bg to white for the shared session before replaying history.
                 this.bg = '#ffffff';
-                this.buf.fill(this.packColor(this.bg));
-                for (const stroke of msg.strokes) this.replayStroke(stroke);
-                this.blit();
-                this._setStatus(1); // updated below when 'users' arrives
+                this._applyReset(msg.strokes);
+                this._setStatus(1);
             } else if (msg.type === 'stroke') {
                 this.replayStroke(msg.stroke);
+            } else if (msg.type === 'reset') {
+                this._applyReset(msg.strokes);
             } else if (msg.type === 'clear') {
                 this.buf.fill(this.packColor(this.bg));
                 this.blit();
@@ -183,7 +197,21 @@ class PaintApp {
         });
     }
 
+    _applyReset(strokes) {
+        this.buf.fill(this.packColor(this.bg));
+        for (const stroke of strokes) this.replayStroke(stroke);
+        this.blit();
+    }
+
+    undo() {
+        if (this._userCount !== 1) return;
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            this.ws.send(JSON.stringify({ type: 'undo' }));
+        }
+    }
+
     _setStatus(count) {
+        this._userCount = count;
         if (!this._statusEl) return;
         const bar = this._statusEl.closest('.paint-status');
         if (count === 0) {

@@ -926,6 +926,7 @@
             }
             const b = document.createElement('button');
             b.textContent = it.label;
+            if (it.disabled) b.disabled = true;
             b.addEventListener('click', () => { closeContextMenu(); if (it.action) it.action(); });
             menu.appendChild(b);
         });
@@ -1062,6 +1063,10 @@
             items.push({ sep: true });
         }
         if (id === 'paint') {
+            const app = win.app;
+            const canUndo = app && app._userCount === 1;
+            items.push({ label: canUndo ? 'Undo' : 'Undo (solo only)', action: () => app?.undo(), disabled: !canUndo });
+            items.push({ sep: true });
             items.push({ label: 'Clear canvas', action: () => paintAct(win, 'clear') });
             return items;
         }

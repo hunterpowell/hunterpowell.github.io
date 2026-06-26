@@ -30,6 +30,9 @@ export class PaintRoom {
                 if (msg.type === 'stroke') {
                     this.strokes.push(msg.stroke);
                     this.broadcastExcept(server, { type: 'stroke', stroke: msg.stroke });
+                } else if (msg.type === 'undo') {
+                    this.strokes.pop();
+                    this.broadcast({ type: 'reset', strokes: this.strokes });
                 } else if (msg.type === 'clear') {
                     this.strokes = [];
                     this.broadcastExcept(server, { type: 'clear' });

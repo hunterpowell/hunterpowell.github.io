@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>paint.exe — session history</title>
+    <meta name="robots" content="noindex, nofollow">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            border-right: 1px solid #21262d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #sidebar-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid #21262d;
+            font-size: 11px;
+            color: #8b949e;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+
+        #session-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .session-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #161b22;
+            user-select: none;
+        }
+        .session-item:hover { background: #161b22; }
+        .session-item.active { background: #1f3a5f; border-left: 3px solid #58a6ff; }
+        .session-date { font-size: 12px; color: #c9d1d9; }
+        .session-meta { font-size: 11px; color: #8b949e; margin-top: 3px; }
+
+        #main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 20px;
+            gap: 12px;
+        }
+
+        #canvas-wrap { display: none; }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            max-height: calc(100vh - 80px);
+            border: 1px solid #21262d;
+            image-rendering: pixelated;
+        }
+
+        #save-btn {
+            font-family: inherit;
+            font-size: 12px;
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 6px 14px;
+            cursor: pointer;
+            letter-spacing: 0.04em;
+        }
+        #save-btn:hover { background: #30363d; }
+
+        #placeholder { color: #484f58; font-size: 13px; }
+        .msg { padding: 20px; font-size: 13px; color: #8b949e; }
+        .err { color: #f85149; }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <div id="sidebar-header">paint.exe / sessions</div>
+        <div id="session-list">
+            <div class="msg" id="status">loading...</div>
+        </div>
+    </div>
+    <div id="main">
+        <div id="placeholder">← select a session</div>
+        <div id="canvas-wrap">
+            <canvas id="c" width="1200" height="900"></canvas>
+            <button id="save-btn" onclick="saveCanvas()">save as png</button>
+        </div>
+    </div>
+
+    <script>
+        const WORKER_URL = 'https://hunterpowell-paint.hunterpowell99.workers.dev';
+        const W = 1200, H = 900;
+
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+        const img = ctx.createImageData(W, H);
+        const buf = new Uint32Array(img.data.buffer);
+
+        let brushSize = 4;
+
+        function packColor(hex) {
+            const n = parseInt(hex.slice(1), 16);
+            const b = new Uint8Array(4);
+            b[0] = (n >> 16) & 255; b[1] = (n >> 8) & 255; b[2] = n & 255; b[3] = 255;
+            return new Uint32Array(b.buffer)[0];
+        }
+
+        function set(x, y, c) {
+            if (x >= 0 && y >= 0 && x < W && y < H) buf[y * W + x] = c;
+        }
+
+        function brush(cx, cy, c) {
+            const r = brushSize / 2;
+            if (r <= 0.5) { set(cx, cy, c); return; }
+            const rad = Math.floor(r), r2 = r * r;
+            for (let dy = -rad; dy <= rad; dy++)
+                for (let dx = -rad; dx <= rad; dx++)
+                    if (dx * dx + dy * dy <= r2) set(cx + dx, cy + dy, c);
+        }
+
+        function line(x0, y0, x1, y1, c) {
+            const dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1, sy = y0 < y1 ? 1 : -1;
+            let err = dx - dy;
+            for (;;) {
+                brush(x0, y0, c);
+                if (x0 === x1 && y0 === y1) break;
+                const e2 = 2 * err;
+                if (e2 > -dy) { err -= dy; x0 += sx; }
+                if (e2 < dx) { err += dx; y0 += sy; }
+            }
+        }
+
+        function ellipseOutline(x0, y0, x1, y1, c) {
+            const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+            const a = Math.abs(x1 - x0) / 2, b = Math.abs(y1 - y0) / 2;
+            if (a < 0.5 || b < 0.5) { line(x0, y0, x1, y1, c); return; }
+            const a2 = a * a, b2 = b * b;
+            let x = 0, y = b, dx = 0, dy = 2 * a2 * b;
+            const plot = () => {
+                brush(Math.round(cx + x), Math.round(cy + y), c);
+                brush(Math.round(cx - x), Math.round(cy + y), c);
+                brush(Math.round(cx + x), Math.round(cy - y), c);
+                brush(Math.round(cx - x), Math.round(cy - y), c);
+            };
+            let d1 = b2 - a2 * b + 0.25 * a2;
+            while (dx < dy) {
+                plot(); x++; dx += 2 * b2;
+                if (d1 < 0) { d1 += dx + b2; }
+                else { y--; dy -= 2 * a2; d1 += dx - dy + b2; }
+            }
+            let d2 = b2 * (x + 0.5) * (x + 0.5) + a2 * (y - 1) * (y - 1) - a2 * b2;
+            while (y >= 0) {
+                plot(); y--; dy -= 2 * a2;
+                if (d2 > 0) { d2 += a2 - dy; }
+                else { x++; dx += 2 * b2; d2 += dx - dy + a2; }
+            }
+        }
+
+        function floodFill(x, y, hex) {
+            if (x < 0 || y < 0 || x >= W || y >= H) return;
+            const start = y * W + x;
+            const target = buf[start];
+            const fill = packColor(hex);
+            if (target === fill) return;
+            const stack = [start];
+            while (stack.length) {
+                const i = stack.pop();
+                if (buf[i] !== target) continue;
+                buf[i] = fill;
+                const col = i % W;
+                if (col > 0) stack.push(i - 1);
+                if (col < W - 1) stack.push(i + 1);
+                if (i >= W) stack.push(i - W);
+                if (i + W < W * H) stack.push(i + W);
+            }
+        }
+
+        function replayStroke(stroke) {
+            const saved = brushSize;
+            brushSize = stroke.size;
+            const c = packColor(stroke.color);
+
+            if (stroke.tool === 'fill') {
+                floodFill(stroke.x, stroke.y, stroke.color);
+            } else if (stroke.tool === 'pencil' || stroke.tool === 'eraser') {
+                // eraser strokes store bg color in .color, so c is correct for both
+                const pts = stroke.points;
+                if (pts.length === 1) {
+                    brush(pts[0][0], pts[0][1], c);
+                } else {
+                    for (let i = 1; i < pts.length; i++)
+                        line(pts[i-1][0], pts[i-1][1], pts[i][0], pts[i][1], c);
+                }
+            } else if (stroke.tool === 'line') {
+                line(stroke.x0, stroke.y0, stroke.x1, stroke.y1, c);
+            } else if (stroke.tool === 'rect') {
+                const xa = Math.min(stroke.x0, stroke.x1), xb = Math.max(stroke.x0, stroke.x1);
+                const ya = Math.min(stroke.y0, stroke.y1), yb = Math.max(stroke.y0, stroke.y1);
+                line(xa, ya, xb, ya, c); line(xa, yb, xb, yb, c);
+                line(xa, ya, xa, yb, c); line(xb, ya, xb, yb, c);
+            } else if (stroke.tool === 'ellipse') {
+                ellipseOutline(stroke.x0, stroke.y0, stroke.x1, stroke.y1, c);
+            }
+
+            brushSize = saved;
+        }
+
+        function renderSession(session) {
+            buf.fill(packColor('#ffffff'));
+            for (const stroke of session.strokes) replayStroke(stroke);
+            ctx.putImageData(img, 0, 0);
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('canvas-wrap').style.display = 'flex';
+            document.getElementById('canvas-wrap').style.flexDirection = 'column';
+            document.getElementById('canvas-wrap').style.alignItems = 'center';
+            document.getElementById('canvas-wrap').style.gap = '10px';
+        }
+
+        function saveCanvas() {
+            const a = document.createElement('a');
+            const d = new Date(currentSession.ts);
+            a.download = `paint-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.png`;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        }
+
+        let currentSession = null;
+
+        async function load() {
+            const token = new URLSearchParams(location.search).get('token');
+            if (!token) {
+                setStatus('add ?token=... to the URL', true);
+                return;
+            }
+
+            let sessions;
+            try {
+                const resp = await fetch(`${WORKER_URL}/history?token=${encodeURIComponent(token)}`);
+                if (resp.status === 401) { setStatus('wrong token', true); return; }
+                if (!resp.ok) { setStatus(`error ${resp.status}`, true); return; }
+                sessions = await resp.json();
+            } catch (_) {
+                setStatus('fetch failed — is the worker deployed?', true);
+                return;
+            }
+
+            if (sessions.length === 0) {
+                setStatus('no sessions yet');
+                return;
+            }
+
+            const list = document.getElementById('session-list');
+            list.innerHTML = '';
+            sessions.forEach((session, i) => {
+                const d = new Date(session.ts);
+                const el = document.createElement('div');
+                el.className = 'session-item';
+                el.innerHTML = `
+                    <div class="session-date">${d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+                    <div class="session-meta">${d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })} &nbsp;·&nbsp; ${session.strokes.length} stroke${session.strokes.length !== 1 ? 's' : ''}</div>
+                `;
+                el.addEventListener('click', () => {
+                    document.querySelectorAll('.session-item').forEach(x => x.classList.remove('active'));
+                    el.classList.add('active');
+                    currentSession = session;
+                    renderSession(session);
+                });
+                list.appendChild(el);
+                if (i === 0) el.click();
+            });
+        }
+
+        function setStatus(msg, isErr) {
+            const el = document.getElementById('status');
+            el.textContent = msg;
+            if (isErr) el.classList.add('err');
+        }
+
+        load();
+    </script>
+</body>
+</html>

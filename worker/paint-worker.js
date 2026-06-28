@@ -1,15 +1,33 @@
 // Cloudflare Worker + Durable Object for multiplayer paint.exe
 // One shared room ("main"). Strokes are ephemeral: when the last client
 // disconnects the history is cleared, so visitors never see stale vandalism.
+// Sessions are saved to DO storage for private review at /history?token=SECRET.
 
 export class PaintRoom {
-    constructor(state) {
+    constructor(state, env) {
         this.state = state;
+        this.env = env;
         this.clients = new Set();
         this.strokes = [];
     }
 
     async fetch(request) {
+        const url = new URL(request.url);
+
+        if (url.pathname === '/history') {
+            const token = url.searchParams.get('token');
+            if (!token || !this.env.HISTORY_TOKEN || token !== this.env.HISTORY_TOKEN) {
+                return new Response('Unauthorized', { status: 401 });
+            }
+            const map = await this.state.storage.list({ prefix: 'session_' });
+            const sessions = [];
+            for (const [, val] of map) sessions.push(val);
+            sessions.sort((a, b) => b.ts - a.ts);
+            return new Response(JSON.stringify(sessions), {
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
+
         if (request.headers.get('Upgrade') !== 'websocket') {
             return new Response('Expected WebSocket upgrade', { status: 426 });
         }
@@ -50,6 +68,10 @@ export class PaintRoom {
         const onClose = () => {
             this.clients.delete(server);
             if (this.clients.size === 0) {
+                if (this.strokes.length > 0) {
+                    const ts = Date.now();
+                    this.state.storage.put('session_' + ts, { ts, strokes: this.strokes });
+                }
                 this.strokes = [];
             } else {
                 this.broadcast({ type: 'users', count: this.clients.size });

@@ -922,12 +922,7 @@ body {
     min-width: 0; min-height: 0;
     display: flex;                  /* lets the canvas center via auto margins (below) */
     overflow: auto;                 /* fixed canvas scrolls inside; window resize crops */
-    /* off-canvas area shows the desktop grid, not a white gap */
-    background-color: var(--win-content);
-    background-image:
-        linear-gradient(var(--grid-faint) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-faint) 1px, transparent 1px);
-    background-size: 24px 24px, 24px 24px;
+    background: var(--desk);
     box-shadow: inset 1px 1px 0 var(--win-dark);
     scrollbar-width: none;          /* hide native bars — our custom ones drive scrolling */
     -ms-overflow-style: none;

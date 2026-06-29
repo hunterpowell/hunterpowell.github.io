@@ -157,15 +157,16 @@
     // dismisses the screensaver (swallowing the event) when it's showing.
     function onActivity(e) {
         if (!active) { scheduleIdle(); return; }
-        // ignore the spurious mousemove some browsers fire as the overlay appears
-        if (e.type === 'mousemove' && performance.now() - activatedAt < GRACE) return;
+        // ignore the spurious mouse/pointer move some browsers fire as the overlay appears
+        if ((e.type === 'mousemove' || e.type === 'pointermove') &&
+            performance.now() - activatedAt < GRACE) return;
         deactivate();
         if (e.cancelable) e.preventDefault();
         e.stopPropagation();   // don't let the waking click reach a window/icon
     }
 
     if (!reduce) {
-        ['mousemove', 'mousedown', 'pointerdown', 'keydown', 'wheel', 'touchstart']
+        ['mousemove', 'pointermove', 'mousedown', 'pointerdown', 'keydown', 'wheel', 'touchstart']
             .forEach((type) => document.addEventListener(type, onActivity, { capture: true, passive: false }));
 
         document.addEventListener('visibilitychange', () => {

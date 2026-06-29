@@ -920,23 +920,29 @@ body {
 .paint-stage {
     grid-column: 1; grid-row: 1;
     min-width: 0; min-height: 0;
-    display: flex;                  /* lets the canvas center via auto margins (below) */
-    overflow: auto;                 /* fixed canvas scrolls inside; window resize crops */
+    overflow: auto;                 /* the padded world scrolls inside; window resize crops */
     background: var(--desk);
     box-shadow: inset 1px 1px 0 var(--win-dark);
     scrollbar-width: none;          /* hide native bars — our custom ones drive scrolling */
     -ms-overflow-style: none;
 }
 .paint-stage::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.paint-world {
+    display: inline-block;          /* shrink-wraps the canvas + its pan-padding */
+    font-size: 0; line-height: 0;   /* kill inline-block whitespace under the canvas */
+    /* padding is set in JS to ~a viewport on every side, so the canvas can be
+       grabbed and dragged freely even when it is smaller than the stage */
+}
 .paint-canvas {
-    display: block;                 /* renders at its fixed intrinsic pixel size */
-    flex: 0 0 auto;                 /* never shrink below intrinsic size — overflow & scroll instead */
-    margin: auto;                   /* centers when the stage is bigger; collapses to 0 on overflow,
-                                       so scroll still reaches the top-left edge */
+    display: block;                 /* renders at its CSS (zoomed) size */
     background: #fff;
     cursor: crosshair;
     touch-action: none;
 }
+/* crisp magnified pixels (MS Paint feel); JS swaps to 'auto' below 100% */
+.paint-canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
+.paint-stage.is-panning { cursor: grabbing; }
+.paint-stage.is-panning .paint-canvas { cursor: grabbing; }
 
 .paint-scroll { display: flex; gap: 2px; }
 .paint-scroll--y { grid-column: 2; grid-row: 1; flex-direction: column; }
@@ -1065,6 +1071,16 @@ body {
     transition: background 0.3s;
 }
 .paint-status.connected .paint-status-dot { background: #5cb85c; }
+.paint-zoom-reset {
+    margin-left: auto; flex-shrink: 0;
+    font-family: inherit; font-size: 0.95rem; color: var(--ink-soft);
+    padding: 0 6px; min-width: 48px;
+    background: var(--win-face);
+    border: 1px solid var(--win-border);
+    box-shadow: inset 1px 1px 0 var(--win-light), inset -1px -1px 0 var(--win-dark);
+    cursor: pointer;
+}
+.paint-zoom-reset:active { box-shadow: inset -1px -1px 0 var(--win-light), inset 1px 1px 0 var(--win-dark); }
 
 @media (max-width: 600px) {
     /* paint.exe on phones: stack toolbox → palette → canvas vertically.

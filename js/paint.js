@@ -10,6 +10,7 @@ class PaintApp {
         this.root = root;
         this.canvas = root.querySelector('.paint-canvas');
         this.viewport = root.querySelector('.paint-stage');
+        this.world = root.querySelector('.paint-world');
         this.ctx = this.canvas.getContext('2d', { willReadFrequently: true });
 
         this.tool = 'pencil';
@@ -27,6 +28,12 @@ class PaintApp {
 
         this.W = this.canvas.width;
         this.H = this.canvas.height;
+
+        // view transform — CSS-scales the canvas inside the scrolling stage
+        this.zoom = 1;
+        this.minZoom = 0.1;
+        this.maxZoom = 16;
+        this._panning = false;
         this.img = this.ctx.createImageData(this.W, this.H);
         this.buf = new Uint32Array(this.img.data.buffer);
         this.base = null;
@@ -41,6 +48,7 @@ class PaintApp {
         this.wireTools();
         this.wireCanvas();
         this.setupScrollbars();
+        this.wireZoomPan();
         this.connect();
         this._wireKeys();
     }
@@ -136,9 +144,150 @@ class PaintApp {
         this.scrollX = window.winScroll(vp, { axis: 'x', bar: this.root.querySelector('.paint-scroll--x') });
     }
 
+    /* ---- zoom + pan --------------------------------------- */
+    // ctrl/⌘ + wheel zooms toward the cursor; middle-button drag pans.
+    wireZoomPan() {
+        const vp = this.viewport;
+        if (!vp) return;
+
+        vp.addEventListener('wheel', (e) => {
+            if (!(e.ctrlKey || e.metaKey)) return;   // plain wheel still scrolls the stage
+            e.preventDefault();
+            const factor = e.deltaY < 0 ? 1.15 : 1 / 1.15;
+            this.setZoom(this.zoom * factor, e.clientX, e.clientY);
+        }, { passive: false });
+
+        // Block the OS middle-click autoscroll bubble (fires on mousedown).
+        vp.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
+
+        vp.addEventListener('pointerdown', (e) => {
+            if (e.button !== 1) return;   // middle button only
+            e.preventDefault();
+            this._panning = true;
+            this._panX = e.clientX; this._panY = e.clientY;
+            this._panSL = vp.scrollLeft; this._panST = vp.scrollTop;
+            vp.classList.add('is-panning');
+            try { vp.setPointerCapture(e.pointerId); } catch (_) {}
+        });
+        vp.addEventListener('pointermove', (e) => {
+            if (!this._panning) return;
+            vp.scrollLeft = this._panSL - (e.clientX - this._panX);
+            vp.scrollTop = this._panST - (e.clientY - this._panY);
+            this._syncBars();
+        });
+        const endPan = (e) => {
+            if (!this._panning) return;
+            this._panning = false;
+            vp.classList.remove('is-panning');
+            try { vp.releasePointerCapture(e.pointerId); } catch (_) {}
+        };
+        vp.addEventListener('pointerup', endPan);
+        vp.addEventListener('pointercancel', endPan);
+
+        this._zoomLabel = this.root.querySelector('.paint-zoom-reset');
+        if (this._zoomLabel) {
+            this._zoomLabel.addEventListener('click', () => this.resetView());
+        }
+        this._updateZoomLabel();
+
+        // Keep the pan-padding sized to the stage so the canvas can always be
+        // dragged freely. Fires on first layout (incl. when the window opens
+        // from a hidden state) and on every resize.
+        this._centered = false;
+        if (window.ResizeObserver) {
+            this._ro = new ResizeObserver(() => this._layoutWorld(true));
+            this._ro.observe(vp);
+        }
+        this._layoutWorld(false);
+    }
+
+    // Pad the world with ~a viewport of slack on each side so there is always
+    // somewhere to pan to. Keeps the view anchored across relayouts; centers
+    // the canvas the first time the stage has a real size.
+    _layoutWorld(preserve) {
+        const vp = this.viewport, world = this.world;
+        if (!world) return;
+        const padX = vp.clientWidth, padY = vp.clientHeight;
+        if (padX === 0 && padY === 0) return;   // still hidden — wait for the observer
+
+        // Anchor on the canvas point currently under the viewport's center.
+        const vr = vp.getBoundingClientRect();
+        const ax = vr.left + vp.clientWidth / 2, ay = vr.top + vp.clientHeight / 2;
+        const r = this.canvas.getBoundingClientRect();
+        const cx = (ax - r.left) / this.zoom, cy = (ay - r.top) / this.zoom;
+
+        world.style.padding = padY + 'px ' + padX + 'px';
+
+        if (preserve && this._centered) {
+            const nr = this.canvas.getBoundingClientRect();
+            vp.scrollLeft += (nr.left + cx * this.zoom) - ax;
+            vp.scrollTop += (nr.top + cy * this.zoom) - ay;
+        } else {
+            this._centerView();
+            this._centered = true;
+        }
+        this._syncBars();
+    }
+
+    _centerView() {
+        const vp = this.viewport;
+        vp.scrollLeft = (vp.scrollWidth - vp.clientWidth) / 2;
+        vp.scrollTop = (vp.scrollHeight - vp.clientHeight) / 2;
+    }
+
+    // Reset button: back to 100% and re-centered.
+    resetView() {
+        this.setZoom(1);
+        this._centerView();
+        this._syncBars();
+    }
+
+    _syncBars() {
+        if (this.scrollX) this.scrollX.update();
+        if (this.scrollY) this.scrollY.update();
+    }
+
+    _updateZoomLabel() {
+        if (this._zoomLabel) this._zoomLabel.textContent = Math.round(this.zoom * 100) + '%';
+    }
+
+    // Set zoom, keeping the canvas point under (clientX, clientY) fixed on
+    // screen. With no anchor given, zooms around the viewport center.
+    setZoom(z, clientX, clientY) {
+        z = Math.max(this.minZoom, Math.min(this.maxZoom, z));
+        if (Math.abs(z - this.zoom) < 1e-4) return;
+        const vp = this.viewport;
+
+        if (clientX == null) {
+            const vr = vp.getBoundingClientRect();
+            clientX = vr.left + vp.clientWidth / 2;
+            clientY = vr.top + vp.clientHeight / 2;
+        }
+
+        // canvas-space coord currently under the cursor
+        const r = this.canvas.getBoundingClientRect();
+        const cx = (clientX - r.left) / this.zoom;
+        const cy = (clientY - r.top) / this.zoom;
+
+        this.zoom = z;
+        this.canvas.style.width = (this.W * z) + 'px';
+        this.canvas.style.height = (this.H * z) + 'px';
+        // crisp pixels when magnifying; smooth when shrinking below 100%
+        this.canvas.style.imageRendering = z >= 1 ? 'pixelated' : 'auto';
+
+        // re-anchor: scroll so that (cx, cy) lands back under the cursor
+        const nr = this.canvas.getBoundingClientRect();
+        vp.scrollLeft += (nr.left + cx * z) - clientX;
+        vp.scrollTop += (nr.top + cy * z) - clientY;
+
+        this._syncBars();
+        this._updateZoomLabel();
+    }
+
     destroy() {
         if (this.scrollY) this.scrollY.destroy();
         if (this.scrollX) this.scrollX.destroy();
+        if (this._ro) this._ro.disconnect();
         if (this.ws) { this.ws.onclose = null; this.ws.close(); this.ws = null; }
         document.removeEventListener('keydown', this._onKey);
     }
@@ -275,6 +424,7 @@ class PaintApp {
         const c = this.canvas;
 
         c.addEventListener('pointerdown', (e) => {
+            if (e.button !== 0) return;   // middle = pan, right = context menu; never draw
             e.preventDefault();
             const p = this.pos(e);
             this.startX = p.x;

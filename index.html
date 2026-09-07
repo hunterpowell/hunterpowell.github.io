@@ -632,6 +632,14 @@
                         person is holding and another isn't. Writing tests that need three participants
                         changed how I thought about the features themselves.
                     </li>
+                    <li>The most surprising time sink in this project has been getting it deployed on a 
+                        local Raspberry Pi. It's deployed behind a cloudflare tunnel so I don't have to port 
+                        forward, don't reveal my IP, and don't deal with any recurring costs. The pipeline is 
+                        simple, just a single PowerShell command that client handles everything: build + 
+                        typecheck + tests, native cargo test, aarch64 cross-compile pinned to an older glibc 
+                        for forward compatibility, then a staged install that verifies the ELF header and every 
+                        bundle artifact on the target before stopping the service, with rollback on failure.
+                    </li>
                 </ul>
 
                 <h3>Pitfalls &amp; gotchas</h3>

@@ -1132,6 +1132,7 @@
     function openMenu() {
         return [
             { label: "Lydia's Law — NOTES.md", action: () => openWindow('notes-lydia') },
+            { label: 'Slate — README.md', action: () => openWindow('notes-slate') },
             { label: 'Coverage Robots — POSTMORTEM.md', action: () => openWindow('notes-robots') },
             { label: 'Heart Classifier — NOTES.md', action: () => openWindow('notes-heart') },
             { label: 'Cherry Tree — README.md', action: () => openWindow('notes-tree') },

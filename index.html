@@ -52,6 +52,8 @@
                 <li><a href="https://github.com/CSUS-Shell-Script/Lydias-Law-Site">Lydia's Law</a> —
                     full-stack Django platform for a family law firm, built with an 8-person team
                     (<a href="https://adoptionsofsac.com">live site</a>)</li>
+                <li><a href="https://github.com/hunterpowell/slatevtt">Slate</a> —
+                    minimal virtual tabletop for remote D&amp;D; Rust/axum server, vanilla TypeScript canvas client</li>
                 <li><a href="https://github.com/hunterpowell/GeneticAlg">Evolving Coverage Robots</a> —
                     C++ genetic algorithm for grid coverage, 27x speedup with OpenMP</li>
                 <li><a href="https://github.com/hunterpowell/HeartDisease">Heart Disease Risk Classifier</a> —
@@ -223,6 +225,27 @@
                             <a href="https://adoptionsofsac.com" target="_blank" rel="noopener" class="btn">Visit site → (client work)</a>
                             <a href="https://github.com/CSUS-Shell-Script/Lydias-Law-Site" target="_blank" rel="noopener" class="btn">GitHub →</a>
                             <a href="#" class="btn" data-open="notes-lydia">Read more →</a>
+                        </p>
+                    </article>
+                    <article class="proj-card">
+                        <h3>Slate — Virtual Tabletop</h3>
+                        <p>A minimal virtual tabletop for a private remote D&amp;D game — a Rust
+                           <code>axum</code>/<code>tokio</code> server and a vanilla TypeScript canvas client,
+                           no framework and no database. The room is a single actor that filters every
+                           message per recipient, so fog of war, hidden monsters and DM-only hit points
+                           are enforced on the server rather than hidden in the UI: a player's client is
+                           never sent what it isn't allowed to draw. Walls and doors block line of sight,
+                           the table remembers where it has been, and state snapshots to JSON on disk.
+                           Tested by 27 browser drivers that open two or three headless Chromes at once
+                           over the DevTools protocol and assert on the <em>difference</em> between what
+                           two people are holding.</p>
+                        <div class="tags">
+                            <span class="tag">Rust</span><span class="tag">Axum</span><span class="tag">Tokio</span>
+                            <span class="tag">TypeScript</span><span class="tag">Canvas 2D</span><span class="tag">WebSockets</span>
+                        </div>
+                        <p class="card-actions">
+                            <a href="https://github.com/hunterpowell/slatevtt" target="_blank" rel="noopener" class="btn">GitHub →</a>
+                            <a href="#" class="btn" data-open="notes-slate">Read more →</a>
                         </p>
                     </article>
                     <article class="proj-card">
@@ -557,6 +580,79 @@
                         seeding the content into the new tables. This, to my utter horror, also wiped the original monotable back
                         to an empty state. Several hours and many cups of coffee later, we'd recovered everything from backups and
                         re-entered it by hand. Then I fixed the seeding and backups for good, so nothing like that can happen again.
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </template>
+
+    <template id="tpl-notes-slate">
+        <section class="window notes-window" style="width:500px;">
+            <div class="title-bar">
+                <span class="dot"></span>
+                <span class="title">slate - README.md</span>
+                <div class="title-controls">
+                    <button aria-label="minimize">_</button>
+                    <button aria-label="maximize">□</button>
+                    <button aria-label="close">×</button>
+                </div>
+            </div>
+            <div class="menu-bar">
+                <button><u>F</u>ile</button><button><u>E</u>dit</button><button><u>V</u>iew</button><button><u>H</u>elp</button>
+            </div>
+            <div class="window-body">
+                <h2>Slate — notes</h2>
+                <p class="subtitle">A virtual tabletop that does six things instead of six hundred.</p>
+
+                <h3>Why I built it</h3>
+                <p>My group plays remotely, and Foundry is an enormous amount of software for what we
+                    actually use it for: a shared map, some tokens, and whose turn it is. Everything else
+                    — character sheets, accounts, modifiers, macros — we already do somewhere else, on
+                    paper or in Discord, with real dice. So I wrote the part we needed and deliberately
+                    left the rest out. The scope being small is the feature, not a stage it's passing
+                    through on the way to something bigger.
+                </p>
+
+                <h3>What I learned</h3>
+                <ul class="notes-list">
+                    <li>Hiding something in the UI isn't hiding it. Fog of war, hidden monsters, and the
+                        DM's hit point bars are all filtered on the server, per recipient, before anything
+                        goes out on the socket — a player's browser is never sent the ambush it isn't
+                        supposed to see. The room being a single actor that owns all the state is what
+                        makes that enforceable in one place instead of scattered across every handler.
+                    </li>
+                    <li>Rust's ownership rules and a mutable shared game room are a genuinely awkward fit
+                        until you stop fighting it and give the state to one task that everything else
+                        talks to over a channel. After that the borrow checker mostly stopped having
+                        opinions.
+                    </li>
+                    <li>Most of what's interesting about this program is a <em>difference</em> between two
+                        screens, which one browser can't observe. So the integration tests drive two or
+                        three headless Chromes at once over the DevTools protocol and assert on what one
+                        person is holding and another isn't. Writing tests that need three participants
+                        changed how I thought about the features themselves.
+                    </li>
+                </ul>
+
+                <h3>Pitfalls &amp; gotchas</h3>
+                <ul class="notes-list">
+                    <li>The browser drivers used to fail in ways that looked exactly like a regression in
+                        whatever I'd just changed. The real cause was that several of them clicked the
+                        middle of the canvas to grab a token — which only works if the middle was empty
+                        and the zoom hadn't moved. Now they measure the grid off the HUD and find tokens
+                        by looking outward, and a driver isn't allowed to assume the map it was written
+                        against.
+                    </li>
+                    <li>Uploads only ever grow: every direct upload gets a fresh UUID, nothing deletes
+                        one, and re-uploading the same battle map five times keeps five copies. I wrote an
+                        audit tool that sorts files into in-use, remembered, and unreferenced — and it
+                        prints the <code>rm</code> lines rather than running them. An automatic reaper would
+                        have to guess about art referenced only by a calibration the DM may still want,
+                        which is exactly the case that deserves a human looking at it.
+                    </li>
+                    <li>There's no CI. These checks run when somebody runs them, and "somebody" is me,
+                        which is a tradeoff I made knowingly and would revisit if anyone else committed
+                        to it.
                     </li>
                 </ul>
             </div>
